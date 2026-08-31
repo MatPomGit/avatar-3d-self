@@ -1,54 +1,23 @@
 name: AI Agent Task Loop
 
 on:
-  schedule:
-    - cron: "0 0 * * *"  # Daily
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-agent-task-loop
+  cancel-in-progress: true
 
 jobs:
   ai_tasks:
+    if: ${{ secrets.CLAUDE_API_KEY != '' }}
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Run AI analysis on project state
-        env:
-          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+      - uses: actions/checkout@v4
+      - name: Explain current state
         run: |
-          python -c "
-          import requests
-          import json
-          
-          # Gather project state
-          project_state = {
-            'last_export': ...,
-            'pending_tasks': ...,
-            'validation_errors': ...
-          }
-          
-          # Send to Claude via API
-          response = requests.post(
-            'https://api.anthropic.com/v1/messages',
-            headers={'Authorization': f'Bearer {CLAUDE_API_KEY}'},
-            json={
-              'model': 'claude-opus-4-6',
-              'max_tokens': 1000,
-              'messages': [{
-                'role': 'user',
-                'content': f'Analyze project state and suggest next steps: {json.dumps(project_state)}'
-              }]
-            }
-          )
-          
-          suggestions = response.json()['content'][0]['text']
-          print(suggestions)
-          "
-      
-      - name: Commit suggested changes
-        run: |
-          git config user.name "Avatar AI"
-          git config user.email "ai@avatar.local"
-          git add .
-          git commit -m "AI: Suggested improvements [skip ci]" || true
-          git push
+          echo "The AI agent workflow is intentionally manual-only."
+          echo "Automatic repository mutation is disabled until the agent implementation is complete."
