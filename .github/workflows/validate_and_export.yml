@@ -1,0 +1,42 @@
+name: Validate & Auto-Export
+
+on:
+  push:
+    paths:
+      - "scripts/**"
+      - "source/metahuman/metahuman_config.json"
+  workflow_dispatch:
+
+jobs:
+  validate_and_export:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      
+      - name: Install dependencies
+        run: |
+          pip install -r scripts/requirements.txt
+          apt-get update && apt-get install -y colmap
+      
+      - name: Validate FBX structure
+        run: python scripts/validate_fbx.py source/metahuman/metahuman_base.fbx
+      
+      - name: Generate blendshapes
+        run: python scripts/blendshape_generator.py
+      
+      - name: Export final FBX
+        run: python scripts/ue_export_fbx.py
+      
+      - name: Commit & push artifacts
+        run: |
+          git config user.name "Avatar Bot"
+          git config user.email "bot@avatar.local"
+          git add exports/ source/metahuman/version_history.json
+          git commit -m "Auto: Export FBX + blendshapes [skip ci]" || true
+          git push
