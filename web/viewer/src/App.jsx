@@ -39,7 +39,7 @@ const pbrMaps = [
   ['Smoothness / Gloss', 'Odwrotność roughness. Wyższa wartość oznacza gładszą i bardziej lustrzaną powierzchnię.', 'skala szarości, dane liniowe'],
   ['Metallic / Metalness', 'Określa, czy piksel zachowuje się jak metal. Dla czystych materiałów zwykle 0 albo 1.', 'skala szarości, dane liniowe'],
   ['Ambient Occlusion', 'Przyciemnia trudno dostępne miejsca i szczeliny. Uzupełnia oświetlenie, ale nie zastępuje cieni.', 'skala szarości, dane liniowe'],
-  ['Height / Displacement', 'Opisuje wysokość powierzchni. Może służyć do parallax, tessellation lub rzeczywistego displacement.', 'skala szarości, dane liniowe'],
+  ['Height / Displacement', 'Opisuje wysokość powierzchni. Może służyć do parallax lub rzeczywistego displacement, zależnie od shadera.', 'skala szarości, dane liniowe'],
   ['Emissive', 'Określa obszary emitujące własne światło lub świecące niezależnie od oświetlenia sceny.', 'RGB, zależnie od pipeline'],
   ['Opacity / Alpha', 'Steruje przezroczystością albo maskowaniem wycięć, np. włosów, rzęs i liści.', 'alpha lub skala szarości'],
 ]
@@ -48,9 +48,9 @@ const engineRows = [
   ['Kolor', 'Base Map / Base Color', 'Base Color', 'Color'],
   ['Mikrochropowatość', 'Smoothness, czyli 1 − Roughness', 'Roughness', 'Roughness'],
   ['Metaliczność', 'Metallic', 'Metallic', 'Metallic'],
-  ['Normal map', 'Normal Map; importer pozwala odwrócić kanał G', 'Normal; typowo konwencja DirectX', 'Normal; domyślnie DirectX, opcja Invert przełącza na OpenGL'],
-  ['AO', 'Occlusion Map', 'Ambient Occlusion', 'zależnie od typu materiału i importu'],
-  ['Wysokość', 'Height / Parallax zależnie od shadera', 'World Position Offset, parallax lub displacement zależnie od materiału', 'Height przez funkcję Parallax'],
+  ['Normal map', 'Normal Map; importer pozwala odwrócić kanał G', 'Normal; należy dopasować konwencję kanału Y do używanego assetu', 'Normal; domyślnie DirectX, opcja Invert przełącza na OpenGL'],
+  ['AO', 'Occlusion Map', 'Ambient Occlusion', 'obsługa zależna od materiału i sposobu importu'],
+  ['Wysokość', 'Height / Parallax zależnie od shadera', 'Parallax, displacement lub modyfikacja położenia zależnie od materiału', 'Height przez funkcję Parallax'],
   ['Emisja', 'Emission', 'Emissive Color', 'Emissive'],
 ]
 
@@ -204,7 +204,7 @@ function App() {
 
           <div className="pbr-notes">
             <article><strong>Roughness a Smoothness</strong><p>Unreal Engine i Twinmotion pracują bezpośrednio na roughness. W typowym materiale Unity używana jest smoothness, czyli wartość odwrotna: smoothness = 1 − roughness. Przy przenoszeniu mapy należy ją więc odwrócić albo wykonać tę operację w shaderze.</p></article>
-            <article><strong>Kanały tekstur</strong><p>Unity często pakuje smoothness do kanału alfa mapy Metallic lub Base Map, zależnie od użytego pipeline i shadera. Unreal Engine pozwala wygodnie pakować niezależne dane skalarne, np. AO, roughness i metallic, do kanałów RGB jednej tekstury.</p></article>
+            <article><strong>Kanały tekstur</strong><p>W Unity sposób pakowania smoothness zależy od render pipeline i użytego shadera, dlatego przed eksportem trzeba sprawdzić jego wejścia. W Unreal Engine niezależne dane skalarne, np. AO, roughness i metallic, można wygodnie pakować do kanałów RGB jednej tekstury.</p></article>
             <article><strong>Normal DirectX i OpenGL</strong><p>Różnica dotyczy przede wszystkim znaku składowej Y, czyli kanału zielonego. Twinmotion domyślnie używa konwencji DirectX i udostępnia przełącznik Invert dla map OpenGL. Unity ma opcję Flip Green Channel w importerze map normalnych.</p></article>
             <article><strong>Przestrzeń barw</strong><p>Base Color jest danymi koloru i zwykle korzysta z sRGB. Roughness, metallic, AO, height i normal są danymi technicznymi i powinny być traktowane liniowo, bez korekcji gamma.</p></article>
           </div>
