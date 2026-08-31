@@ -1,0 +1,69 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/viewer/**"
+      - "exports/avatar_final.fbx"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/viewer/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web/viewer
+        run: npm ci
+
+      - name: Add published avatar model
+        run: |
+          mkdir -p web/viewer/public/model
+          if [ -s exports/avatar_final.fbx ]; then
+            cp exports/avatar_final.fbx web/viewer/public/model/avatar_final.fbx
+          fi
+
+      - name: Build site
+        working-directory: web/viewer
+        run: npm run build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: web/viewer/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 5
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
