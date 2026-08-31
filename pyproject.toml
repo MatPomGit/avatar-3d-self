@@ -27,6 +27,9 @@ vision = [
     "opencv-python>=4.8,<5",
 ]
 
+[tool.setuptools]
+packages = []
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
