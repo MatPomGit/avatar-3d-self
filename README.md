@@ -1,24 +1,25 @@
 # avatar-3d-self
 
-Pipeline for building a realistic 3D self-avatar from scan data, with tooling for COLMAP reconstruction, mesh processing, MetaHuman preparation and Unreal Engine export.
+Pipeline and tooling for building a realistic 3D self-avatar from scan data, through reconstruction and mesh processing, to MetaHuman and Unreal Engine integration.
 
-## Project status
+## Status
 
-The repository is currently at an early development stage. GitHub CI intentionally performs only lightweight, deterministic checks. Operations that require COLMAP, Unreal Engine, MetaHuman assets or other workstation-specific 3D software are not executed on standard GitHub-hosted runners.
+The project is in early development. The repository intentionally separates lightweight Python tooling from workstation-specific 3D software. GitHub-hosted CI validates source quality but does not attempt to run COLMAP, Unreal Engine or MetaHuman workflows.
 
-## Repository layout
+## Structure
 
 - `scripts/` contains pipeline utilities.
-- `source/` contains source avatar and MetaHuman-related data.
-- `exports/` is reserved for generated exports.
-- `animations/` contains animation-related assets.
-- `references/` contains reference material.
-- `docs/` contains project documentation.
-- `.github/workflows/` contains CI and manually triggered pipeline placeholders.
+- `source/` contains reconstruction and avatar source data.
+- `exports/` is reserved for generated deliverables.
+- `animations/` contains animation assets.
+- `references/` contains source/reference material.
+- `notebooks/` contains exploratory analysis.
+- `docs/` contains maintained project documentation.
+- `.github/workflows/` contains CI and manually triggered 3D workflow entry points.
 
-## Python environment
+## Development environment
 
-Use Python 3.11 for development and CI compatibility.
+Python 3.11 is the supported development version.
 
 ```bash
 python -m venv .venv
@@ -27,23 +28,32 @@ python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
 ```
 
-On Windows, activate the environment with:
+On Windows:
 
 ```powershell
 .venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
 ```
 
-Tools tied to Unreal Engine or COLMAP should be installed in their native environments rather than forced into the lightweight CI environment.
+Optional dependency groups are installed only when needed:
+
+```bash
+python -m pip install -e ".[geometry]"
+python -m pip install -e ".[vision]"
+```
+
+`pyproject.toml` is the single source of truth for Python dependencies. Unreal Engine's `unreal` module is provided by Unreal Engine itself and is therefore not declared as a PyPI dependency. COLMAP is an external executable and must also be installed separately.
 
 ## CI policy
 
-Pull requests touching Python sources, dependency metadata or workflow files run a short CI job that checks:
+Pull requests touching Python sources or project configuration run deterministic checks only:
 
 - Python bytecode compilation,
-- critical Ruff errors such as syntax problems and undefined names.
+- Ruff checks for syntax errors, undefined names and related critical failures.
 
-Heavy 3D processing remains manual until a dedicated runner or reproducible containerized toolchain is available.
+Heavy 3D jobs stay manual until a reproducible dedicated runner or containerized toolchain is available.
 
-## Dependency updates
+## Documentation
 
-Dependabot groups Python dependency updates and GitHub Actions updates to reduce unnecessary pull-request noise.
+See [`docs/index.md`](docs/index.md) for the maintained documentation index and environment boundaries.
