@@ -1,0 +1,11 @@
+name: Scan to Mesh
+
+on:
+  workflow_dispatch:
+
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Workflow intentionally manual
+        run: echo "Scan-to-mesh processing is not yet automated in CI."

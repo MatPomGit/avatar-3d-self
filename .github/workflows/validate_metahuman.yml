@@ -1,0 +1,11 @@
+name: Validate MetaHuman
+
+on:
+  workflow_dispatch:
+
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Workflow intentionally manual
+        run: echo "MetaHuman validation is not yet automated in CI."

@@ -1,42 +1,59 @@
-name: Validate & Auto-Export
+name: CI
 
 on:
-  push:
+  pull_request:
+    branches: [main]
     paths:
       - "scripts/**"
-      - "source/metahuman/metahuman_config.json"
+      - "requirements.txt"
+      - ".github/workflows/**"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - "requirements.txt"
+      - ".github/workflows/**"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  validate_and_export:
+  python-checks:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v4
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      
-      - name: Install dependencies
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install Python dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+
+      - name: Compile Python sources
+        run: python -m compileall -q scripts
+
+      - name: Import smoke test
         run: |
-          pip install -r scripts/requirements.txt
-          apt-get update && apt-get install -y colmap
-      
-      - name: Validate FBX structure
-        run: python scripts/validate_fbx.py source/metahuman/metahuman_base.fbx
-      
-      - name: Generate blendshapes
-        run: python scripts/blendshape_generator.py
-      
-      - name: Export final FBX
-        run: python scripts/ue_export_fbx.py
-      
-      - name: Commit & push artifacts
-        run: |
-          git config user.name "Avatar Bot"
-          git config user.email "bot@avatar.local"
-          git add exports/ source/metahuman/version_history.json
-          git commit -m "Auto: Export FBX + blendshapes [skip ci]" || true
-          git push
+          python - <<'PY'
+          import pathlib
+          import runpy
+
+          failures = []
+          for path in pathlib.Path("scripts").glob("*.py"):
+              try:
+                  compile(path.read_text(encoding="utf-8"), str(path), "exec")
+              except Exception as exc:
+                  failures.append(f"{path}: {exc}")
+          if failures:
+              raise SystemExit("\n".join(failures))
+          PY

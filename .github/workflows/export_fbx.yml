@@ -1,0 +1,11 @@
+name: Export FBX
+
+on:
+  workflow_dispatch:
+
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Workflow intentionally manual
+        run: echo "FBX export is not yet automated in CI."
