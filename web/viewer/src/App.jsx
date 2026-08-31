@@ -210,6 +210,7 @@ function App() {
           </div>
 
           <div className="info-strip"><strong>Dla tego projektu:</strong><span>Najbezpieczniej przechowywać źródłowo osobne mapy Base Color, Roughness, Metallic, Normal, AO i Height, a dopiero podczas eksportu wykonywać odwracanie oraz pakowanie kanałów właściwe dla silnika docelowego.</span></div>
+          <div className="source-links"><span>Dokumentacja techniczna:</span><a href="https://docs.unity3d.com/Manual/texture-type-normal-map.html" target="_blank" rel="noreferrer">Unity ↗</a><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/physically-based-materials-in-unreal-engine" target="_blank" rel="noreferrer">Unreal Engine ↗</a><a href="https://dev.epicgames.com/documentation/twinmotion/physically-based-materials-in-twinmotion" target="_blank" rel="noreferrer">Twinmotion ↗</a></div>
         </section>}
 
         {activeTab === 'tools' && <section className="tab-view">
