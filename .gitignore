@@ -2,55 +2,22 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-
-# Wirtualne środowiska
-.venv/
 venv/
-env/
 .env
 
-# Dystrybucja / pakietowanie
-dist/
-build/
-*.egg-info/
-.eggs/
+# Unreal Engine
+source/unreal_project/Intermediate/
+source/unreal_project/Saved/
+source/unreal_project/DerivedDataCache/
+source/unreal_project/Build/
+source/unreal_project/*.sln
+source/unreal_project/*.csproj
 
-# Dane i modele (duże pliki binarne)
-data/raw/*
-data/processed/*
-models/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!models/.gitkeep
+# COLMAP & Heavy Assets
+source/scans/colmap_output/*
+!source/scans/colmap_output/.gitkeep
+*.photogrammetry
 
-# Notatniki Jupyter – checkpointy
-.ipynb_checkpoints/
-*.ipynb_checkpoints
-
-# Pokrycie testów
-.coverage
-htmlcov/
-.pytest_cache/
-
-# mypy
-.mypy_cache/
-
-# ruff
-.ruff_cache/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# System operacyjny
+# OS specific
 .DS_Store
 Thumbs.db
-
-# Zmienne środowiskowe
-.env
-.env.*
-!.env.example
