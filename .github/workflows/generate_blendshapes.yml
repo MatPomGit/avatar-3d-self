@@ -1,0 +1,11 @@
+name: Generate Blendshapes
+
+on:
+  workflow_dispatch:
+
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Workflow intentionally manual
+        run: echo "Blendshape generation is not yet automated in CI."
