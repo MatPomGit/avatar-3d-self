@@ -5,6 +5,7 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 const tabs = [
   ['start', 'Start'],
   ['pipeline', 'Pipeline'],
+  ['pbr', 'Tekstury PBR'],
   ['tools', 'Narzędzia'],
   ['viewer', 'Model 3D'],
   ['setup', 'Uruchomienie'],
@@ -29,6 +30,28 @@ const tools = [
   ['Unreal Engine 5', 'MetaHuman, test animacji i finalny eksport.', 'dla MetaHuman', 'https://www.unrealengine.com/download'],
   ['MetaHuman', 'Rigowanie i dopracowanie cyfrowej postaci.', 'UE5', 'https://www.metahuman.com/create'],
   ['Piper TTS', 'Opcjonalne lokalne TTS i wejście dla lip sync.', 'opcjonalne', 'https://github.com/OHF-Voice/piper1-gpl'],
+]
+
+const pbrMaps = [
+  ['Base Color / Albedo', 'Kolor powierzchni bez cieni, połysków i oświetlenia wypalonego w teksturze.', 'RGB, zwykle sRGB'],
+  ['Normal', 'Koduje kierunek normalnych i pozorną drobną geometrię bez zwiększania liczby wielokątów.', 'RGB, dane liniowe'],
+  ['Roughness', 'Steruje rozproszeniem odbić. Czerń oznacza powierzchnię gładką, biel matową.', 'skala szarości, dane liniowe'],
+  ['Smoothness / Gloss', 'Odwrotność roughness. Wyższa wartość oznacza gładszą i bardziej lustrzaną powierzchnię.', 'skala szarości, dane liniowe'],
+  ['Metallic / Metalness', 'Określa, czy piksel zachowuje się jak metal. Dla czystych materiałów zwykle 0 albo 1.', 'skala szarości, dane liniowe'],
+  ['Ambient Occlusion', 'Przyciemnia trudno dostępne miejsca i szczeliny. Uzupełnia oświetlenie, ale nie zastępuje cieni.', 'skala szarości, dane liniowe'],
+  ['Height / Displacement', 'Opisuje wysokość powierzchni. Może służyć do parallax, tessellation lub rzeczywistego displacement.', 'skala szarości, dane liniowe'],
+  ['Emissive', 'Określa obszary emitujące własne światło lub świecące niezależnie od oświetlenia sceny.', 'RGB, zależnie od pipeline'],
+  ['Opacity / Alpha', 'Steruje przezroczystością albo maskowaniem wycięć, np. włosów, rzęs i liści.', 'alpha lub skala szarości'],
+]
+
+const engineRows = [
+  ['Kolor', 'Base Map / Base Color', 'Base Color', 'Color'],
+  ['Mikrochropowatość', 'Smoothness, czyli 1 − Roughness', 'Roughness', 'Roughness'],
+  ['Metaliczność', 'Metallic', 'Metallic', 'Metallic'],
+  ['Normal map', 'Normal Map; importer pozwala odwrócić kanał G', 'Normal; typowo konwencja DirectX', 'Normal; domyślnie DirectX, opcja Invert przełącza na OpenGL'],
+  ['AO', 'Occlusion Map', 'Ambient Occlusion', 'zależnie od typu materiału i importu'],
+  ['Wysokość', 'Height / Parallax zależnie od shadera', 'World Position Offset, parallax lub displacement zależnie od materiału', 'Height przez funkcję Parallax'],
+  ['Emisja', 'Emission', 'Emissive Color', 'Emissive'],
 ]
 
 const commands = `git clone https://github.com/MatPomGit/avatar-3d-self.git
@@ -154,7 +177,7 @@ function App() {
             <p className="lead">Repozytorium prowadzi od materiału zdjęciowego przez rekonstrukcję i MetaHuman do animowalnego modelu gotowego do użycia w silniku 3D.</p>
             <div className="actions">
               <button className="button primary" onClick={() => openTab('pipeline')}>Zobacz pipeline</button>
-              <button className="button" onClick={() => openTab('tools')}>Pobierz narzędzia</button>
+              <button className="button" onClick={() => openTab('pbr')}>Poznaj tekstury PBR</button>
             </div>
           </div>
           <div className="home-dashboard">
@@ -168,6 +191,25 @@ function App() {
         {activeTab === 'pipeline' && <section className="tab-view">
           <div className="page-heading"><p className="eyebrow">Procedura</p><h2>Pipeline produkcyjny</h2><p>Każdy etap ma jednoznaczny wynik wejściowy dla następnego kroku.</p></div>
           <div className="steps">{steps.map(([title, text], index) => <article className="step" key={title}><span className="step-number">{String(index + 1).padStart(2, '0')}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
+        </section>}
+
+        {activeTab === 'pbr' && <section className="tab-view">
+          <div className="page-heading"><p className="eyebrow">Materiały</p><h2>Tekstury PBR</h2><p>Ten sam zestaw danych fizycznych może być interpretowany inaczej zależnie od silnika. Najważniejsza różnica dotyczy roughness i smoothness oraz sposobu obsługi map normalnych.</p></div>
+          <div className="pbr-grid">{pbrMaps.map(([name, role, format]) => <article className="pbr-card" key={name}><div><h3>{name}</h3><span className="pbr-format">{format}</span></div><p>{role}</p></article>)}</div>
+
+          <div className="comparison-block">
+            <div className="section-subheading"><h3>Unity, Unreal Engine i Twinmotion</h3><p>Przy eksporcie materiału nie wystarczy skopiować nazw plików. Trzeba dopasować semantykę map do wejść konkretnego shadera.</p></div>
+            <div className="comparison-table-wrap"><table className="comparison-table"><thead><tr><th>Właściwość</th><th>Unity</th><th>Unreal Engine</th><th>Twinmotion</th></tr></thead><tbody>{engineRows.map((row) => <tr key={row[0]}>{row.map((cell, index) => index === 0 ? <th key={cell}>{cell}</th> : <td key={cell}>{cell}</td>)}</tr>)}</tbody></table></div>
+          </div>
+
+          <div className="pbr-notes">
+            <article><strong>Roughness a Smoothness</strong><p>Unreal Engine i Twinmotion pracują bezpośrednio na roughness. W typowym materiale Unity używana jest smoothness, czyli wartość odwrotna: smoothness = 1 − roughness. Przy przenoszeniu mapy należy ją więc odwrócić albo wykonać tę operację w shaderze.</p></article>
+            <article><strong>Kanały tekstur</strong><p>Unity często pakuje smoothness do kanału alfa mapy Metallic lub Base Map, zależnie od użytego pipeline i shadera. Unreal Engine pozwala wygodnie pakować niezależne dane skalarne, np. AO, roughness i metallic, do kanałów RGB jednej tekstury.</p></article>
+            <article><strong>Normal DirectX i OpenGL</strong><p>Różnica dotyczy przede wszystkim znaku składowej Y, czyli kanału zielonego. Twinmotion domyślnie używa konwencji DirectX i udostępnia przełącznik Invert dla map OpenGL. Unity ma opcję Flip Green Channel w importerze map normalnych.</p></article>
+            <article><strong>Przestrzeń barw</strong><p>Base Color jest danymi koloru i zwykle korzysta z sRGB. Roughness, metallic, AO, height i normal są danymi technicznymi i powinny być traktowane liniowo, bez korekcji gamma.</p></article>
+          </div>
+
+          <div className="info-strip"><strong>Dla tego projektu:</strong><span>Najbezpieczniej przechowywać źródłowo osobne mapy Base Color, Roughness, Metallic, Normal, AO i Height, a dopiero podczas eksportu wykonywać odwracanie oraz pakowanie kanałów właściwe dla silnika docelowego.</span></div>
         </section>}
 
         {activeTab === 'tools' && <section className="tab-view">
