@@ -5,12 +5,14 @@ on:
     branches: [main]
     paths:
       - "scripts/**"
+      - "pyproject.toml"
       - "requirements.txt"
       - ".github/workflows/**"
   push:
     branches: [main]
     paths:
       - "scripts/**"
+      - "pyproject.toml"
       - "requirements.txt"
       - ".github/workflows/**"
   workflow_dispatch:
@@ -25,7 +27,7 @@ concurrency:
 jobs:
   python-checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
@@ -33,27 +35,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
-          cache-dependency-path: requirements.txt
-
-      - name: Install Python dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
 
       - name: Compile Python sources
         run: python -m compileall -q scripts
 
-      - name: Import smoke test
+      - name: Check critical Python errors
         run: |
-          python - <<'PY'
-          import pathlib
-          import runpy
-
-          failures = []
-          for path in pathlib.Path("scripts").glob("*.py"):
-              try:
-                  compile(path.read_text(encoding="utf-8"), str(path), "exec")
-              except Exception as exc:
-                  failures.append(f"{path}: {exc}")
-          if failures:
-              raise SystemExit("\n".join(failures))
-          PY
+          python -m pip install --disable-pip-version-check --quiet ruff
+          ruff check scripts --select E9,F63,F7,F82
