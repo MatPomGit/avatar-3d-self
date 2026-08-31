@@ -6,14 +6,12 @@ on:
     paths:
       - "scripts/**"
       - "pyproject.toml"
-      - "requirements.txt"
       - ".github/workflows/**"
   push:
     branches: [main]
     paths:
       - "scripts/**"
       - "pyproject.toml"
-      - "requirements.txt"
       - ".github/workflows/**"
   workflow_dispatch:
 
@@ -35,11 +33,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install development tools
+        run: python -m pip install --disable-pip-version-check --quiet -e ".[dev]"
 
       - name: Compile Python sources
         run: python -m compileall -q scripts
 
       - name: Check critical Python errors
-        run: |
-          python -m pip install --disable-pip-version-check --quiet ruff
-          ruff check scripts --select E9,F63,F7,F82
+        run: ruff check scripts
