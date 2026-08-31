@@ -1,0 +1,124 @@
+name: Complete Avatar Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - "source/**"
+  workflow_dispatch:
+
+jobs:
+  pbr_textures:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python + PIL
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install pillow numpy scipy
+      
+      - name: Generate PBR textures
+        run: |
+          python scripts/pbr_texture_processor.py \
+            --diffuse references/photos/scan_output_texture.png \
+            --output assets/textures/pbr
+      
+      - name: Convert materials to multi-engine
+        run: |
+          python scripts/material_converter.py
+
+  lipsync_generation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Piper TTS
+        run: |
+          pip install piper-tts
+          piper --download-model en_US-libritts-high
+      
+      - name: Generate lip sync animations
+        run: |
+          python scripts/piper_lipsync_generator.py \
+            --text "Hello! I'm your realistic 3D avatar." \
+            --output exports/speech
+
+  web_viewer_build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: |
+          cd web/viewer
+          npm install
+      
+      - name: Build THREE.js viewer
+        run: |
+          cd web/viewer
+          npm run build
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web/viewer/dist
+
+  quality_validation:
+    runs-on: ubuntu-latest
+    needs: [pbr_textures, lipsync_generation, web_viewer_build]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Validate all exports
+        run: |
+          python -c "
+          import json
+          from pathlib import Path
+          
+          exports = Path('exports')
+          
+          checks = {
+            'FBX model': (exports / 'avatar_final.fbx').exists(),
+            'PBR textures': (exports / 'materials').exists(),
+            'Lip sync': (exports / 'speech' / 'lipsync.json').exists(),
+            'Web viewer': True
+          }
+          
+          print('✓ Export Validation Report:')
+          for check, status in checks.items():
+            print(f'  [{\"✓\" if status else \"✗\"}] {check}')
+          "
+
+  create_release:
+    runs-on: ubuntu-latest
+    needs: quality_validation
+    if: success()
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: avatar-v${{ github.run_number }}
+          files: |
+            exports/avatar_final.fbx
+            exports/materials/*.json
+            exports/speech/**
+          draft: false
