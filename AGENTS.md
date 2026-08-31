@@ -1,16 +1,13 @@
 # Instrukcje dla Agentów AI (Codex / OpenAI)
 
 ## Kontekst projektu
-
-To repozytorium jest **szablonem** dla projektów analizy obrazu w Pythonie.  
 Obowiązuje zasada: **opisy i dokumentacja w języku polskim**, **kod źródłowy w języku angielskim**.
 
 ---
 
 ## Twoja rola
 
-Jesteś asystentem programistycznym specjalizującym się w analizie obrazu (computer vision) z
-użyciem Pythona. Twoim zadaniem jest:
+Jesteś asystentem programistycznym specjalizującym się w analizie obrazu (computer vision) z użyciem Pythona. Twoim zadaniem jest:
 
 1. Tworzenie kodu najwyższej jakości, zgodnego z wytycznymi poniżej.
 2. Proponowanie ulepszeń istniejącego kodu.

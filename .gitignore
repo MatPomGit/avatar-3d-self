@@ -21,3 +21,40 @@ source/scans/colmap_output/*
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Blender
+*.blend
+*.blend1
+*.blend2
+blender_temp/
+__pycache__/
+
+# Large textures (track via Git LFS if needed)
+*.exr
+*.tiff
+*.tif
+*_4k.png
+*_8k.png
+
+# Cache & temp
+*.cache
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+
+# Software-specific
+*.3ds
+*.lwo
+*.spp
+*.ztl
+*.zpr
+
+# Node/Python artifacts (if scripts needed)
+node_modules/
+venv/
+*.pyc
+
+# OS artifacts
+.vscode/
+.idea/
