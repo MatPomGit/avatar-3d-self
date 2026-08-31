@@ -14,7 +14,7 @@
     "three": "^0.156.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.2.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "vite": "^8.2.2"
   }
 }
