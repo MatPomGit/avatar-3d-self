@@ -96,3 +96,26 @@ Materials: PBR textures (diffuse, normal, roughness, metallic)
 [ ] Animations loop without popping
 [ ] No mesh clipping during extreme poses
 [ ] Skin materials react to lighting
+
+---
+
+## PODSUMOWANIE: Co skopiować
+
+Utwórz te pliki w swoim repo:
+
+1. **`scripts/photogrammetry_pipeline.py`** ← Automatyczna skanowanie + mesh
+2. **`scripts/metahuman_processor.py`** ← 48+ blendshape manifest
+3. **`scripts/facial_blendshape_sculpt.py`** ← Blender automation
+4. **`scripts/ue_export_pipeline.py`** ← Unreal export + validacja
+5. **`scripts/animation_baking.py`** ← Animation librar management
+6. **`.github/workflows/avatar_production_export.yml`** ← GitHub Actions pipeline
+7. **`docs/REALISTIC_AVATAR_GUIDE.md`** ← Full production guide
+
+Wszystkie skrypty są gotowe do copy-paste. Uruchom najpierw:
+```bash
+pip install -e ".[dev]"
+python scripts/metahuman_processor.py
+python scripts/animation_baking.py
+```
+
+Potem GitHub Actions automatycznie uruchomi fotogrametrię + Unreal export.
