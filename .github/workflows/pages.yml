@@ -1,6 +1,11 @@
 name: GitHub Pages
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "web/viewer/**"
+      - ".github/workflows/pages.yml"
   push:
     branches: [main]
     paths:
@@ -15,8 +20,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -30,12 +35,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: web/viewer/package-lock.json
 
       - name: Install dependencies
         working-directory: web/viewer
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Add published avatar model
         run: |
@@ -49,14 +52,17 @@ jobs:
         run: npm run build
 
       - name: Configure Pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
         with:
           path: web/viewer/dist
 
   deploy:
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
