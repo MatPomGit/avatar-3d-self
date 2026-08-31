@@ -13,6 +13,45 @@ const steps = [
   ['8. Walidacja', 'Sprawdź geometrię, rig, blendshapes, materiały, animacje, brak clippingu i zachowanie modelu w docelowym silniku.'],
 ]
 
+const tools = [
+  {
+    name: 'Python 3.11',
+    role: 'Podstawowe środowisko skryptów i narzędzi repozytorium.',
+    tag: 'wymagane',
+    href: 'https://www.python.org/downloads/release/python-31116/',
+  },
+  {
+    name: 'COLMAP',
+    role: 'Fotogrametryczna rekonstrukcja geometrii z serii zdjęć.',
+    tag: 'wymagane dla skanu',
+    href: 'https://colmap.github.io/install.html',
+  },
+  {
+    name: 'Blender',
+    role: 'Korekta geometrii, asymetrii, blendshapes i kontrola modelu.',
+    tag: 'zalecane',
+    href: 'https://www.blender.org/download/',
+  },
+  {
+    name: 'Unreal Engine 5',
+    role: 'Środowisko MetaHuman, test animacji i finalny eksport.',
+    tag: 'wymagane dla MetaHuman',
+    href: 'https://www.unrealengine.com/download',
+  },
+  {
+    name: 'MetaHuman',
+    role: 'Mesh to MetaHuman, rigowanie oraz dopracowanie cyfrowej postaci.',
+    tag: 'część Unreal Engine',
+    href: 'https://www.metahuman.com/create',
+  },
+  {
+    name: 'Piper TTS',
+    role: 'Opcjonalne lokalne TTS oraz dane wejściowe dla lip sync.',
+    tag: 'opcjonalne',
+    href: 'https://github.com/OHF-Voice/piper1-gpl',
+  },
+]
+
 const commands = `git clone https://github.com/MatPomGit/avatar-3d-self.git
 cd avatar-3d-self
 python -m venv .venv
@@ -36,7 +75,7 @@ function Viewer() {
     if (!container) return undefined
 
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x0f172a)
+    scene.background = new THREE.Color(0x08111f)
 
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / 420, 0.1, 1000)
     camera.position.set(0, 1.55, 2.7)
@@ -47,7 +86,7 @@ function Viewer() {
     renderer.setSize(container.clientWidth, 420)
     container.appendChild(renderer.domElement)
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x334155, 2.2))
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x22324b, 2.2))
     const key = new THREE.DirectionalLight(0xffffff, 2.5)
     key.position.set(3, 4, 3)
     scene.add(key)
@@ -103,7 +142,7 @@ function Viewer() {
 
   return (
     <section id="viewer" className="section">
-      <div className="section-heading">
+      <div className="section-heading compact-heading">
         <p className="eyebrow">Podgląd</p>
         <h2>Interaktywny model 3D</h2>
         <p>Viewer wykorzystuje Three.js i automatycznie wyświetli finalny plik FBX, gdy artefakt zostanie opublikowany razem ze stroną.</p>
@@ -123,43 +162,53 @@ function App() {
   return (
     <div>
       <header className="topbar">
-        <a className="brand" href="#start">avatar-3d-self</a>
+        <a className="brand" href="#start"><span className="brand-mark">A3</span><span>avatar-3d-self</span></a>
         <nav>
           <a href="#about">Projekt</a>
           <a href="#pipeline">Pipeline</a>
+          <a href="#tools">Narzędzia</a>
           <a href="#viewer">3D</a>
           <a href="#setup">Uruchomienie</a>
-          <a href="https://github.com/MatPomGit/avatar-3d-self">GitHub</a>
+          <a className="nav-github" href="https://github.com/MatPomGit/avatar-3d-self">GitHub ↗</a>
         </nav>
       </header>
 
       <main>
         <section id="start" className="hero">
           <div className="hero-copy">
+            <div className="hero-badge">Open source · reproducible pipeline</div>
             <p className="eyebrow">Photogrammetry · MetaHuman · PBR · Animation</p>
             <h1>Realistyczny cyfrowy awatar 3D z pełnym pipeline’em produkcyjnym</h1>
             <p className="lead">Projekt łączy rekonstrukcję fotogrametryczną, przetwarzanie geometrii i tekstur, MetaHuman, blendshapes, animację, lip sync oraz eksport do silników 3D. Ta strona jest jednocześnie opisem projektu i instrukcją jego odtworzenia.</p>
             <div className="actions">
               <a className="button primary" href="#pipeline">Zobacz cały proces</a>
-              <a className="button" href="#setup">Przygotuj środowisko</a>
+              <a className="button" href="#tools">Pobierz narzędzia</a>
+            </div>
+            <div className="hero-facts">
+              <span><strong>8</strong> etapów</span>
+              <span><strong>FBX</strong> format wyjściowy</span>
+              <span><strong>UE5</strong> środowisko docelowe</span>
             </div>
           </div>
-          <div className="hero-panel">
-            <span>Wejście</span><strong>Zdjęcia wielowidokowe</strong>
-            <span>Rekonstrukcja</span><strong>COLMAP + mesh</strong>
-            <span>Awatar</span><strong>MetaHuman + blendshapes</strong>
-            <span>Wygląd</span><strong>PBR + materiały</strong>
-            <span>Ruch</span><strong>Animacja + lip sync</strong>
-            <span>Wyjście</span><strong>FBX / Unreal / Unity</strong>
+          <div className="hero-visual">
+            <div className="hero-panel">
+              <span>Wejście</span><strong>Zdjęcia wielowidokowe</strong>
+              <span>Rekonstrukcja</span><strong>COLMAP + mesh</strong>
+              <span>Awatar</span><strong>MetaHuman + blendshapes</strong>
+              <span>Wygląd</span><strong>PBR + materiały</strong>
+              <span>Ruch</span><strong>Animacja + lip sync</strong>
+              <span>Wyjście</span><strong>FBX / Unreal / Unity</strong>
+            </div>
+            <div className="hero-caption">Od surowych zdjęć do gotowej, animowalnej postaci 3D.</div>
           </div>
         </section>
 
-        <section id="about" className="section split">
+        <section id="about" className="section split about-section">
           <div className="section-heading">
             <p className="eyebrow">Cel</p>
             <h2>Jeden repozytoryjny przepływ od zdjęć do awatara</h2>
           </div>
-          <div className="prose">
+          <div className="prose surface-copy">
             <p>Repozytorium porządkuje narzędzia potrzebne do zbudowania realistycznego awatara człowieka. Python odpowiada za etapy możliwe do automatyzacji, natomiast COLMAP, Blender i Unreal Engine pozostają środowiskami wykonawczymi dla zadań wymagających natywnych narzędzi 3D.</p>
             <p>GitHub Actions wykonuje lekką walidację kodu i publikuje tę stronę. Ciężka fotogrametria i eksport Unreal nie są uruchamiane na standardowym runnerze GitHub.</p>
           </div>
@@ -172,18 +221,43 @@ function App() {
             <p>Kolejność odpowiada zależnościom między danymi. Etapy 2, 4 i 7 wymagają lokalnych narzędzi 3D.</p>
           </div>
           <div className="steps">
-            {steps.map(([title, text]) => (
+            {steps.map(([title, text], index) => (
               <article className="step" key={title}>
-                <h3>{title}</h3>
+                <span className="step-number">{String(index + 1).padStart(2, '0')}</span>
+                <h3>{title.replace(/^\d+\.\s*/, '')}</h3>
                 <p>{text}</p>
               </article>
             ))}
           </div>
         </section>
 
+        <section id="tools" className="section tools-section">
+          <div className="section-heading">
+            <p className="eyebrow">Narzędzia</p>
+            <h2>Pobierz środowisko pracy</h2>
+            <p>Linki prowadzą do oficjalnych stron projektów. Nie wszystkie narzędzia są potrzebne na każdym etapie.</p>
+          </div>
+          <div className="tool-grid">
+            {tools.map((tool) => (
+              <a className="tool-card" href={tool.href} key={tool.name} target="_blank" rel="noreferrer">
+                <div className="tool-card-top">
+                  <strong>{tool.name}</strong>
+                  <span className="tool-tag">{tool.tag}</span>
+                </div>
+                <p>{tool.role}</p>
+                <span className="tool-link">Oficjalna strona / pobieranie <b>↗</b></span>
+              </a>
+            ))}
+          </div>
+          <div className="tool-note">
+            <strong>Minimalny zestaw do rozpoczęcia:</strong>
+            <span>Python 3.11 + Git. COLMAP jest potrzebny do rekonstrukcji, a Unreal Engine do etapu MetaHuman i eksportu.</span>
+          </div>
+        </section>
+
         <Viewer />
 
-        <section id="setup" className="section split">
+        <section id="setup" className="section split setup-section">
           <div className="section-heading">
             <p className="eyebrow">Start lokalny</p>
             <h2>Przygotowanie środowiska</h2>
@@ -200,7 +274,7 @@ function App() {
           </div>
         </section>
 
-        <section className="section">
+        <section className="section quality-section">
           <div className="section-heading"><p className="eyebrow">Kontrola jakości</p><h2>Kiedy awatar jest gotowy</h2></div>
           <div className="checklist">
             <span>Geometria zachowuje proporcje twarzy</span>
@@ -215,8 +289,8 @@ function App() {
       </main>
 
       <footer>
-        <strong>avatar-3d-self</strong>
-        <span>Dokumentacja i interaktywny viewer publikowane automatycznie przez GitHub Pages.</span>
+        <div><strong>avatar-3d-self</strong><span>Realistyczny awatar 3D od zdjęć do silnika.</span></div>
+        <div className="footer-links"><a href="#tools">Narzędzia</a><a href="https://github.com/MatPomGit/avatar-3d-self">Repozytorium</a></div>
       </footer>
     </div>
   )
