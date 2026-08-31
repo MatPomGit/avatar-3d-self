@@ -1,149 +1,90 @@
-# Instrukcje dla Agentów AI (Codex / OpenAI)
+\# AGENTS.md - System Instructions \& Guidelines for AI Autonomous Agents
 
-## Kontekst projektu
-Obowiązuje zasada: **opisy i dokumentacja w języku polskim**, **kod źródłowy w języku angielskim**.
 
----
 
-## Twoja rola
+This file establishes execution rules, architectural context, and safety constraints for AI coding agents (e.g., Cursor, Claude Code, Devin, GitHub Copilot) operating within the `avatar-3d-self` repository.
 
-Jesteś asystentem programistycznym specjalizującym się w analizie obrazu (computer vision) z użyciem Pythona. Twoim zadaniem jest:
 
-1. Tworzenie kodu najwyższej jakości, zgodnego z wytycznymi poniżej.
-2. Proponowanie ulepszeń istniejącego kodu.
-3. Pisanie lub uzupełnianie testów jednostkowych.
-4. Wyjaśnianie decyzji architektonicznych po polsku, kiedy jest to wymagane.
 
----
+\---
 
-## Zasady pisania kodu
 
-### Styl i formatowanie
 
-- Przestrzegaj **PEP 8**. Konfiguracja lintowania w `pyproject.toml` (narzędzie: `ruff`).
-- Maksymalna długość linii: **99 znaków**.
-- Stosuj **type hints** we wszystkich sygnaturach funkcji publicznych.
-- Docstringi w formacie **Google-style**, zawsze po angielsku.
-- Importy w kolejności: `stdlib` → `third-party` → `local` (zgodnie z `isort`).
+\## 1. Project Overview \& Architecture
 
-### Struktura kodu
 
-```
-src/image_analysis/
-├── preprocessing.py  – wczytywanie, zmiana rozmiaru, normalizacja, augmentacja
-├── detection.py      – detekcja obiektów, bounding boxes, NMS
-├── classification.py – klasyfikacja obrazów, predykcja, metryki
-└── utils.py          – helpers: walidacja, logowanie, ścieżki, wizualizacja
-```
 
-Nowe moduły umieszczaj w `src/image_analysis/` i eksportuj przez `__init__.py`.
+`avatar-3d-self` is an automated 3D avatar generation pipeline that converts photogrammetry scans into MetaHuman-compatible blendshapes and exports Unreal Engine ready assets (`.fbx`).
 
-### Wymagania dot. typów i danych
 
-- Obrazy reprezentuj jako `np.ndarray` z wymiarami opisanymi w docstringu: `(H, W, C)` BGR lub
-  `(H, W)` grayscale.
-- Dokumentuj oczekiwany `dtype` i zakres: `uint8 [0, 255]` lub `float32 [0.0, 1.0]`.
-- Współrzędne bounding box – format `(x1, y1, x2, y2)` lub `(x, y, w, h)` – zawsze opisuj
-  w docstringu.
 
-### Obsługa błędów
+\* \*\*Primary Stack:\*\* Python 3.10+, Open3D, Trimesh, SciPy, Unreal Engine Python API, COLMAP CLI.
 
-```python
-# Dobrze
-def load_image(path: str) -> np.ndarray:
-    if not os.path.isfile(path):
-        raise FileNotFoundError(f"Image file not found: {path}")
-    image = cv2.imread(path)
-    if image is None:
-        raise ValueError(f"Failed to decode image: {path}")
-    return image
+\* \*\*Target Workflows:\*\* GitHub Actions (`.github/workflows/`), Python automation (`scripts/`).
 
-# Źle – zbyt ogólne wyjątki
-def load_image(path: str) -> np.ndarray:
-    try:
-        return cv2.imread(path)
-    except Exception:
-        return None  # type: ignore
-```
+\* \*\*Storage Rules:\*\* Heavy 3D assets (`.fbx`, `.obj`, raw scans) \*\*MUST\*\* use Git LFS. Never commit large binary files directly to standard Git tracking.
 
-- Nigdy nie połykaj wyjątków bez logowania.
-- Używaj modułu `logging` zamiast `print`.
 
----
 
-## Testowanie
+\---
 
-- Testy w `tests/` odpowiadają modułom w `src/image_analysis/`.
-- Uruchom testy: `pytest --cov=src/image_analysis --cov-report=term-missing`.
-- Wymagane pokrycie: **≥ 80 %**.
-- Używaj syntetycznych obrazów w testach:
 
-```python
-import numpy as np
 
-def make_test_image(h: int = 100, w: int = 100, c: int = 3) -> np.ndarray:
-    """Create a synthetic BGR test image filled with random pixels."""
-    rng = np.random.default_rng(seed=42)
-    return rng.integers(0, 255, (h, w, c), dtype=np.uint8)
-```
+\## 2. Agent Responsibilities \& Workflows
 
-- Parametryzuj przypadki brzegowe: obrazy 1-pikselowe, grayscale, bardzo duże.
-- Mockuj operacje I/O i wywołania modeli za pomocą `pytest-mock` lub `unittest.mock`.
 
----
 
-## Wydajność
+| Agent Focus | Allowed Operations | Restricted Operations |
 
-- Unikaj pętli Pythona na poziomie pikseli – używaj operacji wektoryzowanych NumPy lub funkcji OpenCV.
-- Przetwarzaj wsadowo (batch), gdy dane wejściowe to wiele obrazów.
-- Profile kod przed optymalizacją: `cProfile`, `line_profiler`.
-- Zwalniaj pamięć GPU po inferencji (`.detach()`, `torch.cuda.empty_cache()`).
+| :--- | :--- | :--- |
 
----
+| \*\*Mesh \& Geometry Agent\*\* | Modifying `scripts/blendshape\_generator.py`, processing `.obj`/`.ply` meshes, running `pytest tests/test\_blendshapes.py`. | Overwriting `source/metahuman/metahuman\_base.fbx` directly without validation. |
 
-## Bezpieczeństwo
+| \*\*Unreal Engine Agent\*\* | Editing `scripts/ue\_export\_fbx.py`, configuring `unreal\_project/` settings, running headless UE python jobs. | Modifying core C++ plugins without updating build targets. |
 
-- Zmienne środowiskowe dla kluczy API – nigdy w kodzie.
-- Waliduj ścieżki wejściowe, by uniknąć path traversal.
-- Weryfikuj sumy kontrolne pobieranych wag modeli.
+| \*\*CI/CD Pipeline Agent\*\* | Updating `.github/workflows/\*.yml`, managing `pyproject.toml` dependencies. | Pushing directly to `main` branch without PR check triggers. |
 
----
 
-## Praca z repozytorium
 
-### Branche
+\---
 
-- `main` – stabilna wersja, chroniona reguła branch protection.
-- `feature/<opis>` – nowe funkcjonalności.
-- `fix/<opis>` – poprawki błędów.
-- `refactor/<opis>` – refaktoryzacja bez zmiany zachowania.
 
-### Commit messages (Conventional Commits, angielski)
 
-```
-feat(preprocessing): add histogram equalization
-fix(detection): correct NMS threshold application
-test(utils): add tests for path validation helper
-docs(readme): clarify installation steps
-```
+\## 3. Code Conventions \& Standards
 
-### Pull Requests
 
-Wypełniaj szablon z `.github/PULL_REQUEST_TEMPLATE.md`. Każdy PR musi:
-- Przechodzić `ruff check`, `mypy`, `pytest` bez błędów.
-- Mieć opis zmian po polsku.
-- Zawierać testy dla nowego kodu.
 
----
+\* \*\*Python Constraints:\*\*
 
-## Czego bezwzględnie unikać
+&#x20; \* Enforce strict type hints (`typing` module) across all script interfaces.
 
-| Zakaz | Powód |
-|-------|-------|
-| `except Exception: pass` | Ukrywa błędy |
-| `print()` w kodzie produkcyjnym | Używaj `logging` |
-| Brak type hints | Utrudnia statyczną analizę i AI autocomplete |
-| Magiczne liczby (np. `0.5`, `224`) | Używaj nazwanych stałych |
-| Mutowanie globalnego stanu | Powoduje trudne do wykrycia błędy |
-| Commitowanie plików `data/`, `models/` | Są w `.gitignore` |
-| Klucze API w kodzie | Ryzyko wycieku sekretów |
+&#x20; \* Use standard logging (`logging` library) instead of bare `print()` statements in production scripts.
+
+&#x20; \* Format all code using `black` and adhere to PEP 8 standards (`flake8`).
+
+\* \*\*Geometry Processing:\*\*
+
+&#x20; \* Coordinate System standard: \*\*Z-Up, Right-Handed\*\* for raw scans; convert to \*\*Z-Up, Left-Handed\*\* for Unreal Engine exports.
+
+&#x20; \* Mesh units must be in \*\*centimeters (cm)\*\* upon export.
+
+
+
+\---
+
+
+
+\## 4. Common Commands for Agents
+
+
+
+\* \*\*Environment Setup:\*\*
+
+&#x20; ```bash
+
+&#x20; python -m venv venv
+
+&#x20; source venv/bin/activate  # Or venv\\Scripts\\activate on Windows
+
+&#x20; pip install -e .\[dev]
+
