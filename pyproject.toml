@@ -12,19 +12,19 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8,<9",
+    "pytest>=8,<10",
     "ruff>=0.12,<1",
 ]
 geometry = [
     "numpy>=1.26,<3",
     "scipy>=1.11,<2",
-    "trimesh>=4,<5",
+    "trimesh>=4,<6",
     "open3d>=0.18,<1",
 ]
 vision = [
     "numpy>=1.26,<3",
     "pillow>=10,<13",
-    "opencv-python>=4.8,<5",
+    "opencv-python>=4.8,<6",
 ]
 
 [tool.setuptools]
