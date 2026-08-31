@@ -6,18 +6,12 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ai-agent-task-loop
-  cancel-in-progress: true
-
 jobs:
-  ai_tasks:
-    if: ${{ secrets.CLAUDE_API_KEY != '' }}
+  placeholder:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 2
     steps:
-      - uses: actions/checkout@v4
-      - name: Explain current state
+      - name: Workflow intentionally manual
         run: |
-          echo "The AI agent workflow is intentionally manual-only."
-          echo "Automatic repository mutation is disabled until the agent implementation is complete."
+          echo "AI automation is not enabled yet."
+          echo "This placeholder does not call external APIs or modify the repository."
