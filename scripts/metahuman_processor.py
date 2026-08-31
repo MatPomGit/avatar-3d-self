@@ -117,7 +117,7 @@ class MetahumanProcessor:
         output_file = self.output_dir / "blendshape_manifest.json"
         output_file.write_text(json.dumps(manifest, indent=2))
         logger.info(f"✓ Generated blendshape manifest: {output_file}")
-        logger.info(f"  Total targets: {len(BLENDSHAPELIB_LIBRARY)} (organized in {len(manifest['categories'])} categories)")
+        logger.info(f"  Total targets: {len(BLENDSHAPE_LIBRARY)} (organized in {len(manifest['categories'])} categories)")
         
         return manifest
     
@@ -148,26 +148,20 @@ class MetahumanProcessor:
             "blendshape_priority": [
                 "eyeBlink_L, eyeBlink_R (essential for life-like animation)",
                 "mouthOpen, jawOpen (speech sync)",
-                "expression_Happy, expression_Neutral (base states)"
+                "mouthSmile_L, mouthSmile_R (expression)",
+                "browInner_L, browInner_R (emotion)",
+                "cheekSquint_L, cheekSquint_R (natural smiles)"
             ]
         }
-        
-        report_file = self.output_dir / "preparation_report.json"
+        report_file = self.output_dir / "export_preparation_report.json"
         report_file.write_text(json.dumps(report, indent=2))
-        logger.info(f"✓ Preparation report saved: {report_file}")
+        logger.info(f"✓ Generated export prep report: {report_file}")
 
 if __name__ == "__main__":
-    import argparse
-    
-    parser = argparse.ArgumentParser(description="MetaHuman post-processing")
-    parser.add_argument("--metahuman-fbx", default="source/metahuman/metahuman_base.fbx")
-    parser.add_argument("--output", default="source/metahuman/config")
-    
-    args = parser.parse_args()
-    
-    processor = MetahumanProcessor(args.metahuman_fbx, args.output)
-    
-    if processor.validate_metahuman_fbx():
-        processor.generate_blendshape_manifest()
-        processor.export_preparation_report()
-        logger.info("✓✓✓ MetaHuman preprocessing complete")
+    processor = MetahumanProcessor(
+        "source/metahuman/metahuman_base.fbx",
+        "source/metahuman/processed"
+    )
+    processor.generate_blendshape_manifest()
+    processor.validate_metahuman_fbx()
+    processor.export_preparation_report()
