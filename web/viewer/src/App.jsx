@@ -1,251 +1,225 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
+import React, { useEffect, useRef, useState } from 'react'
+import * as THREE from 'three'
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 
-const AvatarViewer = () => {
-  const containerRef = useRef(null);
-  const sceneRef = useRef(null);
-  const modelRef = useRef(null);
-  const [modelStats, setModelStats] = useState(null);
-  const [blendshapes, setBlendshapes] = useState([]);
-  const [animations, setAnimations] = useState([]);
-  const [selectedAnimation, setSelectedAnimation] = useState(null);
+const steps = [
+  ['1. Przygotowanie zdjęć', 'Wykonaj serię ostrych, równomiernie oświetlonych zdjęć twarzy z wielu kierunków. Umieść materiał wejściowy w references/photos/raw.'],
+  ['2. Rekonstrukcja 3D', 'Uruchom photogrammetry_pipeline.py lub scan_colmap.py lokalnie na stanowisku z COLMAP. Wyniki rekonstrukcji trafiają do source/scans/colmap_output.'],
+  ['3. MetaHuman i geometria twarzy', 'Dopasuj MetaHuman do skanu, zapisz bazowy model w source/metahuman i wygeneruj manifest blendshape przez metahuman_processor.py.'],
+  ['4. Blendshapes i korekty', 'Wykonaj korekty mimiki i asymetrii w Blenderze lub Unreal Engine. Skrypty facial_blendshape_sculpt.py i blendshape_generator.py wspierają ten etap.'],
+  ['5. Tekstury PBR', 'Wygeneruj mapy diffuse, normal, roughness, metallic i AO za pomocą pbr_texture_processor.py, a następnie przygotuj materiały przez material_converter.py.'],
+  ['6. Animacja i lip sync', 'Wypal animacje przez animation_baking.py. Opcjonalny pipeline Piper tworzy audio i dane synchronizacji ust w piper_lipsync_generator.py.'],
+  ['7. Eksport', 'Eksport do Unreal wykonuj w środowisku Unreal Engine przez ue_export_pipeline.py lub ue_export_fbx.py. Finalny FBX przechowuj w exports.'],
+  ['8. Walidacja', 'Sprawdź geometrię, rig, blendshapes, materiały, animacje, brak clippingu i zachowanie modelu w docelowym silniku.'],
+]
+
+const commands = `git clone https://github.com/MatPomGit/avatar-3d-self.git
+cd avatar-3d-self
+python -m venv .venv
+
+# Linux / macOS
+source .venv/bin/activate
+
+# Windows PowerShell
+.venv\\Scripts\\Activate.ps1
+
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev,geometry,vision]"`
+
+function Viewer() {
+  const containerRef = useRef(null)
+  const [status, setStatus] = useState('Sprawdzanie modelu…')
+  const [stats, setStats] = useState(null)
 
   useEffect(() => {
-    // Initialize Three.js scene
-    const width = containerRef.current.clientWidth;
-    const height = containerRef.current.clientHeight;
+    const container = containerRef.current
+    if (!container) return undefined
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a2e);
-    scene.fog = new THREE.Fog(0x1a1a2e, 5, 15);
+    const scene = new THREE.Scene()
+    scene.background = new THREE.Color(0x0f172a)
 
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.position.set(0, 1.7, 2.5);
-    camera.lookAt(0, 1.7, 0);
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / 420, 0.1, 1000)
+    camera.position.set(0, 1.55, 2.7)
+    camera.lookAt(0, 1.45, 0)
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowShadowMap;
-    containerRef.current.appendChild(renderer.domElement);
+    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setSize(container.clientWidth, 420)
+    container.appendChild(renderer.domElement)
 
-    // Lighting setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x334155, 2.2))
+    const key = new THREE.DirectionalLight(0xffffff, 2.5)
+    key.position.set(3, 4, 3)
+    scene.add(key)
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    keyLight.position.set(5, 5, 5);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 2048;
-    keyLight.shadow.mapSize.height = 2048;
-    scene.add(keyLight);
+    let model = null
+    let frameId = 0
+    const loader = new FBXLoader()
+    const modelUrl = `${import.meta.env.BASE_URL}model/avatar_final.fbx`
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-    fillLight.position.set(-5, 3, 2);
-    scene.add(fillLight);
-
-    const rimLight = new THREE.DirectionalLight(0xffffff, 0.4);
-    rimLight.position.set(0, 2, -5);
-    scene.add(rimLight);
-
-    // Load FBX model
-    const loader = new FBXLoader();
-    loader.load('/exports/avatar_final.fbx', (fbx) => {
-      fbx.scale.multiplyScalar(0.01); // Scale down if needed
-      
-      // Configure materials for PBR
-      fbx.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-          
-          // Apply PBR textures if available
-          if (child.material) {
-            child.material.side = THREE.FrontSide;
-            child.material.shadowSide = THREE.BackSide;
+    loader.load(
+      modelUrl,
+      (fbx) => {
+        model = fbx
+        fbx.scale.multiplyScalar(0.01)
+        let triangles = 0
+        let vertices = 0
+        fbx.traverse((child) => {
+          if (child.isMesh) {
+            vertices += child.geometry.attributes.position?.count || 0
+            triangles += child.geometry.index ? child.geometry.index.count / 3 : vertices / 3
           }
-        }
-      });
-
-      scene.add(fbx);
-      modelRef.current = fbx;
-
-      // Calculate stats
-      const stats = calculateModelStats(fbx);
-      setModelStats(stats);
-
-      // Extract blendshapes
-      if (fbx.children[0]?.morphTargetInfluences) {
-        const bs = Object.keys(fbx.children[0].morphTargetDictionary || {});
-        setBlendshapes(bs);
-      }
-
-      // Extract animations
-      if (fbx.animations.length > 0) {
-        setAnimations(fbx.animations.map(a => a.name));
-      }
-    });
-
-    sceneRef.current = scene;
-
-    // Animation loop
-    const mixer = new THREE.AnimationMixer(modelRef.current);
-    let action = null;
+        })
+        setStats({ triangles: Math.round(triangles), vertices })
+        setStatus('Model gotowy')
+        scene.add(fbx)
+      },
+      undefined,
+      () => setStatus('Model FBX nie został jeszcze opublikowany. Dokumentacja jest dostępna niezależnie od modelu.')
+    )
 
     const animate = () => {
-      requestAnimationFrame(animate);
+      frameId = requestAnimationFrame(animate)
+      if (model) model.rotation.y += 0.0025
+      renderer.render(scene, camera)
+    }
+    animate()
 
-      if (mixer) mixer.update(0.016); // 60 FPS
-      renderer.render(scene, camera);
-    };
-    animate();
+    const resize = () => {
+      const width = container.clientWidth
+      camera.aspect = width / 420
+      camera.updateProjectionMatrix()
+      renderer.setSize(width, 420)
+    }
+    window.addEventListener('resize', resize)
 
-    // Handle blendshape changes
-    const handleBlendshapeChange = (name, value) => {
-      if (modelRef.current?.children[0]?.morphTargetInfluences) {
-        const idx = modelRef.current.children[0].morphTargetDictionary[name];
-        if (idx !== undefined) {
-          modelRef.current.children[0].morphTargetInfluences[idx] = value;
-        }
-      }
-    };
-
-    window.handleBlendshapeChange = handleBlendshapeChange;
-
-    // Cleanup
     return () => {
-      renderer.dispose();
-      containerRef.current?.removeChild(renderer.domElement);
-    };
-  }, []);
-
-  const calculateModelStats = (model) => {
-    let triangles = 0;
-    let vertices = 0;
-
-    model.traverse((child) => {
-      if (child.isMesh) {
-        triangles += child.geometry.index?.count / 3 || 0;
-        vertices += child.geometry.attributes.position?.count || 0;
-      }
-    });
-
-    return { triangles, vertices };
-  };
+      cancelAnimationFrame(frameId)
+      window.removeEventListener('resize', resize)
+      renderer.dispose()
+      renderer.domElement.remove()
+    }
+  }, [])
 
   return (
-    <div style={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>
-      {/* 3D Viewer */}
-      <div ref={containerRef} style={{ flex: 1, background: '#1a1a2e' }} />
-
-      {/* Control Panel */}
-      <div style={{
-        width: 350,
-        background: '#2d2d44',
-        color: '#fff',
-        padding: 20,
-        overflowY: 'auto',
-        borderLeft: '1px solid #444'
-      }}>
-        <h2>🧠 Avatar Inspector</h2>
-
-        {/* Model Stats */}
-        {modelStats && (
-          <div style={{ background: '#1a1a2e', padding: 15, borderRadius: 8, marginBottom: 20 }}>
-            <h3>📊 Model Stats</h3>
-            <p>Triangles: <strong>{modelStats.triangles.toLocaleString()}</strong></p>
-            <p>Vertices: <strong>{modelStats.vertices.toLocaleString()}</strong></p>
-            <p>Format: <strong>FBX</strong></p>
-            <p>Rigged: <strong>Yes</strong></p>
-          </div>
-        )}
-
-        {/* Blendshapes */}
-        {blendshapes.length > 0 && (
-          <div style={{ marginBottom: 20 }}>
-            <h3>😊 Facial Blendshapes ({blendshapes.length})</h3>
-            {blendshapes.slice(0, 8).map((bs) => (
-              <div key={bs} style={{ marginBottom: 10 }}>
-                <label>{bs}</label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  onChange={(e) => window.handleBlendshapeChange(bs, parseFloat(e.target.value))}
-                  style={{ width: '100%' }}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Animations */}
-        {animations.length > 0 && (
-          <div>
-            <h3>🎬 Animations ({animations.length})</h3>
-            <select onChange={(e) => setSelectedAnimation(e.target.value)}>
-              <option value="">-- Select Animation --</option>
-              {animations.map((anim) => (
-                <option key={anim} value={anim}>{anim}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Texture Info */}
-        <div style={{ background: '#1a1a2e', padding: 15, borderRadius: 8, marginTop: 20 }}>
-          <h3>🎨 Textures</h3>
-          <p><strong>Diffuse:</strong> 2048×2048</p>
-          <p><strong>Normal:</strong> 2048×2048</p>
-          <p><strong>Roughness:</strong> 2048×2048</p>
-          <p><strong>Metallic:</strong> 2048×2048</p>
-          <p><strong>AO:</strong> 2048×2048</p>
-        </div>
-
-        {/* Engine Export */}
-        <div style={{ marginTop: 20 }}>
-          <h3>📤 Export For</h3>
-          <button style={{
-            width: '100%',
-            padding: 10,
-            marginBottom: 8,
-            background: '#3d5a80',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer'
-          }}>
-            Unreal Engine 5
-          </button>
-          <button style={{
-            width: '100%',
-            padding: 10,
-            marginBottom: 8,
-            background: '#3d5a80',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer'
-          }}>
-            Unity HDRP
-          </button>
-          <button style={{
-            width: '100%',
-            padding: 10,
-            background: '#3d5a80',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer'
-          }}>
-            Twinmotion
-          </button>
+    <section id="viewer" className="section">
+      <div className="section-heading">
+        <p className="eyebrow">Podgląd</p>
+        <h2>Interaktywny model 3D</h2>
+        <p>Viewer wykorzystuje Three.js i automatycznie wyświetli finalny plik FBX, gdy artefakt zostanie opublikowany razem ze stroną.</p>
+      </div>
+      <div className="viewer-card">
+        <div ref={containerRef} className="viewer-canvas" />
+        <div className="viewer-meta">
+          <strong>{status}</strong>
+          {stats && <span>{stats.triangles.toLocaleString()} trójkątów · {stats.vertices.toLocaleString()} wierzchołków</span>}
         </div>
       </div>
-    </div>
-  );
-};
+    </section>
+  )
+}
 
-export default AvatarViewer;
+function App() {
+  return (
+    <div>
+      <header className="topbar">
+        <a className="brand" href="#start">avatar-3d-self</a>
+        <nav>
+          <a href="#about">Projekt</a>
+          <a href="#pipeline">Pipeline</a>
+          <a href="#viewer">3D</a>
+          <a href="#setup">Uruchomienie</a>
+          <a href="https://github.com/MatPomGit/avatar-3d-self">GitHub</a>
+        </nav>
+      </header>
+
+      <main>
+        <section id="start" className="hero">
+          <div className="hero-copy">
+            <p className="eyebrow">Photogrammetry · MetaHuman · PBR · Animation</p>
+            <h1>Realistyczny cyfrowy awatar 3D z pełnym pipeline’em produkcyjnym</h1>
+            <p className="lead">Projekt łączy rekonstrukcję fotogrametryczną, przetwarzanie geometrii i tekstur, MetaHuman, blendshapes, animację, lip sync oraz eksport do silników 3D. Ta strona jest jednocześnie opisem projektu i instrukcją jego odtworzenia.</p>
+            <div className="actions">
+              <a className="button primary" href="#pipeline">Zobacz cały proces</a>
+              <a className="button" href="#setup">Przygotuj środowisko</a>
+            </div>
+          </div>
+          <div className="hero-panel">
+            <span>Wejście</span><strong>Zdjęcia wielowidokowe</strong>
+            <span>Rekonstrukcja</span><strong>COLMAP + mesh</strong>
+            <span>Awatar</span><strong>MetaHuman + blendshapes</strong>
+            <span>Wygląd</span><strong>PBR + materiały</strong>
+            <span>Ruch</span><strong>Animacja + lip sync</strong>
+            <span>Wyjście</span><strong>FBX / Unreal / Unity</strong>
+          </div>
+        </section>
+
+        <section id="about" className="section split">
+          <div className="section-heading">
+            <p className="eyebrow">Cel</p>
+            <h2>Jeden repozytoryjny przepływ od zdjęć do awatara</h2>
+          </div>
+          <div className="prose">
+            <p>Repozytorium porządkuje narzędzia potrzebne do zbudowania realistycznego awatara człowieka. Python odpowiada za etapy możliwe do automatyzacji, natomiast COLMAP, Blender i Unreal Engine pozostają środowiskami wykonawczymi dla zadań wymagających natywnych narzędzi 3D.</p>
+            <p>GitHub Actions wykonuje lekką walidację kodu i publikuje tę stronę. Ciężka fotogrametria i eksport Unreal nie są uruchamiane na standardowym runnerze GitHub.</p>
+          </div>
+        </section>
+
+        <section id="pipeline" className="section">
+          <div className="section-heading">
+            <p className="eyebrow">Procedura</p>
+            <h2>Kompletny pipeline</h2>
+            <p>Kolejność odpowiada zależnościom między danymi. Etapy 2, 4 i 7 wymagają lokalnych narzędzi 3D.</p>
+          </div>
+          <div className="steps">
+            {steps.map(([title, text]) => (
+              <article className="step" key={title}>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <Viewer />
+
+        <section id="setup" className="section split">
+          <div className="section-heading">
+            <p className="eyebrow">Start lokalny</p>
+            <h2>Przygotowanie środowiska</h2>
+            <p>Podstawowe środowisko Python jest niezależne od instalacji COLMAP i Unreal Engine.</p>
+          </div>
+          <div>
+            <pre><code>{commands}</code></pre>
+            <div className="requirements">
+              <div><strong>Python 3.11</strong><span>skrypty, PBR, geometria, walidacja</span></div>
+              <div><strong>COLMAP</strong><span>rekonstrukcja fotogrametryczna</span></div>
+              <div><strong>Blender</strong><span>ręczne korekty geometrii i blendshapes</span></div>
+              <div><strong>Unreal Engine 5</strong><span>MetaHuman i finalny eksport</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="section-heading"><p className="eyebrow">Kontrola jakości</p><h2>Kiedy awatar jest gotowy</h2></div>
+          <div className="checklist">
+            <span>Geometria zachowuje proporcje twarzy</span>
+            <span>Rig i wszystkie wymagane blendshapes działają</span>
+            <span>Brak clippingu przy skrajnych pozach</span>
+            <span>Tekstury PBR reagują poprawnie na oświetlenie</span>
+            <span>Animacje przechodzą płynnie bez skoków</span>
+            <span>Lip sync jest zsynchronizowany z dźwiękiem</span>
+            <span>Model został sprawdzony w docelowym silniku</span>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <strong>avatar-3d-self</strong>
+        <span>Dokumentacja i interaktywny viewer publikowane automatycznie przez GitHub Pages.</span>
+      </footer>
+    </div>
+  )
+}
+
+export default App
