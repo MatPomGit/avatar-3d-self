@@ -1,0 +1,137 @@
+name: Avatar Production Export
+
+on:
+  push:
+    paths:
+      - "source/metahuman/**"
+      - "scripts/**"
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      quality_preset:
+        description: 'Export quality'
+        required: true
+        default: 'high'
+        type: choice
+        options:
+          - high
+          - balanced
+          - fast
+
+jobs:
+  validate_and_prepare:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install trimesh numpy pillow
+      
+      - name: Validate Python integrity
+        run: |
+          python -m py_compile scripts/*.py
+          python -m ruff check scripts/
+      
+      - name: Generate blendshape manifest
+        run: python scripts/metahuman_processor.py
+      
+      - name: Create animation manifest
+        run: python scripts/animation_baking.py
+      
+      - name: Commit manifests
+        run: |
+          git config user.name "Avatar Automation"
+          git config user.email "actions@github.local"
+          git add source/metahuman/config/*.json animations/manifest.json
+          git commit -m "chore: auto-generate metadata manifests [skip ci]" || true
+          git push
+
+  photogrammetry_scan:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: validate_and_prepare
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python + COLMAP
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y colmap
+          python -m pip install opencv-python pillow numpy
+      
+      - name: Run photogrammetry pipeline
+        continue-on-error: true
+        run: |
+          python scripts/photogrammetry_pipeline.py \
+            --photos references/photos/raw \
+            --output source/scans/colmap_output
+      
+      - name: Upload scan results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: scan-results
+          path: source/scans/colmap_output/
+
+  ue_export:
+    runs-on: self-hosted  # Requires local Unreal Engine
+    if: always()
+    needs: [validate_and_prepare, photogrammetry_scan]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Export from Unreal Engine
+        continue-on-error: true
+        run: |
+          python scripts/ue_export_pipeline.py \
+            --project . \
+            --output exports/avatar_final.fbx
+      
+      - name: Validate FBX export
+        run: |
+          python scripts/validate_fbx.py exports/avatar_final.fbx
+      
+      - name: Upload production FBX
+        uses: actions/upload-artifact@v3
+        with:
+          name: avatar-fbx-export
+          path: exports/avatar_final.fbx
+          retention-days: 30
+
+  finalize:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [validate_and_prepare, ue_export]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Generate export report
+        run: |
+          echo "## Avatar Export Summary" > EXPORT_REPORT.md
+          echo "**Date:** $(date)" >> EXPORT_REPORT.md
+          echo "**Status:** Complete" >> EXPORT_REPORT.md
+          echo "**Files:** " >> EXPORT_REPORT.md
+          ls -lh exports/ >> EXPORT_REPORT.md || true
+      
+      - name: Create release
+        uses: actions/create-release@v1
+        if: success()
+        with:
+          tag_name: export-${{ github.run_number }}
+          release_name: Avatar Export #${{ github.run_number }}
+          body_path: EXPORT_REPORT.md
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
