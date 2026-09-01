@@ -77,3 +77,4 @@ scan:
     - .venv/
   exclude_files:
     - config/terminology.yaml
+    - scripts/lint_docs_terminology.py
