@@ -32,6 +32,51 @@ Blender / COLMAP / Piper / FFmpeg / filesystem
 
 UI nie interpretuje plików produkcyjnych bezpośrednio. Inspektor zwraca zunifikowany obiekt zawierający typ artefaktu, metadane i ostrzeżenia. Głębsze kontrole zależne od aplikacji DCC są wykonywane przez adaptery narzędzi.
 
+## Maszynowo czytelne wartości bazowe
+
+Wartości bazowe nie powinny być powielane jako niezależne liczby w kodzie aplikacji. Kanonicznym źródłem danych dla parametrów wspólnych dla dokumentacji, walidatorów i środowiska czasu rzeczywistego jest `config/technical_baselines.yaml`.
+
+Plik ma jawny `schema_version`. Oznacza to, że zmiana struktury danych wymaga świadomej migracji zamiast cichej reinterpretacji istniejących wartości. Moduł `avatar_studio.baselines` udostępnia odczyt całego dokumentu oraz odczyt przez ścieżkę kropkową, np. `behaviour.blink.duration_s`.
+
+W praktyce obowiązuje kolejność:
+
+```text
+wartość bazowa → profil konkretnego awatara → wartość zatwierdzona dla eksportu/runtime
+```
+
+Wartość bazowa jest punktem startowym. Nie może nadpisywać wiarygodnego pomiaru osoby referencyjnej.
+
+## Maszynowo czytelna terminologia
+
+`config/terminology.yaml` przechowuje kanoniczne polskie nazwy, ich angielskie odpowiedniki, skróty oraz formy zabronione. Jest to warstwa pomocnicza dla dokumentacji, nie słownik tłumaczący identyfikatory API.
+
+Przykładowo nazwa **koartykulacja (coarticulation)** jest terminem kanonicznym. Błędne warianty są wykrywane automatycznie przez `scripts/lint_docs_terminology.py`.
+
+Identyfikatory będące kontraktem technicznym, takie jak `jawOpen`, `roughness` czy `schema_version`, pozostają niezmienione. Nie należy ich tłumaczyć w kodzie ani w danych wymiany.
+
+## Adapter narzędzia
+
+Adapter narzędzia (tool adapter) jest cienką warstwą oddzielającą logikę Avatar Studio od szczegółów uruchamiania programu zewnętrznego. Zmiana ścieżki instalacji, nazwy programu wykonywalnego lub sposobu pobierania wersji nie powinna wymagać zmian w UI.
+
+Wspólny kontrakt `ToolAdapter` obejmuje:
+
+- jawnie wskazaną ścieżkę programu albo wykrywanie przez `PATH`;
+- sprawdzenie dostępności bez uruchamiania programu;
+- kontrolowany limit czasu wykonania (timeout);
+- przechwycenie standardowego wyjścia (stdout);
+- przechwycenie standardowego wyjścia błędów (stderr);
+- kod zakończenia procesu;
+- zapis pełnego polecenia jako danych diagnostycznych.
+
+Pierwsze adaptery obejmują:
+
+- `BlenderAdapter`;
+- `ColmapAdapter`;
+- `FFmpegAdapter`;
+- `PiperAdapter`.
+
+Adapter nie powinien implementować logiki biznesowej etapu. Przykładowo `ColmapAdapter` może uruchomić proces rekonstrukcji, ale decyzja, czy wynik spełnia próg błędu reprojekcji, należy do walidatora domenowego.
+
 ## Model stanu
 
 Każdy projekt ma lokalny katalog `.avatar-studio/` z bazą `project.sqlite3` i logami. Jawne raporty walidacji mogą być eksportowane do `reports/*.json`.
@@ -54,12 +99,12 @@ Pierwsza warstwa inspekcji działa bez uruchamiania ciężkich programów:
 | Typ | Parametry |
 | --- | --- |
 | obraz | rozdzielczość, format, tryb koloru, megapiksele |
-| WAV | sample rate, kanały, szerokość próbki, czas |
+| WAV | częstotliwość próbkowania (sample rate), kanały, szerokość próbki, czas |
 | JSON | typ korzenia, liczba i nazwy kluczy lub liczba elementów |
-| OBJ/PLY/STL/GLB/glTF/FBX | geometrie, vertices, faces/triangles, bounds i extents, jeśli dostępny jest `trimesh` |
-| BLEND | podstawowe metadane pliku; pełna inspekcja później przez Blender adapter |
+| OBJ/PLY/STL/GLB/glTF/FBX | geometrie, wierzchołki, ściany/trójkąty, obwiednia i rozmiary, jeśli dostępny jest `trimesh` |
+| BLEND | podstawowe metadane pliku; pełna inspekcja później przez adapter Blendera |
 
-Każdy zarejestrowany artefakt otrzymuje hash SHA-256. Dzięki temu aplikacja może w przyszłości wykrywać zmianę pliku po zatwierdzeniu etapu i unieważniać wyniki zależne.
+Każdy zarejestrowany artefakt otrzymuje hash SHA-256. Dzięki temu aplikacja może wykrywać zmianę pliku po zatwierdzeniu etapu i unieważniać wyniki zależne.
 
 ## Interfejs
 
@@ -75,13 +120,14 @@ Aplikacja nie ukrywa kryteriów. Użytkownik ma widzieć, dlaczego etap jest zab
 
 ## Kolejny poziom inspekcji
 
-Następne adaptery powinny rozszerzyć analizę:
+Adaptery powinny rozszerzać analizę etapami:
 
-- Blender: obiekty, topologia, UV, materiały, armature, shape keys, weights;
-- COLMAP: liczba kamer, zarejestrowanych zdjęć, reprojection error i coverage;
-- Piper/audio: model głosu, długość wypowiedzi, alignment fonemów i pokrycie visemów;
-- runtime package: trójkąty, materiały, tekstury, animacje, morph targets i budżet pamięci.
+- Blender: obiekty, topologia, UV, materiały, szkielet, klucze kształtu i wagi wpływu kości;
+- COLMAP: liczba kamer, zarejestrowanych zdjęć, błąd reprojekcji i pokrycie;
+- Piper/audio: model głosu, długość wypowiedzi, dopasowanie czasowe fonemów i pokrycie wizemów;
+- FFmpeg: parametry kontenera, kodek, częstotliwość próbkowania i deterministyczne przetwarzanie audio/wideo;
+- pakiet runtime: trójkąty, materiały, tekstury, animacje, cele morfowania i budżet pamięci.
 
 ## Bezpieczeństwo
 
-Program nie wysyła prywatnych materiałów do chmury bez jawnej funkcji i zgody. Wszystkie ścieżki prywatnego workspace są lokalne. Logi nie powinny kopiować treści zdjęć ani nagrań.
+Program nie wysyła prywatnych materiałów do chmury bez jawnej funkcji i zgody. Wszystkie ścieżki prywatnego workspace są lokalne. Logi nie powinny kopiować treści zdjęć ani nagrań. Argumenty poleceń muszą być przechowywane jako lista argumentów procesu, a nie składany łańcuch wykonywany przez powłokę, co ogranicza ryzyko niezamierzonej interpretacji znaków specjalnych.
