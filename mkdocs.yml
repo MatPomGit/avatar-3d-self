@@ -45,6 +45,7 @@ nav:
       - 21 Runtime validation: pipeline/21-runtime-validation.md
   - Capture:
       - Photography guide: capture/photography-guide.md
+      - Camera calibration: capture/camera-calibration.md
       - Self capture: capture/self-capture.md
       - Rotating-subject capture: capture/rotating-subject-capture.md
       - Face capture: capture/face-capture.md
@@ -68,6 +69,7 @@ nav:
       - Eyes: materials/eyes.md
       - Hair and facial hair: materials/hair.md
       - Clothing: materials/clothing.md
+      - Glasses: materials/glasses.md
   - Rigging:
       - Skeleton specification: rigging/skeleton-specification.md
       - Body rig: rigging/body-rig.md
@@ -90,6 +92,8 @@ nav:
       - Architecture: speech/architecture.md
       - Piper TTS: speech/piper.md
       - Phonemes: speech/phonemes.md
+      - Polish phoneme profile: speech/polish-phoneme-profile.md
+      - Alignment data format: speech/alignment-format.md
       - Visemes: speech/visemes.md
       - Lip-sync: speech/lip-sync.md
       - Speech animation: speech/speech-animation.md
