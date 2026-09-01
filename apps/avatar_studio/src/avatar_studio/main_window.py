@@ -30,6 +30,9 @@ from avatar_studio.store import ProjectStore
 from avatar_studio.tooling import display_path, probe_default_tools
 
 
+DOCS_BASE_URL = "https://matpomgit.github.io/avatar-studio/"
+
+
 class MainWindow(QMainWindow):
     """Pipeline navigator, learning interface and artefact inspector."""
 
@@ -154,7 +157,7 @@ class MainWindow(QMainWindow):
             f"<p>{stage.summary}</p>"
             f"<p><b>Dependencies:</b> {dependencies}</p>"
             f"<p><b>Expected outputs:</b></p><ul>{outputs}</ul>"
-            f"<p><a href='https://matpomgit.github.io/avatar-3d-self/{stage.document}'>Open full documentation</a></p>"
+            f"<p><a href='{DOCS_BASE_URL}{stage.document}'>Open full documentation</a></p>"
         )
         self.start_button.setEnabled(status in {"ready", "failed", "blocked"})
         self.pass_button.setEnabled(status == "in_progress")
