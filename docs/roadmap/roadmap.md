@@ -1,28 +1,32 @@
 # Roadmapa
 
+Roadmapa opisuje rozwój produktu i implementacji. Warstwa dokumentacji bazowej dla całego 21-etapowego pipeline'u jest opracowana i utrzymywana zgodnie z [mapą dokumentacji](../project/documentation-map.md). Oznacza to kompletność specyfikacji bazowej, nie zakończenie implementacji wszystkich etapów produkcyjnych.
+
 ## M0: profesjonalne fundamenty
 
 - [x] Architektura artefaktów i ADR.
 - [x] Portal dokumentacji MkDocs Material.
 - [x] Rozdzielenie WWW od lokalnego stanu projektu.
 - [x] Architektura Avatar Studio.
-- [ ] Pełny audyt lokalnych linków i manifestów w CI.
+- [x] Automatyczna kontrola pokrycia dokumentów przez nawigację MkDocs.
+- [x] Automatyczna kontrola terminologii.
+- [x] Rygorystyczna budowa dokumentacji przez `mkdocs build --strict`.
 
 **DoD:** czysty klon buduje dokumentację, testy i minimalną aplikację desktopową.
 
-## M1: capture
+## M1: pozyskiwanie materiału referencyjnego
 
 - prywatny workspace;
 - fotografie geometryczne i referencyjne;
 - pomiary antropometryczne;
 - ekspresje i FACS;
-- capture manifest.
+- manifest pozyskiwania danych.
 
 **DoD:** zatwierdzony pakiet referencji z kontrolą jakości i bez publikowania danych prywatnych.
 
-## M2: model i look development
+## M2: model i opracowanie wyglądu
 
-- rekonstrukcja i cleanup;
+- rekonstrukcja i czyszczenie siatki;
 - retopologia;
 - UV i PBR;
 - oczy, jama ustna, włosy i zarost;
@@ -32,36 +36,40 @@
 
 ## M3: rig i deformacja
 
-- skeleton specification;
-- body and hand rig;
-- facial rig ARKit/FACS;
-- secondary motion;
-- skinning validation.
+- specyfikacja szkieletu;
+- rig ciała i dłoni;
+- rig twarzy ARKit/FACS;
+- ruch wtórny;
+- walidacja wiązania skóry z kośćmi.
 
 **DoD:** pełny zakres ruchu bez krytycznych artefaktów deformacji.
 
 ## M4: zachowanie i mowa
 
 - warstwowa animacja;
-- gaze, blinking, idle i gestures;
+- spojrzenie, mruganie, animacja bezczynności i gesty;
 - Piper;
-- phoneme alignment, visemes i coarticulation.
+- dopasowanie czasowe fonemów, wizemy i koartykulacja.
 
-**DoD:** naturalny klip zawierający mowę, emocję, gaze i gest.
+**DoD:** naturalny klip zawierający mowę, emocję, spojrzenie i gest.
 
-## M5: runtime
+## M5: środowisko czasu rzeczywistego
 
-- zatwierdzony target engine;
-- LOD i performance budget;
-- import validation;
+- zatwierdzony silnik docelowy;
+- LOD i budżet wydajności;
+- walidacja importu;
 - demonstrator czasu rzeczywistego.
 
 **DoD:** stabilne działanie na określonym sprzęcie w ustalonym budżecie.
 
 ## M6: Avatar Studio 1.0
 
-- adaptery Blender/COLMAP/Piper;
+- adaptery Blender/COLMAP/FFmpeg/Piper;
 - inspektor artefaktów 3D;
-- preview wyników;
+- integracja operacji narzędzi z interfejsem użytkownika;
+- podgląd wyników;
 - raport końcowy projektu;
+- automatyczne unieważnianie wyników zależnych po zmianie artefaktu;
 - podpisane wydanie `.exe` dla Windows i build Linux.
+
+**DoD:** użytkownik może przejść cały obsługiwany pipeline z poziomu Avatar Studio, otrzymując wersjonowane artefakty, raporty walidacji i odtwarzalny eksport bez ręcznego obchodzenia aplikacji.
