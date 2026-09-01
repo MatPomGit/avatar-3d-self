@@ -1,22 +1,15 @@
-# ADR-0003: Facial-control and speech interface
+# ADR-0003: Kontrola twarzy i mowy
 
-**Status:** accepted, 2026-09-01
+**Status:** zaakceptowana, 2026-09-01
 
-## Context
+## Kontekst
 
-Natural speech cannot be obtained reliably by driving a face only from audio
-amplitude. The facial rig must also remain compatible with face tracking and
-expressive animation.
+Sterowanie twarzą wyłącznie amplitudą audio daje nienaturalny efekt.
 
-## Decision
+## Decyzja
 
-Use a documented facial-control layer compatible with ARKit blendshape names,
-FACS semantics or an explicit mapping between them. Drive speech from
-phoneme/viseme timing derived alongside Piper audio, then layer it with jaw,
-gaze, blinks, asymmetry, head motion and emotion controls.
+System twarzy korzysta z mapowania zgodnego z ARKit, FACS albo jawnej transformacji między nimi. Mowa wykorzystuje czas fonemów lub visemów oraz warstwy ruchu szczęki, spojrzenia, mrugania, głowy i emocji.
 
-## Consequences
+## Konsekwencje
 
-Every target export must include or reference its mapping. A viseme generator is
-an integration helper, not proof of timing accuracy; validate it against the
-actual voice and runtime.
+Każdy eksport zawiera lub wskazuje swoje mapowanie. Generator visemów wymaga walidacji na rzeczywistym głosie i w środowisku docelowym.

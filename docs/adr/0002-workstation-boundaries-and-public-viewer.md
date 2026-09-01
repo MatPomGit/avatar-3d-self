@@ -1,22 +1,15 @@
-# ADR-0002: Workstation boundaries and public viewer
+# ADR-0002: Środowiska robocze i publiczny viewer
 
-**Status:** accepted, 2026-09-01
+**Status:** zaakceptowana, 2026-09-01
 
-## Context
+## Kontekst
 
-COLMAP, Blender, MetaHuman, Unreal Engine and a personal Piper installation are
-large, licensed or locally configured environments. Raw reference and voice data
-are sensitive.
+COLMAP, Blender, MetaHuman, Unreal Engine i osobisty Piper są środowiskami lokalnymi. Materiały referencyjne oraz głos są wrażliwe.
 
-## Decision
+## Decyzja
 
-Use GitHub Actions only for deterministic source checks and static-site
-deployment. Keep specialist processing manual until a reproducible dedicated
-runner and approved test assets exist. Publish only a static viewer and
-non-sensitive documentation through GitHub Pages.
+GitHub Actions wykonują tylko deterministyczne kontrole i wdrażają stronę statyczną. Specjalistyczne przetwarzanie pozostaje ręczne, aż do przygotowania powtarzalnego runnera i zatwierdzonych danych testowych.
 
-## Consequences
+## Konsekwencje
 
-Manual workflows must state prerequisites and validation gates. Credentials and
-source photos, scans and voice recordings never enter the public web bundle or
-routine CI.
+Prywatne zdjęcia, skany, nagrania i dane dostępu nie trafiają do publicznego repozytorium ani viewera.

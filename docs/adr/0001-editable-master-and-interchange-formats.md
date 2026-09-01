@@ -1,21 +1,15 @@
-# ADR-0001: Editable master and interchange formats
+# ADR-0001: Edytowalne źródło i formaty wymiany
 
-**Status:** accepted, 2026-09-01
+**Status:** zaakceptowana, 2026-09-01
 
-## Context
+## Kontekst
 
-The avatar must remain editable across reconstruction, retopology, rigging,
-materials and animation. Export formats differ in their ability to retain
-skinning, morph targets, materials and animation.
+Eksporty nie zachowują zawsze rigu, morph targets, animacji i materiałów.
 
-## Decision
+## Decyzja
 
-Keep the native DCC scene and separated source assets as the canonical master.
-Use target-specific interchange: FBX for established engine rigging paths,
-GLB/glTF for web delivery, and USD/USDZ only after target validation. Produce
-and review a conversion report at each lossy boundary.
+Scena DCC oraz rozdzielone źródła są artefaktem kanonicznym. FBX służy sprawdzonym ścieżkom silnikowym, GLB/glTF viewerowi WWW, a USD/USDZ tylko po walidacji. Każda potencjalnie stratna konwersja wymaga raportu.
 
-## Consequences
+## Konsekwencje
 
-Exports are deliverables, not source of truth. The repository must not claim a
-conversion is lossless merely because the target format nominally supports it.
+Eksport jest deliverable, nie źródłem prawdy.

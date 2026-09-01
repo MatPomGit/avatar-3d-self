@@ -1,10 +1,8 @@
-# Architecture decision records
+# Decyzje architektoniczne
 
-ADRs preserve decisions that affect compatibility, assets, privacy or runtime
-boundaries. New records use `NNNN-short-title.md` and include status, context,
-decision and consequences. Supersede a record rather than silently rewriting a
-decision that has already guided work.
+ADR zapisują decyzje wpływające na zgodność, zasoby, prywatność lub środowiska wykonawcze. Nowy ADR zawiera kontekst, decyzję i konsekwencje. Decyzję zastępuj nowym ADR, zamiast zmieniać jej historię.
 
-- [ADR-0001: Editable master and interchange formats](0001-editable-master-and-interchange-formats.md)
-- [ADR-0002: Workstation boundaries and public viewer](0002-workstation-boundaries-and-public-viewer.md)
-- [ADR-0003: Facial-control and speech interface](0003-facial-control-and-speech-interface.md)
+- [ADR-0001: Edytowalne źródło i formaty wymiany](0001-editable-master-and-interchange-formats.md)
+- [ADR-0002: Środowiska robocze i publiczny viewer](0002-workstation-boundaries-and-public-viewer.md)
+- [ADR-0003: Kontrola twarzy i mowy](0003-facial-control-and-speech-interface.md)
+- [ADR-0004: Nazewnictwo i styl Pythona](0004-naming-and-python-style.md)

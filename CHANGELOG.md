@@ -1,29 +1,21 @@
-# Changelog
+# Dziennik zmian
 
-All notable repository changes are documented here. The project follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and uses semantic
-versioning for Python tooling.
+Projekt stosuje format [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/) oraz wersjonowanie semantyczne narzędzi Python.
 
-## [Unreleased]
+## [Nieopublikowane]
 
-### Changed
+### Zmieniono
 
-- Established documentation governance, architecture, ADRs and a roadmap.
-- Corrected case-sensitive documentation links and removed false automation
-  claims for workstation-only 3D workflows.
+- Ujednolicono język dokumentacji do polskiego.
+- Ustanowiono zasady nazewnictwa, PEP 8, PEP 257 oraz KISS dla nowego i modyfikowanego kodu.
 
 ## [0.1.0] - 2026-09-01
 
-### Added
+### Dodano
 
-- Initial Python utilities, format-conversion documentation, test suite and
-  static Three.js viewer.
+- Narzędzia Python, dokumentację konwersji, testy i statyczny viewer Three.js.
 
-### Known limitations
+### Ograniczenia
 
-- No public release artefact or validated end-to-end production avatar exists.
-- Reconstruction, Blender, MetaHuman, Piper voice configuration and engine
-  validation remain workstation-dependent.
-
-[Unreleased]: https://github.com/MatPomGit/avatar-3d-self/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/MatPomGit/avatar-3d-self/releases/tag/v0.1.0
+- Brak publicznego, zwalidowanego eksportu kompletnego awatara.
+- Rekonstrukcja, Blender, MetaHuman, Piper i integracja silnikowa wymagają środowiska lokalnego.
