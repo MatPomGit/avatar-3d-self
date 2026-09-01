@@ -166,3 +166,9 @@ Przykład:
   "lossless_for_detected_features": false
 }
 ```
+
+## Referencje techniczne
+
+- Blender Manual: Universal Scene Description (USD), `https://docs.blender.org/manual/en/4.2/files/import_export/usd.html`
+- Blender Manual: Wavefront OBJ, `https://docs.blender.org/manual/en/5.3/files/import_export/obj.html`
+- Blender Manual: Stanford PLY, `https://docs.blender.org/manual/en/4.5/files/import_export/ply.html`
