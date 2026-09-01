@@ -42,6 +42,7 @@ Przykład: zamiast pisać tylko „IOR rogówki = 1,376”, należy najpierw wyj
 | współczynnik załamania światła | Index of Refraction, IOR | Wielkość bezwymiarowa. |
 | współczynnik odbicia Fresnela dla padania prostopadłego | normal-incidence Fresnel reflectance, F0 | Stosować symbol F0. |
 | dwukierunkowa funkcja rozkładu odbicia | Bidirectional Reflectance Distribution Function, BRDF | Termin optyczny. |
+| powłoka antyrefleksyjna | anti-reflective coating | Powłoka ograniczająca część odbić na granicy ośrodków optycznych. |
 | program cieniujący | shader | W kontekście konkretnego silnika można mówić o module lub programie cieniującym. |
 | model cieniowania | shading model | Nie utożsamiać z programem cieniującym. |
 | przestrzeń barw | color space | Termin stosowany w grafice komputerowej i poligrafii. |
@@ -158,6 +159,9 @@ Przykład: zamiast pisać tylko „IOR rogówki = 1,376”, należy najpierw wyj
 | wizem | viseme | Utrwalony termin dla wizualnego odpowiednika fonemu. |
 | koartykulacja | coarticulation | Forma preferowana w dokumentacji projektu. |
 | wymuszane dopasowanie czasowe | forced alignment | Dopasowanie transkrypcji/fonemów do sygnału mowy. |
+| miara pewności | confidence score | Wartość opisująca wiarygodność wyniku algorytmu, jeśli narzędzie ją udostępnia. |
+| częstotliwość próbkowania | sample rate | Liczba próbek sygnału audio zapisywanych w ciągu sekundy. |
+| modulacja kodowo-impulsowa | Pulse-Code Modulation, PCM | Standardowa reprezentacja próbek cyfrowego audio. |
 | synchronizacja ruchu ust z mową | lip-sync | W tytułach można zachować „lip-sync” po polskim rozwinięciu. |
 | żuchwa | jaw/mandible | Dla anatomii preferować mandible, dla kanału sterującego jaw. |
 | domknięcie warg | lip seal | |
@@ -169,6 +173,9 @@ Przykład: zamiast pisać tylko „IOR rogówki = 1,376”, należy najpierw wyj
 | pozyskiwanie materiału referencyjnego | reference capture | |
 | sesja zdjęciowa do rekonstrukcji | photogrammetry capture | |
 | fotogrametria | photogrammetry | |
+| parametry wewnętrzne aparatu | camera intrinsics | Parametry modelu kamery, m.in. ogniskowa w pikselach i punkt główny. |
+| zniekształcenie promieniowe | radial distortion | Zniekształcenie obrazu rosnące zwykle wraz z odległością od środka kadru. |
+| balans bieli | white balance | Ustawienie określające neutralne odwzorowanie barw dla danego oświetlenia. |
 | rekonstrukcja z ruchu kamery | Structure from Motion, SfM | Pełna polska nazwa + nazwa standardowa. |
 | wielowidokowa rekonstrukcja stereo | Multi-View Stereo, MVS | |
 | dopasowanie cech | feature matching | |

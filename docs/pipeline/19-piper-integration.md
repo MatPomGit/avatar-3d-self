@@ -1,30 +1,48 @@
 # 19. Integracja Piper
 
-**Input:** tekst, zatwierdzony model Piper i pipeline alignmentu.  
-**Editable output:** konfiguracja głosu i mappingu.  
-**Derived output:** WAV + phoneme timing + animation curves.
+**Dane wejściowe (input):** tekst, zatwierdzony model Piper i profil syntezy.  
+**Edytowalny wynik (editable output):** konfiguracja głosu, mapowanie fonemów i wizemów oraz parametry koartykulacji.  
+**Wynik pochodny (derived output):** WAV, czasy fonemów i krzywe animacji.
 
 ```text
-text → Piper → audio.wav → phoneme alignment → timestamps
-     → phoneme-to-viseme mapping → coarticulation → facial curves
+tekst → Piper → audio.wav → normalizacja fonemów → dopasowanie czasowe
+      → fonem → wizem → koartykulacja → krzywe twarzy
 ```
+
+## Dlaczego audio nie wystarcza
+
+Amplituda sygnału mówi, kiedy dźwięk jest głośniejszy lub cichszy, ale nie mówi, czy mówca wypowiada `/m/`, `/f/`, `/a/` czy `/u/`. Dlatego sterowanie ustami wyłącznie amplitudą prowadzi do losowego otwierania i zamykania żuchwy.
 
 ## Windows
 
-1. Uruchom Piper z lokalnym modelem i jawnie ustawionym sample rate.
-2. Zapisz WAV bez ponownej kompresji stratnej.
-3. Uruchom aligner i zapisz timestampy w JSON.
-4. Wygeneruj viseme curves.
-5. Zachowaj wersję modelu głosu w raporcie.
+1. Uruchom lokalny Piper z zatwierdzonym modelem i profilem parametrów.
+2. Zapisz WAV PCM bez stratnej kompresji.
+3. Zapisz metadane modelu i parametrów syntezy.
+4. Pobierz lub wyznacz czasy fonemów.
+5. Znormalizuj symbole do [profilu języka polskiego](../speech/polish-phoneme-profile.md).
+6. Zapisz wynik w [kanonicznym formacie dopasowania](../speech/alignment-format.md).
+7. Wygeneruj wizemy i koartykulację.
+8. Zweryfikuj wynik z audio i bez audio.
 
 ## Linux
 
-1. Uruchom lokalny Piper z tą samą konfiguracją głosu.
-2. Wygeneruj WAV PCM.
-3. Uruchom alignment fonemów.
-4. Wygeneruj identyczny format JSON timingów i krzywych.
-5. Zweryfikuj zgodność czasu audio i animacji.
+Wykonaj te same kroki. Różnią się wyłącznie ścieżki środowiska i sposób uruchamiania procesu lub usługi Piper. Format WAV, JSON i parametry animacji pozostają identyczne.
 
-## DoD
+## Walidacja
 
-Ten sam tekst daje audytowalny łańcuch artefaktów: tekst, audio, fonemy, visemy i wynikową animację. Brak kroku opartego wyłącznie na amplitudzie audio.
+Dla krótkiego zdania testowego zapisujemy cały łańcuch:
+
+- tekst;
+- identyfikator i wersję modelu;
+- parametry syntezy;
+- skrót SHA-256 WAV;
+- fonemy źródłowe;
+- fonemy znormalizowane;
+- wizemy;
+- krzywe wynikowe.
+
+Zmiana tekstu, modelu, `length_scale` albo pliku WAV unieważnia wszystkie późniejsze artefakty.
+
+## Definition of Done
+
+Etap jest zaliczony, gdy ten sam zestaw wejściowy daje audytowalny i odtwarzalny łańcuch danych, a synchronizacja nie opiera się wyłącznie na amplitudzie audio.
