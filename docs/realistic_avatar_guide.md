@@ -10,11 +10,11 @@ Zachowaj proporcje twarzy i sylwetki, kształt oczu, okulary, linię włosów or
 
 Główna siatka ciała musi zachowywać poprawny kształt podczas zgięcia stawów. Dłonie wymagają niezależnego ruchu wszystkich palców. Otwieranie ust wymaga ruchu żuchwy, dolnych zębów i języka.
 
-## Oczy i włosy
+## Oczy, włosy, broda i piersi
 
 Gałki oczne obracają się niezależnie od głowy. Powieki oraz rzęsy współpracują z mruganiem. Włosy i broda są osobnymi elementami przytwierdzonymi do skóry, a nie wyłącznie płaską teksturą.
 
-Długie włosy wymagają rigowania pasm lub symulacji z kolizją z głową, barkami i ubraniem. Dla sylwetki kobiecej z piersiami dodatkowy rig zapewnia subtelny ruch wtórny zależny od ruchu klatki piersiowej.
+Długie włosy wymagają rigowania pasm lub symulacji z kolizją z głową, barkami i ubraniem. Dla sylwetki kobiecej z piersiami dodatkowy rig zapewnia zauważalny ruch wtórny zależny od ruchu klatki piersiowej.
 
 ## Materiały
 
