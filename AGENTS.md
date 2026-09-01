@@ -1,91 +1,52 @@
-\# AGENTS.md - System Instructions \& Guidelines for AI Autonomous Agents
+# Contributor guidance
 
+## Project scope
 
+`avatar-3d-self` is an editable, workstation-centred production pipeline for a
+photorealistic digital self-avatar. It contains lightweight Python utilities,
+documentation and a Three.js viewer. Reconstruction, DCC work, MetaHuman and
+Unreal Engine integration require local specialist software and are not
+reproducible on GitHub-hosted runners.
 
-This file establishes execution rules, architectural context, and safety constraints for AI coding agents (e.g., Cursor, Claude Code, Devin, GitHub Copilot) operating within the `avatar-3d-self` repository.
+The quality order is: likeness to approved reference material, anatomical and
+deformation quality, natural facial animation, and real-time performance. Do
+not trade the first three for generic beautification or stylisation.
 
+## Authoritative project facts
 
+- Python 3.11+ is required; `pyproject.toml` is the dependency source of truth.
+- CI runs `compileall`, Ruff's critical-error rules and pytest. It does not run
+  COLMAP, Blender, MetaHuman or Unreal Engine.
+- GitHub Pages is a static viewer only. It must never contain source scans,
+  private reference photos, credentials or privileged processing logic.
+- The canonical interchange package is documented in `docs/ARCHITECTURE.md`
+  and decisions in `docs/adr/`.
 
-\---
+## Asset and privacy rules
 
+- Treat source photographs, body scans, audio recordings and biometric
+  annotations as sensitive personal data. Keep them outside this public
+  repository unless explicit publication approval is recorded.
+- Large binary source and deliverable assets must use Git LFS when intentionally
+  versioned. Do not commit generated caches, render outputs or workstation-only
+  intermediate files.
+- Preserve editable source, retopology, textures, rig and animation separately;
+  an exported FBX or GLB must not be the only surviving asset.
 
+## Change rules
 
-\## 1. Project Overview \& Architecture
+- Read the relevant documentation and scripts before modifying a pipeline step.
+- Keep changes small and reviewable. Do not push directly to `main`.
+- Update the roadmap, changelog and an ADR when a change alters an architectural
+  boundary, canonical format, privacy rule or runtime contract.
+- Use type hints and `logging` in new or substantially changed Python code.
+- Run the narrowest relevant checks, then `python -m pytest -q` and
+  `ruff check scripts tests` for Python changes.
 
+## Coordinate and export conventions
 
-
-`avatar-3d-self` is an automated 3D avatar generation pipeline that converts photogrammetry scans into MetaHuman-compatible blendshapes and exports Unreal Engine ready assets (`.fbx`).
-
-
-
-\* \*\*Primary Stack:\*\* Python 3.10+, Open3D, Trimesh, SciPy, Unreal Engine Python API, COLMAP CLI, pygltflib, ufbx, assimp, pyscript, Three.js.
-Optional: Pygbag + Ursina Engine.
-
-\* \*\*Target Workflows:\*\* GitHub Actions (`.github/workflows/`), Python automation (`scripts/`).
-
-\* \*\*Storage Rules:\*\* Heavy 3D assets (`.fbx`, `.obj`, raw scans) \*\*MUST\*\* use Git LFS. Never commit large binary files directly to standard Git tracking.
-
-
-
-\---
-
-
-
-\## 2. Agent Responsibilities \& Workflows
-
-
-
-| Agent Focus | Allowed Operations | Restricted Operations |
-
-| :--- | :--- | :--- |
-
-| \*\*Mesh \& Geometry Agent\*\* | Modifying `scripts/blendshape\_generator.py`, processing `.obj`/`.ply` meshes, running `pytest tests/test\_blendshapes.py`. | Overwriting `source/metahuman/metahuman\_base.fbx` directly without validation. |
-
-| \*\*Unreal Engine Agent\*\* | Editing `scripts/ue\_export\_fbx.py`, configuring `unreal\_project/` settings, running headless UE python jobs. | Modifying core C++ plugins without updating build targets. |
-
-| \*\*CI/CD Pipeline Agent\*\* | Updating `.github/workflows/\*.yml`, managing `pyproject.toml` dependencies. | Pushing directly to `main` branch without PR check triggers. |
-
-
-
-\---
-
-
-
-\## 3. Code Conventions \& Standards
-
-
-
-\* \*\*Python Constraints:\*\*
-
-&#x20; \* Enforce strict type hints (`typing` module) across all script interfaces.
-
-&#x20; \* Use standard logging (`logging` library) instead of bare `print()` statements in production scripts.
-
-&#x20; \* Format all code using `black` and adhere to PEP 8 standards (`flake8`).
-
-\* \*\*Geometry Processing:\*\*
-
-&#x20; \* Coordinate System standard: \*\*Z-Up, Right-Handed\*\* for raw scans; convert to \*\*Z-Up, Left-Handed\*\* for Unreal Engine exports.
-
-&#x20; \* Mesh units must be in \*\*centimeters (cm)\*\* upon export.
-
-
-
-\---
-
-
-
-\## 4. Common Commands for Agents
-
-
-
-\* \*\*Environment Setup:\*\*
-
-&#x20; ```bash
-
-&#x20; python -m venv venv
-
-&#x20; source venv/bin/activate  # Or venv\\Scripts\\activate on Windows
-
-&#x20; pip install -e .\[dev]
-
+Source scans use a right-handed, Z-up convention. Exports for Unreal Engine are
+converted deliberately at the exporter boundary and validated in the target
+application. Exported meshes use centimetres. Never assume that a conversion
+preserves materials, rigs, shape keys or animation: use its report and validate
+in the target application.
