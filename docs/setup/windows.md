@@ -3,8 +3,8 @@
 ## Python i repozytorium
 
 ```powershell
-git clone https://github.com/MatPomGit/avatar-3d-self.git
-cd avatar-3d-self
+git clone https://github.com/MatPomGit/avatar-studio.git
+cd avatar-studio
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
@@ -27,7 +27,7 @@ Zainstaluj Blender, COLMAP, Git LFS i FFmpeg z oficjalnych dystrybucji. Ścieżk
 Przykładowa lokalizacja workspace:
 
 ```text
-D:\Avatar3D\projects\self-avatar\
+D:\AvatarStudio\projects\self-avatar\
 ```
 
-Nie umieszczaj prywatnego capture w katalogu sklonowanego repozytorium.
+Nie umieszczaj prywatnego materiału referencyjnego (reference capture) w katalogu sklonowanego repozytorium.
