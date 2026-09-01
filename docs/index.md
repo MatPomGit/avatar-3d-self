@@ -14,11 +14,11 @@ generator.
 
 ## Production and tools
 
-- [Complete production pipeline](COMPLETE_PIPELINE.md): manual workflow and
+- [Complete production pipeline](complete-pipeline.md): manual workflow and
   quality gates.
 - [Realistic avatar guide](realistic_avatar_guide.md): capture, topology, rig
   and animation principles.
-- [Engine integration](ENGINE_INTEGRATION.md): target-engine responsibilities.
+- [Engine integration](engine-integration.md): target-engine responsibilities.
 - [Model format converter](model_format_converter.md): authoritative CLI and
   limitations.
 - [Format conversion examples](format_conversion_examples.md): loss-aware
