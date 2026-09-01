@@ -85,6 +85,33 @@ def test_piper_synthesis_records_provenance(tmp_path, monkeypatch):
     assert report["parameters"]["length_scale"] == 1.05
 
 
+def test_piper_http_alignment_becomes_start_end_timing():
+    payload = {
+        "voice": {"name": "pl_PL-test-medium", "language": "pl", "num_speakers": 1},
+        "last": {
+            "text": "ma",
+            "synthesize_seconds": 0.08,
+            "phonemes": ["m", "a"],
+            "alignments": [
+                {"phoneme": "m", "seconds": 0.06},
+                {"phoneme": "a", "seconds": 0.14},
+            ],
+        },
+    }
+    report = PiperAdapter.normalize_http_info(payload, source_url="http://127.0.0.1:5000/info")
+    assert report["last_available"] is True
+    assert report["duration_s"] == 0.2
+    assert report["phonemes"][0] == {
+        "symbol": "m",
+        "start_s": 0.0,
+        "end_s": 0.06,
+        "duration_s": 0.06,
+    }
+    assert report["phonemes"][1]["start_s"] == 0.06
+    assert report["phonemes"][1]["end_s"] == 0.2
+    assert "text" not in report
+
+
 def test_ffmpeg_normalization_builds_pcm_wav_contract(tmp_path, monkeypatch):
     source = tmp_path / "source.wav"
     source.write_bytes(b"source")
