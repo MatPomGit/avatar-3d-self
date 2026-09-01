@@ -18,7 +18,8 @@ This file establishes execution rules, architectural context, and safety constra
 
 
 
-\* \*\*Primary Stack:\*\* Python 3.10+, Open3D, Trimesh, SciPy, Unreal Engine Python API, COLMAP CLI.
+\* \*\*Primary Stack:\*\* Python 3.10+, Open3D, Trimesh, SciPy, Unreal Engine Python API, COLMAP CLI, pygltflib, ufbx, assimp, pyscript, Three.js.
+Optional: Pygbag + Ursina Engine.
 
 \* \*\*Target Workflows:\*\* GitHub Actions (`.github/workflows/`), Python automation (`scripts/`).
 
