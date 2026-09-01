@@ -23,10 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v7
         with:
           python-version: '3.11'
       
@@ -61,7 +61,7 @@ jobs:
     needs: validate_and_prepare
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Setup Python + COLMAP
         run: |
@@ -77,7 +77,7 @@ jobs:
             --output source/scans/colmap_output
       
       - name: Upload scan results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: scan-results
@@ -89,7 +89,7 @@ jobs:
     needs: [validate_and_prepare, photogrammetry_scan]
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Export from Unreal Engine
         continue-on-error: true
@@ -103,7 +103,7 @@ jobs:
           python scripts/validate_fbx.py exports/avatar_final.fbx
       
       - name: Upload production FBX
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: avatar-fbx-export
           path: exports/avatar_final.fbx
@@ -115,7 +115,7 @@ jobs:
     needs: [validate_and_prepare, ue_export]
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Generate export report
         run: |
