@@ -17,6 +17,28 @@ Nie tworzymy prostych kalek językowych, jeżeli istnieje poprawny polski termin
 
 Nowy powtarzalny termin techniczny należy najpierw dopisać do słownika, a dopiero potem stosować w kolejnych dokumentach.
 
+### Dydaktyczne wprowadzenie nowego pojęcia
+
+Przy pierwszym omawianiu nowego pojęcia w rozdziale nie zaczynamy od tabeli parametrów ani od skrótu. Najpierw wyjaśniamy czytelnikowi:
+
+1. czym jest dane pojęcie;
+2. do czego służy w projekcie Avatar Studio;
+3. co w praktyce powoduje zwiększenie albo zmniejszenie jego wartości;
+4. jaki jest typowy zakres wartości;
+5. jakie wartości można uznać za niskie, typowe i wysokie;
+6. w jakich sytuacjach wybiera się poszczególne wartości;
+7. jakie objawy wskazują, że parametr jest ustawiony zbyt nisko albo zbyt wysoko.
+
+Dla parametru liczbowego preferowany schemat dydaktyczny to:
+
+> **Co to jest?** Krótkie wyjaśnienie znaczenia fizycznego lub technicznego.  
+> **Co zmienia?** Opis wpływu zmiany wartości na wynik.  
+> **Przykładowe wartości:** wartość niska, typowa i wysoka wraz z jednostką.  
+> **Kiedy stosować?** Przykładowe sytuacje produkcyjne.  
+> **Jak rozpoznać błąd?** Typowy artefakt przy wartości zbyt małej lub zbyt dużej.
+
+Nie należy stosować tego jako sztywnego bloczka w każdym miejscu. Informacje mogą być zapisane płynnym tekstem, tabelą lub krótkim przykładem. Obowiązkowa jest treść dydaktyczna, a nie konkretny układ wizualny.
+
 ## Kod
 
 Python 3.11, PEP 8 i PEP 257. Preferowane są małe moduły, jawne zależności i KISS. Adapter do zewnętrznego programu nie może mieszać logiki domenowej z analizowaniem interfejsu użytkownika.
