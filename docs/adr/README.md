@@ -1,8 +1,9 @@
-# Decyzje architektoniczne
+# Architecture Decision Records
 
-ADR zapisują decyzje wpływające na zgodność, zasoby, prywatność lub środowiska wykonawcze. Nowy ADR zawiera kontekst, decyzję i konsekwencje. Decyzję zastępuj nowym ADR, zamiast zmieniać jej historię.
+ADR zapisują decyzje, które zmieniają granice systemu, formaty kanoniczne, prywatność albo środowisko wykonawcze.
 
-- [ADR-0001: Edytowalne źródło i formaty wymiany](0001-editable-master-and-interchange-formats.md)
-- [ADR-0002: Środowiska robocze i publiczny viewer](0002-workstation-boundaries-and-public-viewer.md)
-- [ADR-0003: Kontrola twarzy i mowy](0003-facial-control-and-speech-interface.md)
-- [ADR-0004: Nazewnictwo i styl Pythona](0004-naming-and-python-style.md)
+- [ADR-0001](0001-editable-master-and-interchange-formats.md): editable master and interchange formats.
+- [ADR-0002](0002-workstation-boundaries-and-public-viewer.md): workstation boundaries.
+- [ADR-0003](0003-facial-control-and-speech-interface.md): facial control and speech interface.
+- [ADR-0004](0004-naming-and-python-style.md): naming and Python style.
+- [ADR-0005](0005-mkdocs-and-avatar-studio.md): MkDocs documentation and local Avatar Studio.

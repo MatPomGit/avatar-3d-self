@@ -1,9 +1,21 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
+.venv/
 venv/
 .env
+.pytest_cache/
+.ruff_cache/
+
+# Documentation and packaging
+site/
+build/
+dist/
+*.spec
+
+# Avatar Studio local/private state
+.avatar-studio/
+*.sqlite3
 
 # Unreal Engine
 source/unreal_project/Intermediate/
@@ -13,23 +25,23 @@ source/unreal_project/Build/
 source/unreal_project/*.sln
 source/unreal_project/*.csproj
 
-# COLMAP & Heavy Assets
+# COLMAP and private/heavy working output
 source/scans/colmap_output/*
 !source/scans/colmap_output/.gitkeep
 *.photogrammetry
 
-# OS specific
-.DS_Store
-Thumbs.db
-
-# Blender
+# Blender and DCC working files
 *.blend
 *.blend1
 *.blend2
 blender_temp/
-__pycache__/
+*.3ds
+*.lwo
+*.spp
+*.ztl
+*.zpr
 
-# Large textures (track via Git LFS if needed)
+# Large texture working formats
 *.exr
 *.tiff
 *.tif
@@ -37,25 +49,16 @@ __pycache__/
 *_8k.png
 !baner.jpg
 
-# Cache & temp
+# Front-end leftovers or local package managers
+node_modules/
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary files
 *.cache
 *.tmp
 *.bak
-.DS_Store
-Thumbs.db
-
-# Software-specific
-*.3ds
-*.lwo
-*.spp
-*.ztl
-*.zpr
-
-# Node/Python artifacts (if scripts needed)
-node_modules/
-venv/
-*.pyc
-
-# OS artifacts
-.vscode/
-.idea/

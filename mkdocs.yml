@@ -1,0 +1,124 @@
+site_name: Avatar 3D Self
+site_description: Professional documentation for a photorealistic, editable real-time digital human pipeline.
+site_url: https://matpomgit.github.io/avatar-3d-self/
+repo_url: https://github.com/MatPomGit/avatar-3d-self
+repo_name: MatPomGit/avatar-3d-self
+edit_uri: edit/main/docs/
+
+copyright: Documentation for the Avatar 3D Self project
+
+nav:
+  - Start: index.md
+  - Project:
+      - Overview: project/overview.md
+      - Goals and requirements: project/goals-and-requirements.md
+      - Architecture: project/architecture.md
+      - Repository structure: project/repository-structure.md
+      - Conventions: project/conventions.md
+      - Asset versioning: project/asset-versioning.md
+      - Privacy and reference data: project/privacy-and-reference-data.md
+  - Production pipeline:
+      - Pipeline overview: pipeline/overview.md
+      - 01 Reference acquisition: pipeline/01-reference-acquisition.md
+      - 02 Photogrammetry: pipeline/02-photogrammetry.md
+      - 03 Reconstruction: pipeline/03-reconstruction.md
+      - 04 Mesh cleanup: pipeline/04-mesh-cleanup.md
+      - 05 Retopology: pipeline/05-retopology.md
+      - 06 UV: pipeline/06-uv.md
+      - 07 PBR materials: pipeline/07-pbr-materials.md
+      - 08 Eyes: pipeline/08-eyes.md
+      - 09 Hair and facial hair: pipeline/09-hair-and-facial-hair.md
+      - 10 Clothing: pipeline/10-clothing.md
+      - 11 Glasses: pipeline/11-glasses.md
+      - 12 Body rig: pipeline/12-body-rig.md
+      - 13 Hand rig: pipeline/13-hand-rig.md
+      - 14 Facial rig: pipeline/14-facial-rig.md
+      - 15 Secondary motion: pipeline/15-secondary-motion.md
+      - 16 Skinning: pipeline/16-skinning.md
+      - 17 Animation: pipeline/17-animation.md
+      - 18 Lip-sync: pipeline/18-lip-sync.md
+      - 19 Piper integration: pipeline/19-piper-integration.md
+      - 20 Export: pipeline/20-export.md
+      - 21 Runtime validation: pipeline/21-runtime-validation.md
+  - Capture:
+      - Photography guide: capture/photography-guide.md
+      - Expression capture: capture/expression-capture.md
+      - Measurements: capture/measurements.md
+      - Capture manifest: capture/capture-manifest.md
+  - Rigging specifications:
+      - Skeleton specification: rigging/skeleton-specification.md
+      - Facial rig specification: rigging/facial-rig-specification.md
+  - Animation:
+      - Animation architecture: animation/animation-architecture.md
+  - Speech:
+      - Speech architecture: speech/architecture.md
+  - Runtime:
+      - Performance budget: runtime/performance-budget.md
+      - Unreal Engine: runtime/unreal.md
+      - Unity: runtime/unity.md
+      - Web: runtime/web.md
+  - Validation:
+      - Acceptance criteria: validation/acceptance-criteria.md
+      - Uncanny valley: validation/uncanny-valley.md
+  - Tools:
+      - Blender: tools/blender.md
+      - COLMAP: tools/colmap.md
+      - Model format converter: tools/model-format-converter.md
+  - Setup:
+      - Windows: setup/windows.md
+      - Linux: setup/linux.md
+  - Avatar Studio:
+      - Architecture: desktop/architecture.md
+      - User workflow: desktop/user-workflow.md
+  - Roadmap: roadmap/roadmap.md
+  - Architecture decisions: adr/README.md
+
+plugins:
+  - search:
+      lang: en
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.tabs.link
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue grey
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue grey
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+extra_css:
+  - assets/stylesheets/extra.css
