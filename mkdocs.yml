@@ -1,11 +1,11 @@
-site_name: Avatar 3D Self
-site_description: Professional documentation for a photorealistic, editable real-time digital human pipeline.
+site_name: Avatar Studio
+site_description: Professional documentation for Avatar Studio and its photorealistic editable real-time digital human pipeline.
 site_url: https://matpomgit.github.io/avatar-3d-self/
 repo_url: https://github.com/MatPomGit/avatar-3d-self
 repo_name: MatPomGit/avatar-3d-self
 edit_uri: edit/main/docs/
 
-copyright: Documentation for the Avatar 3D Self project
+copyright: Avatar Studio documentation
 
 nav:
   - Start: index.md
@@ -13,6 +13,7 @@ nav:
       - Overview: project/overview.md
       - Goals and requirements: project/goals-and-requirements.md
       - Architecture: project/architecture.md
+      - Naming: project/naming.md
       - Repository structure: project/repository-structure.md
       - Conventions: project/conventions.md
       - Asset versioning: project/asset-versioning.md
