@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import shutil
 import subprocess
-from typing import Sequence
+from typing import Mapping, Sequence
 
 
 @dataclass(frozen=True, slots=True)
@@ -17,6 +17,10 @@ class CommandResult:
     returncode: int
     stdout: str
     stderr: str
+
+    @property
+    def ok(self) -> bool:
+        return self.returncode == 0
 
 
 class ToolAdapter:
@@ -43,7 +47,15 @@ class ToolAdapter:
     def available(self) -> bool:
         return self.resolve() is not None
 
-    def run(self, args: Sequence[str], *, timeout_s: float | None = None) -> CommandResult:
+    def run(
+        self,
+        args: Sequence[str],
+        *,
+        timeout_s: float | None = None,
+        input_text: str | None = None,
+        cwd: str | Path | None = None,
+        env: Mapping[str, str] | None = None,
+    ) -> CommandResult:
         executable = self.resolve()
         if executable is None:
             raise FileNotFoundError(f"{self.name} executable not found")
@@ -52,6 +64,9 @@ class ToolAdapter:
             command,
             capture_output=True,
             text=True,
+            input=input_text,
+            cwd=str(cwd) if cwd is not None else None,
+            env=dict(env) if env is not None else None,
             timeout=timeout_s or self.timeout_s,
             check=False,
         )
