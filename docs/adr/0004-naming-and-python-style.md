@@ -8,7 +8,7 @@ Różne konwencje nazw powodowały ryzyko błędów na systemach rozróżniając
 
 ## Decyzja
 
-Szczegółowe zasady nazw, PEP 8, PEP 257 i KISS są utrzymywane wyłącznie w [architekturze](../architecture.md).
+Szczegółowe zasady nazw, PEP 8, PEP 257 i KISS są utrzymywane w [konwencjach projektu](../project/conventions.md) oraz [architekturze](../project/architecture.md).
 
 ## Konsekwencje
 
