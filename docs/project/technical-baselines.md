@@ -1,13 +1,13 @@
 # Techniczne wartości bazowe
 
-Ten dokument definiuje domyślne parametry Avatar Studio dla zachowania, animacji i walidacji. Są to wartości startowe dla zdrowej dorosłej postaci w neutralnym stanie, a nie niezmienne prawa fizjologiczne. Parametry powinny być nadpisywane danymi osoby referencyjnej, jeśli dostępne są wiarygodne pomiary.
+Ten dokument definiuje domyślne parametry Avatar Studio dla zachowania, animacji, materiałów, rigu i walidacji. Są to wartości startowe dla zdrowej dorosłej postaci w neutralnym stanie, a nie niezmienne prawa fizjologiczne. Parametry powinny być nadpisywane danymi osoby referencyjnej, jeśli dostępne są wiarygodne pomiary.
 
 ## Zasada strojenia
 
 Każdy parametr ma trzy poziomy:
 
 1. `baseline`: wartość domyślna używana bez danych osobowych;
-2. `range`: dopuszczalny zakres naturalnej zmienności;
+2. `range`: dopuszczalny zakres naturalnej lub produkcyjnej zmienności;
 3. `profile`: wartość zmierzona lub ręcznie zatwierdzona dla konkretnego awatara.
 
 Runtime używa `profile`, jeśli istnieje, w przeciwnym razie `baseline`.
@@ -102,6 +102,125 @@ Dla każdego celu viseme tworzymy krzywą z:
 - overlap z sąsiednim viseme.
 
 Jeżeli suma wag konkurujących visemów przekracza 1.0, stosujemy normalizację grupy, ale `jawOpen` jest traktowany osobno jako kanał anatomiczny. Spółgłoski zwarte `/p b m/` muszą uzyskać rzeczywiste domknięcie warg, a `/f v/` kontakt dolnej wargi z górnymi zębami.
+
+## PBR i skóra
+
+Skóra jest dielektrykiem:
+
+| Parametr | Baseline | Zakres strojenia |
+| --- | ---: | ---: |
+| metallic | 0 | 0 |
+| IOR skóry | 1.40 | 1.38-1.45 |
+| Fresnel F0 dla IOR 1.40 | 0.028 | wynik z IOR |
+| roughness czoła | 0.38 | 0.30-0.48 |
+| roughness T-zone | 0.34 | 0.26-0.44 |
+| roughness policzków | 0.48 | 0.38-0.60 |
+| roughness okolic oczu | 0.52 | 0.42-0.64 |
+
+Dla fizycznie skalowanego SSS przyjmujemy początkowy efektywny radius RGB:
+
+`[1.2, 0.55, 0.25] mm`.
+
+Wartości te służą wyłącznie jako start strojenia. Ostateczna wartość ma wynikać z porównania z referencją w świetle frontalnym, bocznym i backlight.
+
+## Oko
+
+| Parametr | Baseline | Zakres |
+| --- | ---: | ---: |
+| średnica gałki ocznej | 24.0 mm | 23-25 mm |
+| średnica tęczówki | 11.8 mm | 11-12.5 mm |
+| źrenica neutralna | 3.5 mm | 2-5 mm |
+| dynamiczny zakres źrenicy | 2-8 mm | profil osoby/światła |
+| IOR rogówki | 1.376 | 1.37-1.38 |
+| IOR łez/cieczy | 1.336 | 1.33-1.34 |
+| roughness rogówki | 0.02 | 0.01-0.04 |
+
+Pupil constriction ma baseline time constant 0.6 s, a dilation 1.2 s. W braku danych o luminancji źrenica pozostaje stabilna.
+
+## Groom
+
+Baseline dla włosów głowy:
+
+| Parametr | Baseline | Zakres |
+| --- | ---: | ---: |
+| średnica włosa | 70 µm | 50-100 µm |
+| guides LOD0 | 800-1500 | zależnie od fryzury |
+| render strands LOD0 | 60k-120k | zależnie od targetu |
+| flyaways | 0.5-2% | 0-3% |
+| collision margin | 3 mm | 2-4 mm |
+
+LOD groomu: około 100%, 60%, 30%, 10-15%/cards.
+
+## Skeleton
+
+Kanoniczny rest pose to A-pose. Baseline odwiedzenia ramion: 35-45°.
+
+Dla profilu fotorealistycznego twist bones są domyślnie zalecane dla ramion, przedramion i ud. Stretch IK jest wyłączony.
+
+Testowe zakresy:
+
+- shoulder flexion 160°;
+- shoulder abduction 150°;
+- elbow flexion 145°;
+- forearm pronation/supination około ±80°;
+- hip flexion 120°;
+- knee flexion 135°.
+
+## Facial rig
+
+ARKit interface używa zakresu 0-1. `1` oznacza zatwierdzone maksimum danego kanału.
+
+Baseline jaw:
+
+- pełne otwarcie: 30-35 mm;
+- rotacja około 25-30°;
+- lateral translation 5-8 mm;
+- forward 4-7 mm.
+
+Lip seal: pełna siła do `jawOpen=0.08`, wygaszenie do zera przy `jawOpen≈0.22`.
+
+Eyelid follow:
+
+- look up: 0.30-0.35;
+- look down: 0.40-0.45.
+
+Corrective dla pary kanałów może używać:
+
+`w_corrective = smoothstep(0.15, 0.55, w_A * w_B)`.
+
+## Secondary motion
+
+Kanoniczny model:
+
+`x'' + 2*zeta*omega_n*x' + omega_n^2*x = omega_n^2*x_target`
+
+z `omega_n = 2*pi*f_n`.
+
+Baseline:
+
+| Element | `f_n` | `zeta` |
+| --- | ---: | ---: |
+| krótkie włosy | 4-6 Hz | 0.75-0.95 |
+| średnie włosy | 2.5-4 Hz | 0.65-0.85 |
+| długie włosy | 1.2-2.5 Hz | 0.55-0.80 |
+| luźna tkanina | 1.5-3 Hz | 0.65-0.90 |
+| miękkie tkanki | 2-4 Hz | 0.75-1.0 |
+
+Dla modelu kobiecego, jeśli wymagany jest niezależny secondary motion piersi, baseline to `f_n=2.2 Hz`, `zeta=0.85`, z ograniczoną amplitudą wynikającą z anatomii i podparcia ubraniem.
+
+## Self-capture z obracającą się osobą
+
+Wariant `rotating_subject` jest wspieranym workflow dla samodzielnego capture sylwetki.
+
+Baseline:
+
+- krok 10°;
+- 36 pozycji na 360°;
+- opóźnienie po obrocie 2 s;
+- minimum dwa poziomy aparatu, preferowane trzy;
+- obowiązkowa segmentacja foreground;
+- pełny obrót wykonywany całym ciałem razem ze stopami;
+- skala nadawana z co najmniej trzech rzeczywistych pomiarów.
 
 ## Runtime baseline
 
