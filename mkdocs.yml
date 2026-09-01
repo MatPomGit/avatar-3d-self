@@ -108,11 +108,14 @@ nav:
       - Blender: tools/blender.md
       - COLMAP: tools/colmap.md
       - Model format converter: tools/model-format-converter.md
+      - Conversion examples: tools/conversion-examples.md
   - Setup:
       - Windows: setup/windows.md
       - Linux: setup/linux.md
   - Avatar Studio:
       - Architecture: desktop/architecture.md
+      - Project workspace: desktop/project-workspace.md
+      - Artefact inspection: desktop/artifact-inspection.md
       - User workflow: desktop/user-workflow.md
   - Roadmap: roadmap/roadmap.md
   - Architecture decisions: adr/README.md
