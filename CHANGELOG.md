@@ -8,6 +8,9 @@ versioning for Python tooling.
 
 ### Changed
 
+ - Standardised naming rules and made PEP 8, PEP 257 and KISS mandatory for
+  new or modified Python code.
+- Renamed production-pipeline documentation to lowercase `kebab-case`.
 - Established documentation governance, architecture, ADRs and a roadmap.
 - Corrected case-sensitive documentation links and removed false automation
   claims for workstation-only 3D workflows.
