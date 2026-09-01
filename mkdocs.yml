@@ -1,8 +1,8 @@
 site_name: Avatar Studio
 site_description: Professional documentation for Avatar Studio and its photorealistic editable real-time digital human pipeline.
-site_url: https://matpomgit.github.io/avatar-3d-self/
-repo_url: https://github.com/MatPomGit/avatar-3d-self
-repo_name: MatPomGit/avatar-3d-self
+site_url: https://matpomgit.github.io/avatar-studio/
+repo_url: https://github.com/MatPomGit/avatar-studio
+repo_name: MatPomGit/avatar-studio
 edit_uri: edit/main/docs/
 
 copyright: Avatar Studio documentation
