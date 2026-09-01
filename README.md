@@ -103,4 +103,4 @@ The separate `GitHub Pages` workflow validates the web build on pull requests an
 
 ## Documentation
 
-See [`docs/index.md`](docs/index.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`CHANGELOG.md`](CHANGELOG.md), [`docs/realistic_avatar_guide.md`](docs/realistic_avatar_guide.md), [`docs/COMPLETE_PIPELINE.md`](docs/COMPLETE_PIPELINE.md), [`docs/model_format_converter.md`](docs/model_format_converter.md) and [`docs/format_conversion_examples.md`](docs/format_conversion_examples.md) for detailed technical notes.
+See [`docs/index.md`](docs/index.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`CHANGELOG.md`](CHANGELOG.md), [`docs/realistic_avatar_guide.md`](docs/realistic_avatar_guide.md), [`docs/complete-pipeline.md`](docs/complete-pipeline.md), [`docs/model_format_converter.md`](docs/model_format_converter.md) and [`docs/format_conversion_examples.md`](docs/format_conversion_examples.md) for detailed technical notes.
