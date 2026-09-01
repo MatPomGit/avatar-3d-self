@@ -38,6 +38,25 @@ storage. Generated runtime files never replace the editable master.
 - Coordinate conversion occurs at export. Source scans are right-handed Z-up;
   Unreal-target exports are centimetres and verified after import.
 
+## Naming and code-style contract
+
+- Use lowercase `snake_case` for Python filenames, packages, functions,
+  variables, test modules and machine-oriented pipeline metadata.
+- Use lowercase `kebab-case` for Markdown documentation, general asset folders
+  and static web assets. The production-pipeline documents use
+  `complete-pipeline.md` and `engine-integration.md`.
+- Keep conventional or tool-mandated names unchanged, including repository root
+  documents, `pyproject.toml`, `package.json` and exported React components such
+  as `App.jsx`.
+- Apply PEP 8 and PEP 257 to every new or modified Python module: readable
+  layout, explicit imports, descriptive names, and concise English docstrings
+  for public modules, classes and functions.
+- Apply KISS: choose the smallest clear design, avoid speculative abstractions,
+  and add dependencies only for a verified requirement.
+
+See [ADR-0004](adr/0004-naming-and-python-style.md) for rationale and migration
+rules.
+
 ## Runtime separation
 
 Python and GitHub Actions handle deterministic checks. Blender, COLMAP,
