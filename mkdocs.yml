@@ -131,8 +131,16 @@ nav:
       - Artefact inspection: desktop/artifact-inspection.md
       - User workflow: desktop/user-workflow.md
       - Packaging and releases: desktop/packaging.md
+      - Troubleshooting: desktop/troubleshooting.md
   - Roadmap: roadmap/roadmap.md
-  - Architecture decisions: adr/README.md
+  - Architecture decisions:
+      - Overview: adr/README.md
+      - ADR-0001 Editable master and interchange formats: adr/0001-editable-master-and-interchange-formats.md
+      - ADR-0002 Workstation boundaries and public viewer: adr/0002-workstation-boundaries-and-public-viewer.md
+      - ADR-0003 Facial control and speech interface: adr/0003-facial-control-and-speech-interface.md
+      - ADR-0004 Naming and Python style: adr/0004-naming-and-python-style.md
+      - ADR-0005 MkDocs and Avatar Studio: adr/0005-mkdocs-and-avatar-studio.md
+      - ADR-0006 Canonical product name: adr/0006-avatar-studio-canonical-product-name.md
 
 plugins:
   - search:
