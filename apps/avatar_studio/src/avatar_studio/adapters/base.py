@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import shutil
 import subprocess
-from typing import Mapping, Sequence
+from typing import Any, Mapping, Sequence
 
 
 @dataclass(frozen=True, slots=True)
@@ -21,6 +22,14 @@ class CommandResult:
     @property
     def ok(self) -> bool:
         return self.returncode == 0
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "command": list(self.command),
+            "returncode": self.returncode,
+            "stdout": self.stdout,
+            "stderr": self.stderr,
+        }
 
 
 class ToolAdapter:
@@ -74,3 +83,15 @@ class ToolAdapter:
 
     def version(self) -> CommandResult:
         return self.run(self.version_args)
+
+    @staticmethod
+    def write_report(report: Mapping[str, Any], path: str | Path) -> Path:
+        """Persist one normalized adapter report as stable, human-readable JSON."""
+
+        destination = Path(path).expanduser().resolve()
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(
+            json.dumps(dict(report), ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        return destination
