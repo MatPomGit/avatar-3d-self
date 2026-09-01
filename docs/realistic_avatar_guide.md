@@ -1,29 +1,3 @@
-# Kryteria realizmu awatara
+# Dokument przeniesiony
 
-Szczegółowy proces wykonania znajduje się w [instrukcji pipeline'u](complete-pipeline.md). Ten dokument określa wynik, który należy ocenić.
-
-## Podobieństwo
-
-Zachowaj proporcje twarzy i sylwetki, kształt oczu, okulary, linię włosów oraz charakter zarostu. Nie wygładzaj ani nie upiększaj cech kosztem podobieństwa do referencji.
-
-## Anatomia i deformacja
-
-Główna siatka ciała musi zachowywać poprawny kształt podczas zgięcia stawów. Dłonie wymagają niezależnego ruchu wszystkich palców. Otwieranie ust wymaga ruchu żuchwy, dolnych zębów i języka.
-
-## Oczy, włosy, broda i piersi
-
-Gałki oczne obracają się niezależnie od głowy. Powieki oraz rzęsy współpracują z mruganiem. Włosy i broda są osobnymi elementami przytwierdzonymi do skóry, a nie wyłącznie płaską teksturą.
-
-Długie włosy wymagają rigowania pasm lub symulacji z kolizją z głową, barkami i ubraniem. Dla sylwetki kobiecej z piersiami dodatkowy rig zapewnia zauważalny ruch wtórny zależny od ruchu klatki piersiowej.
-
-## Materiały
-
-Skóra, oczy, włosy, broda, ubrania i okulary mają własne materiały PBR. Skórę sprawdzaj w świetle frontalnym i bocznym.
-
-## Zachowanie
-
-Mowa łączy visemy z ruchem żuchwy, mimiką, spojrzeniem, mruganiem i niewielkim ruchem głowy. Emocje nie powinny być idealnie symetryczne.
-
-## Minimalny test odbiorczy
-
-Postać w środowisku docelowym ma: patrzeć w różnych kierunkach, mrugać, otwierać usta, poruszać każdym palcem, wykonywać gest, mówić oraz utrzymywać stabilne okulary i ubranie.
+Kryteria jakości znajdują się w [Acceptance criteria](validation/acceptance-criteria.md) oraz [Uncanny valley audit](validation/uncanny-valley.md).
