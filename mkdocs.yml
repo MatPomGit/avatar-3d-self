@@ -43,33 +43,79 @@ nav:
       - 21 Runtime validation: pipeline/21-runtime-validation.md
   - Capture:
       - Photography guide: capture/photography-guide.md
+      - Self capture: capture/self-capture.md
+      - Face capture: capture/face-capture.md
+      - Body capture: capture/body-capture.md
+      - Hands capture: capture/hands-capture.md
       - Expression capture: capture/expression-capture.md
       - Measurements: capture/measurements.md
       - Capture manifest: capture/capture-manifest.md
-  - Rigging specifications:
+  - Modeling:
+      - Overview: modeling/overview.md
+      - Anatomy and proportions: modeling/anatomy-and-proportions.md
+      - Production topology: modeling/topology.md
+      - Face topology: modeling/face-topology.md
+      - Hands and feet: modeling/hands-and-feet.md
+      - Mouth cavity: modeling/mouth-cavity.md
+  - Materials:
+      - Overview: materials/overview.md
+      - PBR conventions: materials/pbr-conventions.md
+      - Skin: materials/skin.md
+      - Eyes: materials/eyes.md
+      - Hair and facial hair: materials/hair.md
+      - Clothing: materials/clothing.md
+  - Rigging:
       - Skeleton specification: rigging/skeleton-specification.md
+      - Body rig: rigging/body-rig.md
+      - Hand rig: rigging/hand-rig.md
       - Facial rig specification: rigging/facial-rig-specification.md
+      - ARKit blend shapes: rigging/arkit-blendshapes.md
+      - FACS: rigging/facs.md
+      - Secondary motion: rigging/secondary-motion.md
+      - Skinning validation: rigging/skinning-validation.md
   - Animation:
-      - Animation architecture: animation/animation-architecture.md
+      - Architecture: animation/animation-architecture.md
+      - Locomotion: animation/locomotion.md
+      - Gestures: animation/gestures.md
+      - Gaze: animation/gaze.md
+      - Blinking: animation/blinking.md
+      - Facial animation: animation/facial-animation.md
+      - Emotions: animation/emotions.md
+      - Idle behaviour: animation/idle-behaviour.md
   - Speech:
-      - Speech architecture: speech/architecture.md
+      - Architecture: speech/architecture.md
+      - Piper TTS: speech/piper.md
+      - Phonemes: speech/phonemes.md
+      - Visemes: speech/visemes.md
+      - Lip-sync: speech/lip-sync.md
+      - Speech animation: speech/speech-animation.md
   - Runtime:
+      - Overview: runtime/overview.md
       - Performance budget: runtime/performance-budget.md
+      - LOD: runtime/lod.md
       - Unreal Engine: runtime/unreal.md
       - Unity: runtime/unity.md
       - Web: runtime/web.md
   - Validation:
       - Acceptance criteria: validation/acceptance-criteria.md
+      - Likeness: validation/likeness.md
+      - Geometry: validation/geometry.md
+      - Deformation: validation/deformation.md
+      - Facial animation: validation/facial-animation.md
       - Uncanny valley: validation/uncanny-valley.md
+      - Performance: validation/performance.md
   - Tools:
       - Blender: tools/blender.md
       - COLMAP: tools/colmap.md
       - Model format converter: tools/model-format-converter.md
+      - Conversion examples: tools/conversion-examples.md
   - Setup:
       - Windows: setup/windows.md
       - Linux: setup/linux.md
   - Avatar Studio:
       - Architecture: desktop/architecture.md
+      - Project workspace: desktop/project-workspace.md
+      - Artefact inspection: desktop/artifact-inspection.md
       - User workflow: desktop/user-workflow.md
   - Roadmap: roadmap/roadmap.md
   - Architecture decisions: adr/README.md
@@ -87,6 +133,7 @@ theme:
     - navigation.sections
     - navigation.indexes
     - navigation.top
+    - navigation.tracking
     - search.highlight
     - search.suggest
     - content.code.copy
