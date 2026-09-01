@@ -35,6 +35,7 @@ __pycache__/
 *.tif
 *_4k.png
 *_8k.png
+!baner.jpg
 
 # Cache & temp
 *.cache
