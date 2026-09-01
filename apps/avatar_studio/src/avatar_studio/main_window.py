@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from PySide6.QtCore import Qt
@@ -13,6 +14,7 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QMainWindow,
     QMessageBox,
+    QProgressBar,
     QPushButton,
     QPlainTextEdit,
     QSplitter,
@@ -29,13 +31,13 @@ from avatar_studio.tooling import display_path, probe_default_tools
 
 
 class MainWindow(QMainWindow):
-    """Pipeline navigator and artefact inspector."""
+    """Pipeline navigator, learning interface and artefact inspector."""
 
     def __init__(self, store: ProjectStore) -> None:
         super().__init__()
         self.store = store
         self.setWindowTitle(f"Avatar Studio — {store.workspace.name}")
-        self.resize(1450, 900)
+        self.resize(1500, 920)
         self._build_ui()
         self._refresh_stage_list()
         if self.stage_list.count():
@@ -44,8 +46,16 @@ class MainWindow(QMainWindow):
     def _build_ui(self) -> None:
         root = QWidget()
         root_layout = QVBoxLayout(root)
-        splitter = QSplitter(Qt.Horizontal)
 
+        header = QHBoxLayout()
+        self.project_label = QLabel()
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 1000)
+        header.addWidget(self.project_label, stretch=1)
+        header.addWidget(self.progress_bar, stretch=2)
+        root_layout.addLayout(header)
+
+        splitter = QSplitter(Qt.Horizontal)
         left = QWidget()
         left_layout = QVBoxLayout(left)
         left_layout.addWidget(QLabel("Production pipeline"))
@@ -78,12 +88,18 @@ class MainWindow(QMainWindow):
         self.artifact_table = QTableWidget(0, 4)
         self.artifact_table.setHorizontalHeaderLabels(["File", "Size", "SHA-256", "Type"])
         self.artifact_table.horizontalHeader().setStretchLastSection(True)
+        self.artifact_table.itemSelectionChanged.connect(self._artifact_selected)
         right_layout.addWidget(self.artifact_table)
-        add_artifact = QPushButton("Register artefact")
+        add_artifact = QPushButton("Register and inspect artefact")
         add_artifact.clicked.connect(self._register_artifact)
         right_layout.addWidget(add_artifact)
+        right_layout.addWidget(QLabel("Technical parameters"))
+        self.artifact_details = QPlainTextEdit()
+        self.artifact_details.setReadOnly(True)
+        self.artifact_details.setPlaceholderText("Select an artefact to inspect its recorded metadata.")
+        right_layout.addWidget(self.artifact_details)
         splitter.addWidget(right)
-        splitter.setSizes([300, 650, 500])
+        splitter.setSizes([300, 620, 580])
         root_layout.addWidget(splitter, stretch=1)
 
         self.log = QPlainTextEdit()
@@ -99,6 +115,11 @@ class MainWindow(QMainWindow):
     def _refresh_stage_list(self) -> None:
         current_id = self._current_stage_id()
         statuses = self.store.stage_statuses()
+        passed, total, percentage = self.store.progress()
+        self.project_label.setText(f"{self.store.workspace.name}: {passed}/{total} stages passed")
+        self.progress_bar.setValue(round(percentage * 10))
+        self.progress_bar.setFormat(f"{percentage:.1f}%")
+
         self.stage_list.blockSignals(True)
         self.stage_list.clear()
         for stage in STAGES:
@@ -144,6 +165,14 @@ class MainWindow(QMainWindow):
         stage_id = self._current_stage_id()
         if not stage_id:
             return
+        if status == "passed" and not self.store.artifacts_for_stage(stage_id):
+            answer = QMessageBox.question(
+                self,
+                "No registered artefact",
+                "This stage has no registered output artefact. Mark it as passed anyway?",
+            )
+            if answer != QMessageBox.Yes:
+                return
         self.store.set_stage_status(stage_id, status)
         self.log.appendPlainText(f"{stage_id}: {status}")
         self._refresh_stage_list()
@@ -160,8 +189,14 @@ class MainWindow(QMainWindow):
         except OSError as exc:
             QMessageBox.critical(self, "Artefact registration failed", str(exc))
             return
-        self.log.appendPlainText(f"Registered artefact #{artifact_id}: {path}")
+        artifact = self.store.artifact(artifact_id)
+        warnings = artifact["metadata"].get("inspection_warnings", []) if artifact else []
+        self.log.appendPlainText(f"Registered and inspected artefact #{artifact_id}: {path}")
+        for warning in warnings:
+            self.log.appendPlainText(f"  warning: {warning}")
         self._refresh_artifacts(stage_id)
+        if self.artifact_table.rowCount():
+            self.artifact_table.selectRow(0)
 
     def _refresh_artifacts(self, stage_id: str) -> None:
         artifacts = self.store.artifacts_for_stage(stage_id)
@@ -175,7 +210,31 @@ class MainWindow(QMainWindow):
                 artifact["kind"],
             )
             for column, value in enumerate(values):
-                self.artifact_table.setItem(row_index, column, QTableWidgetItem(value))
+                item = QTableWidgetItem(value)
+                item.setData(Qt.UserRole, artifact["id"])
+                self.artifact_table.setItem(row_index, column, item)
+        self.artifact_details.clear()
+
+    def _artifact_selected(self) -> None:
+        items = self.artifact_table.selectedItems()
+        if not items:
+            self.artifact_details.clear()
+            return
+        artifact_id = items[0].data(Qt.UserRole)
+        artifact = self.store.artifact(int(artifact_id)) if artifact_id is not None else None
+        if artifact is None:
+            self.artifact_details.clear()
+            return
+        payload = {
+            "id": artifact["id"],
+            "path": artifact["path"],
+            "kind": artifact["kind"],
+            "size_bytes": artifact["size_bytes"],
+            "sha256": artifact["sha256"],
+            "created_at": artifact["created_at"],
+            "metadata": artifact["metadata"],
+        }
+        self.artifact_details.setPlainText(json.dumps(payload, indent=2, ensure_ascii=False))
 
     def _probe_tools(self) -> None:
         self.log.appendPlainText("Local tool diagnostics:")

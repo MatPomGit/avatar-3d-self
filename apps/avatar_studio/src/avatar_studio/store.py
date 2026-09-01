@@ -9,11 +9,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from avatar_studio.inspectors import inspect_artifact
 from avatar_studio.pipeline import STAGES
 
 
 VALID_STATUSES = {"pending", "ready", "in_progress", "blocked", "passed", "failed"}
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def _utc_now() -> str:
@@ -84,7 +85,7 @@ class ProjectStore:
                 """
             )
             connection.execute(
-                "INSERT OR IGNORE INTO project_meta(key, value) VALUES('schema_version', ?)",
+                "INSERT OR REPLACE INTO project_meta(key, value) VALUES('schema_version', ?)",
                 (str(SCHEMA_VERSION),),
             )
             connection.execute(
@@ -104,6 +105,15 @@ class ProjectStore:
         with self._connect() as connection:
             rows = connection.execute("SELECT stage_id, status FROM stage_state").fetchall()
         return {row["stage_id"]: row["status"] for row in rows}
+
+    def progress(self) -> tuple[int, int, float]:
+        """Return passed stages, total stages and completion percentage."""
+
+        statuses = self.stage_statuses()
+        passed = sum(status == "passed" for status in statuses.values())
+        total = len(STAGES)
+        percentage = (passed / total * 100.0) if total else 0.0
+        return passed, total, percentage
 
     def set_stage_status(self, stage_id: str, status: str, notes: str = "") -> None:
         """Set a stage status and recompute readiness of dependent stages."""
@@ -140,24 +150,32 @@ class ProjectStore:
         self,
         stage_id: str,
         path: str | Path,
-        kind: str = "file",
+        kind: str | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> int:
-        """Register an existing file with deterministic metadata and SHA-256."""
+        """Register an existing file with SHA-256 and automatically inspected metadata."""
 
+        if stage_id not in {stage.stage_id for stage in STAGES}:
+            raise KeyError(f"Unknown pipeline stage: {stage_id}")
         artifact_path = Path(path).expanduser().resolve()
         if not artifact_path.is_file():
             raise FileNotFoundError(artifact_path)
+
+        inspection = inspect_artifact(artifact_path)
         digest = hashlib.sha256()
         with artifact_path.open("rb") as handle:
             for chunk in iter(lambda: handle.read(1024 * 1024), b""):
                 digest.update(chunk)
+
         stat = artifact_path.stat()
         automatic = {
-            "suffix": artifact_path.suffix.lower(),
+            **inspection.metadata,
             "modified_ns": stat.st_mtime_ns,
+            "inspection_warnings": list(inspection.warnings),
         }
         automatic.update(metadata or {})
+        artifact_kind = kind or inspection.kind
+
         with self._connect() as connection:
             cursor = connection.execute(
                 """
@@ -167,7 +185,7 @@ class ProjectStore:
                 (
                     stage_id,
                     str(artifact_path),
-                    kind,
+                    artifact_kind,
                     digest.hexdigest(),
                     stat.st_size,
                     json.dumps(automatic, sort_keys=True),
@@ -184,10 +202,13 @@ class ProjectStore:
                 "SELECT * FROM artifacts WHERE stage_id = ? ORDER BY id DESC",
                 (stage_id,),
             ).fetchall()
-        return [
-            {
-                **dict(row),
-                "metadata": json.loads(row["metadata_json"]),
-            }
-            for row in rows
-        ]
+        return [{**dict(row), "metadata": json.loads(row["metadata_json"])} for row in rows]
+
+    def artifact(self, artifact_id: int) -> dict[str, Any] | None:
+        """Return one artefact with decoded metadata."""
+
+        with self._connect() as connection:
+            row = connection.execute("SELECT * FROM artifacts WHERE id = ?", (artifact_id,)).fetchone()
+        if row is None:
+            return None
+        return {**dict(row), "metadata": json.loads(row["metadata_json"])}
