@@ -123,6 +123,7 @@ nav:
       - Linux: setup/linux.md
   - Avatar Studio:
       - Architecture: desktop/architecture.md
+      - Tool operations: desktop/tool-operations.md
       - Project workspace: desktop/project-workspace.md
       - Artefact inspection: desktop/artifact-inspection.md
       - User workflow: desktop/user-workflow.md
