@@ -1,34 +1,121 @@
 # Walidacja deformacji
 
-Skinning i correctives są zatwierdzane przez macierz póz, nie przez pojedynczą T/A-pose.
+Walidacja deformacji sprawdza, czy geometria zachowuje się wiarygodnie w pełnym zakresie animacji. Nie oceniamy jedynie pozy spoczynkowej. Stosujemy macierz póz oraz kombinacje ruchów, ponieważ wiele błędów pojawia się dopiero przy jednoczesnym działaniu kilku stawów lub kanałów twarzy.
 
-## Ciało
+## Poziomy oceny
 
-Minimalny zestaw:
+Każdy test otrzymuje wynik:
 
-- shoulder flexion 0°, 45°, 90°, 150°;
-- shoulder abduction 0°, 45°, 90°, 150°;
-- elbow 0°, 45°, 90°, 130°;
-- forearm pronation/supination około ±80°;
-- wrist flexion/extension około ±60°;
-- hip flexion 0°, 45°, 90°, 120°;
-- knee 0°, 45°, 90°, 130°;
-- ankle dorsiflexion 20° i plantarflexion 35°.
+- **pass**: brak widocznego problemu;
+- **warning**: niewielki problem w skrajnym zakresie;
+- **fail**: błąd widoczny w zakresie używanym w środowisku czasu rzeczywistego.
 
-Zakresy są testowe, nie medyczne limity postaci. Avatar nie musi osiągać pozy powodującej nienaturalne naprężenie referencyjnej anatomii.
+## Obręcz barkowa
 
-## Dłonie
+Testuj zgięcie i odwiedzenie ramienia:
 
-Pełna pięść, pinch, chwyt cylindryczny, wskazywanie i opozycja kciuka. Każdy palec testowany osobno. Nie akceptujemy zapadania knuckles ani utraty objętości opuszek.
+`0°, 45°, 90°, 120°, 150°`.
+
+Dodatkowo testuj rotację ramienia ±30° i ±60° przy 90° uniesienia.
+
+Kryteria:
+
+- bark zachowuje objętość;
+- pacha nie tworzy dziury ani ostrego grzbietu;
+- obojczyk reaguje na wysokie uniesienie;
+- szyja nie jest ciągnięta przez ramię;
+- ubranie nie przenika skóry w typowym zakresie.
+
+## Łokieć i przedramię
+
+Łokieć:
+
+`0°, 45°, 90°, 130°`.
+
+Przedramię:
+
+pronacja/supinacja około `±80°`.
+
+Krytyczne są zachowanie łuku łokcia, fałd kompresyjny i brak spiralnego skrętu przedramienia.
+
+## Dłoń
+
+Testuj:
+
+- pełną pięść;
+- wskazywanie;
+- chwyt cylindryczny;
+- chwyt szczypcowy;
+- chwyt sferyczny;
+- opozycję kciuka;
+- rozstaw palców;
+- każdy palec osobno.
+
+Fail, jeśli kostki zapadają się, opuszki tracą objętość lub błony międzypalcowe rozrywają się.
+
+## Kręgosłup
+
+Testuj skłon, wyprost, skłon boczny oraz skręt około ±30° i ±45°. Dodaj kombinację skrętu z podniesionymi ramionami.
+
+## Biodro i kolano
+
+Biodro:
+
+`0°, 45°, 90°, 120°` zgięcia.
+
+Kolano:
+
+`0°, 45°, 90°, 130°`.
+
+Dodaj głęboki przysiad. Pachwina i pośladek powinny zachować masę, a kolano nie może tworzyć ostrego przewężenia.
 
 ## Twarz
 
-Jaw open, smile, frown, pucker, funnel, blink, squint, brows oraz kombinacje. Krytyczne są okolice commissures, nasolabial fold, dolnej powieki i żuchwy.
+Każdy kanał twarzy testuj przy:
 
-## Tolerancja penetracji
+`0.0, 0.25, 0.5, 0.75, 1.0`.
 
-Widoczna penetracja skóry, zębów, oka lub odzieży w kluczowej pozie to fail. Drobne kolizje <1 mm mogą być warning tylko w ekstremalnych pozach, których runtime nie używa.
+Następnie testuj kombinacje:
 
-## Correctives
+- `jawOpen + mouthSmile`;
+- `jawOpen + mouthPucker`;
+- `jawOpen + mouthFunnel`;
+- `eyeBlink + eyeLookUp/Down`;
+- `cheekSquint + eyeBlink`;
+- `browDown + eyeSquint`;
+- asymetryczny uśmiech;
+- lip-sync + mruganie + ruch oczu.
 
-Corrective shape jest wymagany, jeśli problem nie może być usunięty wagami bez pogorszenia sąsiednich póz. Corrective ma mieć jawny driver i test regresyjny.
+## Kształty korekcyjne
+
+Kształt korekcyjny jest wymagany, gdy poprawa samych wag pogarsza inną pozę lub nie jest w stanie zachować objętości.
+
+Każdy corrective musi mieć:
+
+- jawny warunek aktywacji;
+- zakres wpływu;
+- test pozy pośredniej;
+- test regresyjny.
+
+## Penetracje
+
+Widoczna penetracja skóry, oka, zębów, języka lub odzieży w typowej pozie to fail. Drobna kolizja poniżej około 1 mm może być warning tylko w ekstremalnej pozie, która nie występuje w docelowej animacji.
+
+## Macierz testowa
+
+Raport powinien zawierać co najmniej:
+
+| Pole | Znaczenie |
+| --- | --- |
+| `region` | bark, łokieć, dłoń, biodro, twarz itd. |
+| `pose` | nazwa pozy |
+| `value` | kąt lub waga kanału |
+| `result` | pass/warning/fail |
+| `artifact` | opis błędu |
+| `cause` | wagi, topologia, rig, corrective |
+| `fix` | zastosowana poprawka |
+| `regression_passed` | wynik ponownego testu |
+
+## Definition of Done
+
+Deformacja jest zatwierdzona, gdy wszystkie obowiązkowe pozy i kombinacje przechodzą bez błędów w zakresie produkcyjnym, a wszystkie warnings są udokumentowane jako świadome ograniczenia.
