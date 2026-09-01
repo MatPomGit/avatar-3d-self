@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
-"""Loss-aware converter for common 3D interchange formats.
+"""Loss-aware converter for common 3D interchange formats used by Avatar Studio.
 
-Supported formats:
-    FBX, glTF, GLB, USD, USDZ, OBJ, PLY and STL.
-
-Examples:
-    python scripts/model_format_converter.py model.fbx model.glb
-    python scripts/model_format_converter.py model.glb model.usdz --textures embed
-    python scripts/model_format_converter.py scan.ply scan.glb
-    python scripts/model_format_converter.py model.fbx model.obj --strict
-
-The script uses Blender in background mode because complete character assets can
-contain geometry, UVs, materials, images, armatures, skin weights, shape keys and
+Supported formats: FBX, glTF, GLB, USD, USDZ, OBJ, PLY and STL.
+The converter uses Blender in background mode because complete character assets can
+contain geometry, UVs, materials, textures, armatures, skin weights, shape keys and
 animation. Mesh-only conversion libraries cannot preserve all of those reliably.
 """
 
@@ -142,6 +134,32 @@ def extension(path: Path) -> str:
     return ext
 
 
+def present_features(inventory: dict[str, Any]) -> dict[str, bool]:
+    return {
+        "geometry": inventory["meshes"] > 0,
+        "uv": inventory["uv_layers"] > 0,
+        "materials": inventory["materials"] > 0,
+        "textures": inventory["textures"] > 0,
+        "armature": inventory["armatures"] > 0,
+        "skinning": inventory["skinned_meshes"] > 0,
+        "shape_keys": inventory["shape_keys"] > 0,
+        "animation": inventory["actions"] > 0,
+    }
+
+
+def loss_analysis(
+    inventory: dict[str, Any], output_ext: str, animations: str, textures: str
+) -> list[str]:
+    present = present_features(inventory)
+    supported = FORMAT_CAPABILITIES[output_ext]
+    losses = [FEATURE_LABELS[key] for key, value in present.items() if value and not supported[key]]
+    if animations == "strip" and present["animation"] and "animacje" not in losses:
+        losses.append("animacje (wyłączone przez --animations strip)")
+    if textures == "skip" and present["textures"] and "tekstury" not in losses:
+        losses.append("tekstury (wyłączone przez --textures skip)")
+    return losses
+
+
 def find_blender(explicit: str | None) -> str:
     candidates: list[str | None] = []
     if explicit:
@@ -258,10 +276,10 @@ def import_model(path: Path) -> None:
 def scene_inventory() -> dict[str, Any]:
     import bpy  # type: ignore
 
-    mesh_objects = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
+    meshes = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
     armatures = [obj for obj in bpy.context.scene.objects if obj.type == "ARMATURE"]
-    materials = {mat.name for obj in mesh_objects for mat in obj.data.materials if mat}
-    images = set()
+    materials = {mat.name for obj in meshes for mat in obj.data.materials if mat}
+    images: set[str] = set()
     color_attributes = 0
     for material_name in materials:
         material = bpy.data.materials.get(material_name)
@@ -274,7 +292,7 @@ def scene_inventory() -> dict[str, Any]:
     shape_keys = 0
     uv_layers = 0
     skinned_meshes = 0
-    for obj in mesh_objects:
+    for obj in meshes:
         uv_layers += len(getattr(obj.data, "uv_layers", []))
         color_attributes += len(getattr(obj.data, "color_attributes", []))
         keys = getattr(obj.data, "shape_keys", None)
@@ -285,9 +303,9 @@ def scene_inventory() -> dict[str, Any]:
 
     return {
         "objects": len(bpy.context.scene.objects),
-        "meshes": len(mesh_objects),
-        "vertices": sum(len(obj.data.vertices) for obj in mesh_objects),
-        "polygons": sum(len(obj.data.polygons) for obj in mesh_objects),
+        "meshes": len(meshes),
+        "vertices": sum(len(obj.data.vertices) for obj in meshes),
+        "polygons": sum(len(obj.data.polygons) for obj in meshes),
         "uv_layers": uv_layers,
         "color_attributes": color_attributes,
         "materials": len(materials),
@@ -297,32 +315,6 @@ def scene_inventory() -> dict[str, Any]:
         "shape_keys": shape_keys,
         "actions": len(bpy.data.actions),
     }
-
-
-def present_features(inventory: dict[str, Any]) -> dict[str, bool]:
-    return {
-        "geometry": inventory["meshes"] > 0,
-        "uv": inventory["uv_layers"] > 0,
-        "materials": inventory["materials"] > 0,
-        "textures": inventory["textures"] > 0,
-        "armature": inventory["armatures"] > 0,
-        "skinning": inventory["skinned_meshes"] > 0,
-        "shape_keys": inventory["shape_keys"] > 0,
-        "animation": inventory["actions"] > 0,
-    }
-
-
-def loss_analysis(
-    inventory: dict[str, Any], output_ext: str, animations: str, textures: str
-) -> list[str]:
-    present = present_features(inventory)
-    supported = FORMAT_CAPABILITIES[output_ext]
-    losses = [FEATURE_LABELS[key] for key, value in present.items() if value and not supported[key]]
-    if animations == "strip" and present["animation"] and "animacje" not in losses:
-        losses.append("animacje (wyłączone przez --animations strip)")
-    if textures == "skip" and present["textures"] and "tekstury" not in losses:
-        losses.append("tekstury (wyłączone przez --textures skip)")
-    return losses
 
 
 def apply_transforms() -> None:
@@ -346,16 +338,13 @@ def strip_textures() -> None:
     import bpy  # type: ignore
 
     for material in bpy.data.materials:
-        if not material.use_nodes:
-            continue
-        for node in list(material.node_tree.nodes):
-            if node.type == "TEX_IMAGE":
-                material.node_tree.nodes.remove(node)
+        if material.use_nodes:
+            for node in list(material.node_tree.nodes):
+                if node.type == "TEX_IMAGE":
+                    material.node_tree.nodes.remove(node)
 
 
-def process_textures(
-    mode: str, image_format: str, max_size: int | None
-) -> list[dict[str, Any]]:
+def process_textures(mode: str, image_format: str, max_size: int | None) -> list[dict[str, Any]]:
     import bpy  # type: ignore
 
     processed: list[dict[str, Any]] = []
@@ -369,27 +358,20 @@ def process_textures(
         before = [int(image.size[0]), int(image.size[1])]
         if max_size and max(before) > max_size:
             scale = max_size / max(before)
-            width = max(1, round(before[0] * scale))
-            height = max(1, round(before[1] * scale))
-            image.scale(width, height)
+            image.scale(max(1, round(before[0] * scale)), max(1, round(before[1] * scale)))
         after = [int(image.size[0]), int(image.size[1])]
 
         if image_format != "auto" and image.packed_file is None and image.filepath:
             original = Path(bpy.path.abspath(image.filepath))
             if original.exists():
                 suffix = ".png" if image_format == "png" else ".jpg"
-                converted_dir = Path(bpy.path.abspath("//")) / "converted_textures"
-                converted_dir.mkdir(parents=True, exist_ok=True)
-                destination = converted_dir / f"{original.stem}{suffix}"
-                old_path = image.filepath_raw
-                old_format = image.file_format
+                destination_dir = Path(bpy.path.abspath("//")) / "converted_textures"
+                destination_dir.mkdir(parents=True, exist_ok=True)
+                destination = destination_dir / f"{original.stem}{suffix}"
                 image.filepath_raw = str(destination)
                 image.file_format = "PNG" if image_format == "png" else "JPEG"
                 image.save()
                 image.filepath = str(destination)
-                if not destination.exists():
-                    image.filepath_raw = old_path
-                    image.file_format = old_format
 
         processed.append(
             {
@@ -411,7 +393,7 @@ def process_textures(
 def _material_mtl_text() -> str:
     import bpy  # type: ignore
 
-    lines = ["# Generated by avatar-3d-self model_format_converter.py", ""]
+    lines = ["# Generated by Avatar Studio model_format_converter.py", ""]
     if not bpy.data.materials:
         lines.extend(["newmtl default", "Kd 0.8 0.8 0.8", "d 1.0", ""])
         return "\n".join(lines)
@@ -430,20 +412,18 @@ def _material_mtl_text() -> str:
             for node in material.node_tree.nodes:
                 image = getattr(node, "image", None)
                 if node.type == "TEX_IMAGE" and image and image.filepath:
-                    texture_path = Path(image.filepath).name
-                    lines.append(f"map_Kd {texture_path}")
+                    lines.append(f"map_Kd {Path(image.filepath).name}")
                     break
         lines.append("")
     return "\n".join(lines)
 
 
 def ensure_obj_mtl(obj_path: Path) -> Path:
-    """Guarantee an OBJ companion MTL and a mtllib reference in the OBJ file."""
+    """Guarantee an OBJ companion MTL and a matching `mtllib` reference."""
 
     mtl_path = obj_path.with_suffix(".mtl")
     if not mtl_path.exists():
         mtl_path.write_text(_material_mtl_text(), encoding="utf-8")
-
     try:
         obj_text = obj_path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
@@ -462,49 +442,30 @@ def export_model(path: Path, textures: str, animations: str) -> list[Path]:
 
     if ext == ".fbx":
         _call_first(
-            [
-                (
-                    "export_scene.fbx",
-                    {
-                        "filepath": str(path),
-                        "use_selection": False,
-                        "path_mode": "COPY" if textures in {"auto", "copy", "embed"} else "AUTO",
-                        "embed_textures": textures == "embed",
-                        "bake_anim": keep_animation,
-                        "add_leaf_bones": False,
-                    },
-                )
-            ]
+            [(
+                "export_scene.fbx",
+                {
+                    "filepath": str(path),
+                    "use_selection": False,
+                    "path_mode": "COPY" if textures in {"auto", "copy", "embed"} else "AUTO",
+                    "embed_textures": textures == "embed",
+                    "bake_anim": keep_animation,
+                    "add_leaf_bones": False,
+                },
+            )]
         )
-    elif ext == ".glb":
+    elif ext in {".glb", ".gltf"}:
         _call_first(
-            [
-                (
-                    "export_scene.gltf",
-                    {
-                        "filepath": str(path),
-                        "export_format": "GLB",
-                        "export_animations": keep_animation,
-                        "export_morph": True,
-                        "export_skins": True,
-                    },
-                )
-            ]
-        )
-    elif ext == ".gltf":
-        _call_first(
-            [
-                (
-                    "export_scene.gltf",
-                    {
-                        "filepath": str(path),
-                        "export_format": "GLTF_SEPARATE",
-                        "export_animations": keep_animation,
-                        "export_morph": True,
-                        "export_skins": True,
-                    },
-                )
-            ]
+            [(
+                "export_scene.gltf",
+                {
+                    "filepath": str(path),
+                    "export_format": "GLB" if ext == ".glb" else "GLTF_SEPARATE",
+                    "export_animations": keep_animation,
+                    "export_morph": True,
+                    "export_skins": True,
+                },
+            )]
         )
     elif ext in {".usd", ".usdz"}:
         _call_first(
@@ -526,14 +487,8 @@ def export_model(path: Path, textures: str, animations: str) -> list[Path]:
     elif ext == ".obj":
         _call_first(
             [
-                (
-                    "wm.obj_export",
-                    {"filepath": str(path), "export_materials": True},
-                ),
-                (
-                    "export_scene.obj",
-                    {"filepath": str(path), "use_materials": True},
-                ),
+                ("wm.obj_export", {"filepath": str(path), "export_materials": True}),
+                ("export_scene.obj", {"filepath": str(path), "use_materials": True}),
             ]
         )
         companions.append(ensure_obj_mtl(path))
@@ -572,6 +527,7 @@ def conversion_report(
 ) -> dict[str, Any]:
     output_ext = extension(args.output)
     return {
+        "producer": "Avatar Studio",
         "input": str(args.input.resolve()),
         "output": str(args.output.resolve()),
         "input_format": extension(args.input),
