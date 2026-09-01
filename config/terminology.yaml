@@ -1,0 +1,79 @@
+schema_version: 1
+language: pl
+rules:
+  - preferred: koartykulacja
+    english: coarticulation
+    forbidden:
+      - współartykulacja
+      - wspołartykulacja
+      - wspolartykulacja
+  - preferred: przestrzeń barw
+    english: color space
+    discouraged:
+      - kolor space
+  - preferred: głębia bitowa
+    english: bit depth
+    discouraged:
+      - bit depth
+  - preferred: gęstość tekseli
+    english: texel density
+    discouraged:
+      - texel density
+  - preferred: margines między wyspami UV
+    english: UV padding
+  - preferred: współczynnik załamania światła
+    english: Index of Refraction
+    abbreviation: IOR
+  - preferred: współczynnik odbicia Fresnela dla padania prostopadłego
+    english: normal-incidence Fresnel reflectance
+    abbreviation: F0
+  - preferred: rozpraszanie podpowierzchniowe
+    english: Subsurface Scattering
+    abbreviation: SSS
+  - preferred: kształt deformacyjny
+    english: blend shape
+  - preferred: klucz kształtu
+    english: shape key
+  - preferred: kształt korekcyjny
+    english: corrective shape
+  - preferred: wiązanie skóry z kośćmi
+    english: skinning
+  - preferred: waga wpływu kości
+    english: skin weight
+  - preferred: poziom szczegółowości
+    english: Level of Detail
+    abbreviation: LOD
+  - preferred: system włosów
+    english: groom
+  - preferred: płaszczyzna z teksturą włosów
+    english: hair card
+  - preferred: wymuszane dopasowanie czasowe
+    english: forced alignment
+  - preferred: synchronizacja ruchu ust z mową
+    english: lip-sync
+  - preferred: środowisko czasu rzeczywistego
+    english: runtime environment
+  - preferred: renderowanie oparte na fizyce
+    english: Physically Based Rendering
+    abbreviation: PBR
+
+code_identifiers_allowed:
+  - jawOpen
+  - mouthClose
+  - eyeBlinkLeft
+  - eyeBlinkRight
+  - roughness
+  - metallic
+  - BaseColor
+  - schema_version
+  - capture_method
+  - reconstruction_mode
+
+scan:
+  extensions: [.md, .py, .yml, .yaml, .toml]
+  exclude_prefixes:
+    - .git/
+    - site/
+    - .venv/
+  exclude_files:
+    - config/terminology.yaml
