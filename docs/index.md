@@ -1,36 +1,44 @@
 # Avatar Studio
 
-Dokumentacja profesjonalnego pipeline'u i aplikacji wspierającej tworzenie fotorealistycznego, edytowalnego cyfrowego człowieka czasu rzeczywistego.
+**Avatar Studio** to pipeline i aplikacja desktopowa do tworzenia fotorealistycznego, edytowalnego cyfrowego człowieka czasu rzeczywistego.
 
-<div class="avatar-status-grid">
-  <div class="avatar-status-card"><strong>Produkt</strong>Avatar Studio</div>
-  <div class="avatar-status-card"><strong>Faza</strong>Reference acquisition and pipeline engineering</div>
-  <div class="avatar-status-card"><strong>Kanoniczny DCC</strong>Blender</div>
-  <div class="avatar-status-card"><strong>Mowa</strong>Piper → phonemes → visemes</div>
-</div>
+## Od czego zacząć
 
-## Dwa komponenty jednego projektu
+Dla nowego projektu przeczytaj kolejno [cele i wymagania](project/goals-and-requirements.md), [architekturę](project/architecture.md) oraz [przegląd pipeline'u](pipeline/overview.md).
 
-**Dokumentacja WWW** opisuje architekturę, teorię, procedury, kryteria jakości i pełny pipeline produkcyjny. **Avatar Studio Desktop** prowadzi użytkownika przez etapy, zachowuje stan lokalnego projektu, rejestruje artefakty, analizuje ich parametry oraz docelowo będzie uruchamiać i kontrolować narzędzia produkcyjne.
+Materiał zdjęciowy: [Photography guide](capture/photography-guide.md) oraz [Self capture](capture/self-capture.md).
 
-## Jak korzystać z dokumentacji
+Rozwój aplikacji: [architektura Avatar Studio](desktop/architecture.md), [workspace projektu](desktop/project-workspace.md) i [inspekcja artefaktów](desktop/artifact-inspection.md).
 
-Jeśli rozpoczynasz projekt, przeczytaj kolejno [cele i wymagania](project/goals-and-requirements.md), [architekturę](project/architecture.md), [konwencję nazewniczą](project/naming.md) i [przegląd pipeline'u](pipeline/overview.md). Następnie wykonuj etapy 01–21 w podanej kolejności. Każdy etap definiuje wejście, edytowalny artefakt wyjściowy, kontrole jakości i Definition of Done.
+!!! important "WWW i aplikacja"
+    Strona WWW jest dokumentacją techniczną i dydaktyczną. Stan projektu, lokalne uruchamianie narzędzi i inspekcja wyników należą do aplikacji Avatar Studio.
 
-!!! important "Rozdzielenie WWW i aplikacji"
-    Strona WWW jest wyłącznie dokumentacją. Prowadzenie użytkownika krok po kroku, zapisywanie stanu projektu, uruchamianie narzędzi lokalnych oraz inspekcja wyników należą do aplikacji [Avatar Studio](desktop/architecture.md).
+## Obszary dokumentacji
 
-## Główne obszary
+- [Capture](capture/photography-guide.md): zdjęcia, pomiary, ekspresje i manifesty.
+- [Modeling](modeling/overview.md): anatomia, retopologia, topologia twarzy, dłonie, stopy i jama ustna.
+- [Materials](materials/overview.md): PBR, skóra, oczy, włosy, zarost i ubrania.
+- [Rigging](rigging/skeleton-specification.md): skeleton, ciało, dłonie, twarz, ARKit, FACS i ruch wtórny.
+- [Animation](animation/animation-architecture.md): locomotion, gestures, gaze, blinking, emotions i idle.
+- [Speech](speech/architecture.md): Piper, fonemy, visemy, koartykulacja i facial curves.
+- [Runtime](runtime/overview.md): eksport, LOD, wydajność i integracja z silnikiem.
+- [Validation](validation/acceptance-criteria.md): podobieństwo, geometria, deformacja, uncanny valley i performance.
 
-- **Capture**: fotografie, ekspresje, pomiary i manifesty.
-- **Modeling**: rekonstrukcja, cleanup, retopologia i UV.
-- **Look development**: PBR, skóra, oczy, włosy, zarost, ubrania i okulary.
-- **Rigging**: ciało, dłonie, twarz i ruch wtórny.
-- **Animation**: lokomocja, gesty, gaze, blinking, emotions i idle motion.
-- **Speech**: Piper, alignment fonemów, visemy, koartykulacja i synchronizacja.
-- **Runtime**: eksport, integracja z silnikiem, LOD i wydajność.
-- **Validation**: podobieństwo, deformacja, uncanny valley i testy odbiorcze.
+## Kontrakt każdego etapu
 
-## Zasada jakości
+Każdy etap powinien pozostawić jawne wejście, edytowalny artefakt źródłowy, artefakty pochodne, metadane, raport walidacji i spełnione Definition of Done.
 
-Nie przechodź do kolejnego etapu dlatego, że poprzedni „wygląda dobrze”. Przechodź dalej dopiero po zapisaniu edytowalnego wyniku i zaliczeniu zdefiniowanych kontroli.
+Nie przechodź dalej tylko dlatego, że wynik wygląda poprawnie. Avatar Studio ma pokazywać, dlaczego etap został zaliczony albo zablokowany.
+
+## Kluczowe dokumenty
+
+- [Production pipeline](pipeline/overview.md)
+- [Photography guide](capture/photography-guide.md)
+- [Topology](modeling/topology.md)
+- [PBR conventions](materials/pbr-conventions.md)
+- [Facial rig specification](rigging/facial-rig-specification.md)
+- [Animation architecture](animation/animation-architecture.md)
+- [Speech architecture](speech/architecture.md)
+- [Acceptance criteria](validation/acceptance-criteria.md)
+- [Avatar Studio architecture](desktop/architecture.md)
+- [Roadmap](roadmap/roadmap.md)
