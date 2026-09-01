@@ -10,6 +10,18 @@ Wyjątkiem są identyfikatory będące częścią kontraktu technicznego, na prz
 
 Jeżeli termin nie ma dobrze utrwalonego polskiego odpowiednika, stosujemy opisową polską nazwę i zachowujemy termin angielski w nawiasie. Nie spolszczamy nazw standardów, formatów i produktów.
 
+## Zasada pierwszego użycia pojęcia
+
+Nowe pojęcie nie może pojawić się po raz pierwszy wyłącznie jako nazwa parametru, skrót albo wartość w tabeli. Przy pierwszym użyciu w danym rozdziale należy krótko wyjaśnić:
+
+1. **czym jest pojęcie**, najlepiej jednym lub dwoma zdaniami wprowadzającymi;
+2. **co zmienia w praktyce**, czyli jaki efekt wizualny, geometryczny, fizyczny lub wydajnościowy powoduje zwiększenie albo zmniejszenie wartości;
+3. **jakie wartości może przyjmować**, z co najmniej jednym przykładem wartości niskiej, typowej i wysokiej, jeśli parametr jest liczbowy;
+4. **kiedy stosuje się poszczególne wartości**, np. dla skóry, szkła, włosów, zbliżenia twarzy, dalszego poziomu szczegółowości albo innego środowiska docelowego;
+5. **jak rozpoznać wartość błędną**, jeśli zbyt mała lub zbyt duża wartość prowadzi do charakterystycznego artefaktu.
+
+Przykład: zamiast pisać tylko „IOR rogówki = 1,376”, należy najpierw wyjaśnić, że **współczynnik załamania światła (Index of Refraction, IOR)** opisuje zmianę kierunku światła przy przejściu między ośrodkami. Wartość około 1,0 oznacza praktycznie brak załamania względem próżni lub powietrza, około 1,33 jest typowa dla wody, około 1,38 dla rogówki, a około 1,5 dla wielu rodzajów szkła. Zwiększenie IOR wzmacnia załamanie i zmienia zachowanie odbić Fresnela.
+
 ## Renderowanie i materiały
 
 | Polski termin | Angielski termin | Uwagi |
@@ -32,7 +44,7 @@ Jeżeli termin nie ma dobrze utrwalonego polskiego odpowiednika, stosujemy opiso
 | dwukierunkowa funkcja rozkładu odbicia | Bidirectional Reflectance Distribution Function, BRDF | Termin optyczny. |
 | program cieniujący | shader | W kontekście konkretnego silnika można mówić o module lub programie cieniującym. |
 | model cieniowania | shading model | Nie utożsamiać z programem cieniującym. |
-| przestrzeń barw | color space | Termin potwierdzony w polskich materiałach edukacyjnych i poligraficznych. |
+| przestrzeń barw | color space | Termin stosowany w grafice komputerowej i poligrafii. |
 | zarządzanie barwą | color management | Dotyczy profili, transformacji i zgodności barw. |
 | profil barwny | color profile | Dla ICC: profil ICC. |
 | funkcja przenoszenia | transfer function | Np. sRGB. |
@@ -144,7 +156,7 @@ Jeżeli termin nie ma dobrze utrwalonego polskiego odpowiednika, stosujemy opiso
 | jednostka działania mięśniowego | Action Unit, AU | W systemie FACS. |
 | fonem | phoneme | |
 | wizem | viseme | Utrwalony termin dla wizualnego odpowiednika fonemu. |
-| współartykulacja | coarticulation | Nie używać „koartykulacja”. |
+| koartykulacja | coarticulation | Forma preferowana w dokumentacji projektu. |
 | wymuszane dopasowanie czasowe | forced alignment | Dopasowanie transkrypcji/fonemów do sygnału mowy. |
 | synchronizacja ruchu ust z mową | lip-sync | W tytułach można zachować „lip-sync” po polskim rozwinięciu. |
 | żuchwa | jaw/mandible | Dla anatomii preferować mandible, dla kanału sterującego jaw. |
@@ -188,6 +200,7 @@ Przy dodawaniu terminu, którego nie ma w słowniku:
 2. wybierz termin opisujący znaczenie, a nie mechaniczną kalkę słowo po słowie;
 3. dodaj angielski odpowiednik w nawiasie;
 4. wpisz termin do tego słownika przed użyciem go w wielu dokumentach;
-5. nie zmieniaj istniejących identyfikatorów API, formatów danych ani nazw wymaganych przez standardy.
+5. przy pierwszym użyciu przygotuj dydaktyczne wyjaśnienie zgodne z zasadą pierwszego użycia pojęcia;
+6. nie zmieniaj istniejących identyfikatorów API, formatów danych ani nazw wymaganych przez standardy.
 
 W razie kilku poprawnych polskich odpowiedników preferujemy formę najbardziej jednoznaczną w grafice komputerowej, optyce, animacji lub informatyce.
