@@ -3,9 +3,9 @@ requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "avatar-3d-self"
-version = "0.2.0"
-description = "Tooling and desktop guidance for a photorealistic editable real-time digital human pipeline."
+name = "avatar-studio"
+version = "0.3.0"
+description = "Avatar Studio: professional tooling, documentation and desktop guidance for a photorealistic editable real-time digital human pipeline."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []

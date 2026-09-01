@@ -1,17 +1,21 @@
-# Avatar 3D Self
+# Avatar Studio
 
-Dokumentacja profesjonalnego pipeline'u tworzenia fotorealistycznego, edytowalnego cyfrowego człowieka czasu rzeczywistego.
+Dokumentacja profesjonalnego pipeline'u i aplikacji wspierającej tworzenie fotorealistycznego, edytowalnego cyfrowego człowieka czasu rzeczywistego.
 
 <div class="avatar-status-grid">
+  <div class="avatar-status-card"><strong>Produkt</strong>Avatar Studio</div>
   <div class="avatar-status-card"><strong>Faza</strong>Reference acquisition and pipeline engineering</div>
   <div class="avatar-status-card"><strong>Kanoniczny DCC</strong>Blender</div>
   <div class="avatar-status-card"><strong>Mowa</strong>Piper → phonemes → visemes</div>
-  <div class="avatar-status-card"><strong>Aplikacja</strong>Avatar Studio desktop</div>
 </div>
+
+## Dwa komponenty jednego projektu
+
+**Dokumentacja WWW** opisuje architekturę, teorię, procedury, kryteria jakości i pełny pipeline produkcyjny. **Avatar Studio Desktop** prowadzi użytkownika przez etapy, zachowuje stan lokalnego projektu, rejestruje artefakty, analizuje ich parametry oraz docelowo będzie uruchamiać i kontrolować narzędzia produkcyjne.
 
 ## Jak korzystać z dokumentacji
 
-Jeśli rozpoczynasz projekt, przeczytaj kolejno [cele i wymagania](project/goals-and-requirements.md), [architekturę](project/architecture.md) i [przegląd pipeline'u](pipeline/overview.md). Następnie wykonuj etapy 01–21 w podanej kolejności. Każdy etap definiuje wejście, edytowalny artefakt wyjściowy, kontrole jakości i Definition of Done.
+Jeśli rozpoczynasz projekt, przeczytaj kolejno [cele i wymagania](project/goals-and-requirements.md), [architekturę](project/architecture.md), [konwencję nazewniczą](project/naming.md) i [przegląd pipeline'u](pipeline/overview.md). Następnie wykonuj etapy 01–21 w podanej kolejności. Każdy etap definiuje wejście, edytowalny artefakt wyjściowy, kontrole jakości i Definition of Done.
 
 !!! important "Rozdzielenie WWW i aplikacji"
     Strona WWW jest wyłącznie dokumentacją. Prowadzenie użytkownika krok po kroku, zapisywanie stanu projektu, uruchamianie narzędzi lokalnych oraz inspekcja wyników należą do aplikacji [Avatar Studio](desktop/architecture.md).

@@ -2,13 +2,13 @@
 
 ## Zakres projektu
 
-`avatar-3d-self` jest edytowalnym pipeline'em tworzenia fotorealistycznego cyfrowego człowieka czasu rzeczywistego. Repozytorium zawiera narzędzia Python, dokumentację MkDocs i aplikację desktopową Avatar Studio. Rekonstrukcja, Blender, COLMAP, Unreal Engine oraz Piper działają lokalnie i nie są wykonywane w standardowym CI.
+**Avatar Studio** jest profesjonalnym środowiskiem i edytowalnym pipeline'em tworzenia fotorealistycznego cyfrowego człowieka czasu rzeczywistego. Repozytorium zawiera narzędzia Python, dokumentację MkDocs i aplikację desktopową `avatar_studio`. Rekonstrukcja, Blender, COLMAP, Unreal Engine oraz Piper działają lokalnie i nie są wykonywane w standardowym CI.
 
 Priorytety jakości: podobieństwo do materiałów referencyjnych, anatomia i deformacje, naturalna mimika, realistyczne oczy i skóra, wiarygodny lip-sync oraz wydajność czasu rzeczywistego.
 
 ## Zasady obowiązkowe
 
-- Stosuj konwencje z `docs/project/conventions.md` oraz architekturę z `docs/project/architecture.md`.
+- Stosuj konwencje z `docs/project/conventions.md`, nazewnictwo z `docs/project/naming.md` oraz architekturę z `docs/project/architecture.md`.
 - Kod, identyfikatory i docstringi zapisuj po angielsku. Dokumentację użytkową w Markdown zapisuj po polsku albo, dla stabilnych nazw standardów i API, zachowuj terminologię angielską.
 - Procedury instalacyjne, polecenia CLI i ścieżki systemowe dokumentuj osobno dla Windows i Linux.
 - Nie wprowadzaj frameworków ani warstw abstrakcji bez konkretnej potrzeby.
