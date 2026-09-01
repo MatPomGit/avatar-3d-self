@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import shutil
 import subprocess
-from typing import Sequence
+from typing import Any, Mapping, Sequence
 
 
 @dataclass(frozen=True, slots=True)
@@ -17,6 +18,18 @@ class CommandResult:
     returncode: int
     stdout: str
     stderr: str
+
+    @property
+    def ok(self) -> bool:
+        return self.returncode == 0
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "command": list(self.command),
+            "returncode": self.returncode,
+            "stdout": self.stdout,
+            "stderr": self.stderr,
+        }
 
 
 class ToolAdapter:
@@ -43,7 +56,15 @@ class ToolAdapter:
     def available(self) -> bool:
         return self.resolve() is not None
 
-    def run(self, args: Sequence[str], *, timeout_s: float | None = None) -> CommandResult:
+    def run(
+        self,
+        args: Sequence[str],
+        *,
+        timeout_s: float | None = None,
+        input_text: str | None = None,
+        cwd: str | Path | None = None,
+        env: Mapping[str, str] | None = None,
+    ) -> CommandResult:
         executable = self.resolve()
         if executable is None:
             raise FileNotFoundError(f"{self.name} executable not found")
@@ -52,6 +73,9 @@ class ToolAdapter:
             command,
             capture_output=True,
             text=True,
+            input=input_text,
+            cwd=str(cwd) if cwd is not None else None,
+            env=dict(env) if env is not None else None,
             timeout=timeout_s or self.timeout_s,
             check=False,
         )
@@ -59,3 +83,15 @@ class ToolAdapter:
 
     def version(self) -> CommandResult:
         return self.run(self.version_args)
+
+    @staticmethod
+    def write_report(report: Mapping[str, Any], path: str | Path) -> Path:
+        """Persist one normalized adapter report as stable, human-readable JSON."""
+
+        destination = Path(path).expanduser().resolve()
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(
+            json.dumps(dict(report), ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        return destination
