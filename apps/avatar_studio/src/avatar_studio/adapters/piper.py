@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+from urllib.request import urlopen
 
 from avatar_studio.adapters.base import CommandResult, ToolAdapter
 
@@ -83,6 +84,74 @@ class PiperAdapter(ToolAdapter):
                 "noise_w_scale": noise_w_scale,
             },
             "command": list(result.command),
+        }
+
+    def fetch_http_alignment(
+        self,
+        base_url: str = "http://127.0.0.1:5000",
+        *,
+        timeout_s: float = 10.0,
+    ) -> dict:
+        """Read Piper HTTP /info and normalize the latest phoneme-duration alignment."""
+
+        url = base_url.rstrip("/") + "/info"
+        with urlopen(url, timeout=timeout_s) as response:
+            payload = json.load(response)
+        return self.normalize_http_info(payload, source_url=url)
+
+    @staticmethod
+    def normalize_http_info(payload: dict, *, source_url: str | None = None) -> dict:
+        """Convert Piper duration alignments into canonical start/end timing records."""
+
+        if not isinstance(payload, dict):
+            raise ValueError("Piper /info response must be a JSON object")
+        voice = payload.get("voice") if isinstance(payload.get("voice"), dict) else {}
+        last = payload.get("last")
+        if last is None:
+            return {
+                "tool": "Piper HTTP",
+                "source_url": source_url,
+                "voice": voice,
+                "last_available": False,
+                "phonemes": [],
+            }
+        if not isinstance(last, dict):
+            raise ValueError("Piper /info field 'last' must be an object or null")
+        alignments = last.get("alignments") or []
+        if not isinstance(alignments, list):
+            raise ValueError("Piper /info alignments must be a list")
+
+        normalized = []
+        cursor = 0.0
+        for index, item in enumerate(alignments):
+            if not isinstance(item, dict):
+                raise ValueError(f"Piper alignment {index} must be an object")
+            duration = float(item.get("seconds", 0.0))
+            if duration < 0:
+                raise ValueError(f"Piper alignment {index} has negative duration")
+            symbol = str(item.get("phoneme", ""))
+            end = cursor + duration
+            normalized.append(
+                {
+                    "symbol": symbol,
+                    "start_s": round(cursor, 9),
+                    "end_s": round(end, 9),
+                    "duration_s": duration,
+                }
+            )
+            cursor = end
+
+        text = str(last.get("text", ""))
+        return {
+            "tool": "Piper HTTP",
+            "source_url": source_url,
+            "voice": voice,
+            "last_available": True,
+            "text_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+            "text_characters": len(text),
+            "synthesize_seconds": last.get("synthesize_seconds"),
+            "duration_s": round(cursor, 9),
+            "phonemes": normalized,
         }
 
     @staticmethod
