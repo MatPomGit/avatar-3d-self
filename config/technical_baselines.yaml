@@ -1,0 +1,110 @@
+schema_version: 1
+project: Avatar Studio
+units:
+  time: seconds
+  angle: degrees
+  distance: millimetres
+  frequency: hertz
+  normalized_weight: unit_interval
+
+behaviour:
+  blink:
+    rate_per_minute: {baseline: 12, min: 6, max: 20}
+    minimum_interval_s: {baseline: 1.2, min: 0.8, max: 2.0}
+    duration_s: {baseline: 0.170, min: 0.140, max: 0.240}
+    close_s: {baseline: 0.055, min: 0.040, max: 0.080}
+    hold_s: {baseline: 0.020, min: 0.000, max: 0.040}
+    open_s: {baseline: 0.095, min: 0.070, max: 0.140}
+    left_right_asymmetry_s: {baseline: 0.008, min: 0.000, max: 0.020}
+  gaze:
+    conversational_saccade_deg: {min: 2, max: 12}
+    large_saccade_deg: {min: 12, max: 20}
+    microsaccade_deg: {min: 0.1, max: 0.6}
+    visible_microsaccade_hz: {min: 0.4, max: 1.2}
+    object_fixation_s: {min: 0.220, max: 0.650}
+    face_fixation_s: {min: 0.7, max: 2.5}
+    gaze_aversion_s: {min: 0.2, max: 1.1}
+    head_contribution_threshold_deg: {min: 25, max: 30}
+  breathing:
+    rate_per_minute: {baseline: 14, min: 10, max: 20}
+    chest_excursion_mm: {baseline: 4, min: 2, max: 8}
+    shoulder_motion_deg: {baseline: 0.35, min: 0.1, max: 0.8}
+    postural_sway_hz: {baseline: 0.18, min: 0.08, max: 0.35}
+    sway_translation_mm: {baseline: 4, min: 1, max: 10}
+
+speech:
+  visual_lead_s: {baseline: 0.060, min: 0.040, max: 0.100}
+  anticipatory_attack_s: {min: 0.050, max: 0.080}
+  release_s: {min: 0.080, max: 0.120}
+  lip_seal:
+    full_until_jaw_open: 0.08
+    zero_at_jaw_open: 0.22
+
+materials:
+  skin:
+    metallic: {baseline: 0.0, min: 0.0, max: 0.0}
+    ior: {baseline: 1.40, min: 1.38, max: 1.45}
+    f0: {baseline: 0.028}
+    roughness:
+      forehead: {baseline: 0.38, min: 0.30, max: 0.48}
+      t_zone: {baseline: 0.34, min: 0.26, max: 0.44}
+      cheeks: {baseline: 0.48, min: 0.38, max: 0.60}
+      eye_area: {baseline: 0.52, min: 0.42, max: 0.64}
+    sss_radius_rgb_mm: [1.2, 0.55, 0.25]
+  eyes:
+    eyeball_diameter_mm: {baseline: 24.0, min: 23.0, max: 25.0}
+    iris_diameter_mm: {baseline: 11.8, min: 11.0, max: 12.5}
+    pupil_neutral_mm: {baseline: 3.5, min: 2.0, max: 5.0}
+    pupil_dynamic_mm: {min: 2.0, max: 8.0}
+    cornea_ior: {baseline: 1.376, min: 1.37, max: 1.38}
+    tear_ior: {baseline: 1.336, min: 1.33, max: 1.34}
+    cornea_roughness: {baseline: 0.02, min: 0.01, max: 0.04}
+
+rigging:
+  rest_pose: A-pose
+  arm_abduction_deg: {min: 35, max: 45}
+  ik_stretch_default: false
+  test_ranges_deg:
+    shoulder_flexion: 160
+    shoulder_abduction: 150
+    elbow_flexion: 145
+    forearm_pronation: 80
+    forearm_supination: 80
+    hip_flexion: 120
+    knee_flexion: 135
+  face:
+    arkit_range: [0.0, 1.0]
+    jaw_open_mm: {min: 30, max: 35}
+    jaw_rotation_deg: {min: 25, max: 30}
+    jaw_lateral_mm: {min: 5, max: 8}
+    jaw_forward_mm: {min: 4, max: 7}
+    eyelid_follow_up: {min: 0.30, max: 0.35}
+    eyelid_follow_down: {min: 0.40, max: 0.45}
+    corrective_smoothstep: {t0: 0.15, t1: 0.55}
+
+secondary_motion:
+  short_hair: {natural_frequency_hz: [4.0, 6.0], damping_ratio: [0.75, 0.95]}
+  medium_hair: {natural_frequency_hz: [2.5, 4.0], damping_ratio: [0.65, 0.85]}
+  long_hair: {natural_frequency_hz: [1.2, 2.5], damping_ratio: [0.55, 0.80]}
+  clothing: {natural_frequency_hz: [1.5, 3.0], damping_ratio: [0.65, 0.90]}
+  soft_tissue: {natural_frequency_hz: [2.0, 4.0], damping_ratio: [0.75, 1.00]}
+
+runtime:
+  target_fps: 60
+  frame_budget_ms: 16.67
+  cpu_animation_and_face_ms_max: 2.0
+  gpu_character_ms_max: 8.0
+  reserve_ms_min: 6.67
+  p99_frame_ms_max: 33.3
+  p99_window_s: 60
+
+capture:
+  rotating_subject:
+    baseline_angle_step_deg: 10
+    baseline_positions: 36
+    minimum_positions: 24
+    high_quality_positions: 48
+    settle_time_s: 2
+    camera_levels: [2, 3]
+    mask_dilation_px_4k: {min: 3, max: 8}
+    reconstruction_mode: object_centric
