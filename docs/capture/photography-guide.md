@@ -12,9 +12,13 @@ Preferuj główny aparat 1× telefonu lub obiektyw o małym zniekształceniu per
 
 ## Operator i samodzielny capture
 
-**Operator:** osoba pozostaje nieruchoma, kamera porusza się po pierścieniach. To wariant preferowany, bo obiekt nie zmienia kształtu między zdjęciami.
+**Operator:** osoba pozostaje nieruchoma, kamera porusza się po pierścieniach. To wariant najbardziej zgodny z klasyczną fotogrametrią statycznej sceny.
 
-**Samodzielnie:** kamera stoi na statywie, a osoba obraca całe ciało o 10–15° między ujęciami. Jest to kompromis: ubrania, włosy i tkanki mogą zmieniać położenie, dlatego serie wykonuj wolno i bez zmiany pozy kończyn. Nie mieszaj obu metod w jednej rekonstrukcji bez testu.
+**Samodzielnie, obracająca się osoba:** kamera stoi na statywie, a osoba obraca całe ciało między ujęciami. Ten wariant jest oficjalnie wspierany, ponieważ jest praktycznie niezbędny przy samodzielnym fotografowaniu własnej sylwetki. Wymaga jednak segmentacji foreground, stałej pozy, kontrolowanych kroków kątowych oraz solve prowadzonego obiektocentrycznie, tak aby nieruchome tło nie sterowało rekonstrukcją.
+
+Baseline dla sylwetki to krok 10° i 36 pozycji na pełne 360°. Każdy krok wykonuje się całym ciałem razem ze stopami, a nie przez skręcenie tułowia. Po zajęciu pozy należy odczekać około 2 s przed zdjęciem.
+
+Szczegółowy workflow znajduje się w [przewodniku dla obracającej się osoby](rotating-subject-capture.md). Ogólne zasady self-capture opisuje [osobny dokument](self-capture.md).
 
 ## Twarz
 
@@ -22,7 +26,7 @@ Wykonaj trzy pierścienie: wysokość oczu, około 20 cm wyżej i około 20 cm n
 
 ## Sylwetka
 
-Użyj A-pose z ramionami odsuniętymi od tułowia 30–45°, rozstawionymi palcami i równoległymi stopami. Wykonaj pełne pierścienie na kilku wysokościach. Nie zasłaniaj pach, wewnętrznych stron kończyn i dłoni.
+Użyj A-pose z ramionami odsuniętymi od tułowia 30–45°, rozstawionymi palcami i równoległymi stopami. Wykonaj pełne pierścienie na kilku wysokościach albo, w wariancie samodzielnym, pełne obroty osoby dla kolejnych wysokości kamery. Nie zasłaniaj pach, wewnętrznych stron kończyn i dłoni.
 
 ## Dłonie
 
@@ -54,4 +58,6 @@ Zachowaj niezmienione oryginały i pracuj na kopii.
 
 ## Odrzucanie klatek
 
-Odrzuć: motion blur, mrugnięcie w neutralnej serii, zmianę zoomu, zmianę pozy, częściowe zasłonięcie obiektu, clipped highlights na dużej części skóry, silny rolling-shutter deformation i zdjęcia przetworzone innym profilem niż reszta serii.
+Odrzuć: motion blur, mrugnięcie w neutralnej serii, zmianę zoomu, zmianę pozy kończyn, częściowe zasłonięcie obiektu, clipped highlights na dużej części skóry, silny rolling-shutter deformation i zdjęcia przetworzone innym profilem niż reszta serii.
+
+Dla `rotating_subject` dodatkowo odrzuć klatki, w których miednica wyraźnie zeszła z osi obrotu, ręce zmieniły ułożenie, włosy nadal poruszają się po obrocie albo tło zostało błędnie uwzględnione w masce foreground.
