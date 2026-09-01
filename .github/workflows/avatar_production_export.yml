@@ -1,137 +1,133 @@
 name: Avatar Production Export
 
 on:
-  push:
-    paths:
-      - "source/metahuman/**"
-      - "scripts/**"
-    branches: [main]
   workflow_dispatch:
     inputs:
       quality_preset:
-        description: 'Export quality'
+        description: "Export quality"
         required: true
-        default: 'high'
+        default: "high"
         type: choice
         options:
           - high
           - balanced
           - fast
 
+permissions:
+  contents: write
+
+concurrency:
+  group: avatar-production-export
+  cancel-in-progress: false
+
 jobs:
   validate_and_prepare:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      
       - name: Setup Python
         uses: actions/setup-python@v7
         with:
-          python-version: '3.11'
-      
+          python-version: "3.11"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-          pip install trimesh numpy pillow
-      
+          python -m pip install -e ".[dev]"
+          python -m pip install trimesh numpy pillow
       - name: Validate Python integrity
         run: |
-          python -m py_compile scripts/*.py
-          python -m ruff check scripts/
-      
+          python -m compileall -q scripts
+          ruff check scripts
       - name: Generate blendshape manifest
         run: python scripts/metahuman_processor.py
-      
       - name: Create animation manifest
         run: python scripts/animation_baking.py
-      
-      - name: Commit manifests
+      - name: Commit manifests when changed
         run: |
           git config user.name "Avatar Automation"
           git config user.email "actions@github.local"
           git add source/metahuman/config/*.json animations/manifest.json
-          git commit -m "chore: auto-generate metadata manifests [skip ci]" || true
-          git push
+          if git diff --cached --quiet; then
+            echo "No generated manifest changes."
+          else
+            git commit -m "chore: update generated avatar manifests [skip ci]"
+            git push
+          fi
 
   photogrammetry_scan:
     runs-on: ubuntu-latest
-    if: always()
     needs: validate_and_prepare
-    
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
-      
       - name: Setup Python + COLMAP
         run: |
           sudo apt-get update
           sudo apt-get install -y colmap
           python -m pip install opencv-python pillow numpy
-      
+      - name: Check source photographs
+        id: photos
+        run: |
+          if find references/photos/raw -type f -print -quit 2>/dev/null | grep -q .; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "No source photographs found. Photogrammetry step will be skipped."
+          fi
       - name: Run photogrammetry pipeline
-        continue-on-error: true
+        if: steps.photos.outputs.available == 'true'
         run: |
           python scripts/photogrammetry_pipeline.py \
             --photos references/photos/raw \
             --output source/scans/colmap_output
-      
       - name: Upload scan results
+        if: steps.photos.outputs.available == 'true'
         uses: actions/upload-artifact@v7
-        if: always()
         with:
           name: scan-results
           path: source/scans/colmap_output/
+          if-no-files-found: warn
 
   ue_export:
-    runs-on: self-hosted  # Requires local Unreal Engine
-    if: always()
+    runs-on: self-hosted
     needs: [validate_and_prepare, photogrammetry_scan]
-    
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
-      
       - name: Export from Unreal Engine
-        continue-on-error: true
         run: |
           python scripts/ue_export_pipeline.py \
             --project . \
             --output exports/avatar_final.fbx
-      
       - name: Validate FBX export
-        run: |
-          python scripts/validate_fbx.py exports/avatar_final.fbx
-      
+        run: python scripts/validate_fbx.py exports/avatar_final.fbx
       - name: Upload production FBX
         uses: actions/upload-artifact@v7
         with:
           name: avatar-fbx-export
           path: exports/avatar_final.fbx
+          if-no-files-found: error
           retention-days: 30
 
   finalize:
     runs-on: ubuntu-latest
-    if: always()
-    needs: [validate_and_prepare, ue_export]
-    
+    needs: [validate_and_prepare, photogrammetry_scan, ue_export]
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
-      
       - name: Generate export report
         run: |
-          echo "## Avatar Export Summary" > EXPORT_REPORT.md
-          echo "**Date:** $(date)" >> EXPORT_REPORT.md
-          echo "**Status:** Complete" >> EXPORT_REPORT.md
-          echo "**Files:** " >> EXPORT_REPORT.md
-          ls -lh exports/ >> EXPORT_REPORT.md || true
-      
+          {
+            echo "## Avatar Export Summary"
+            echo "**Run:** ${{ github.run_number }}"
+            echo "**Quality preset:** ${{ inputs.quality_preset }}"
+            echo "**Status:** completed"
+          } > EXPORT_REPORT.md
       - name: Create release
-        uses: actions/create-release@v1
-        if: success()
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: export-${{ github.run_number }}
-          release_name: Avatar Export #${{ github.run_number }}
+          name: Avatar Export #${{ github.run_number }}
           body_path: EXPORT_REPORT.md
           draft: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

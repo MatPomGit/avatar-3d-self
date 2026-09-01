@@ -73,7 +73,12 @@ def test_skip_textures_is_reported():
     assert losses == ["tekstury (wyłączone przez --textures skip)"]
 
 
-def test_obj_mtl_name_uses_same_stem(tmp_path):
+def test_obj_mtl_name_uses_same_stem(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        converter,
+        "_material_mtl_text",
+        lambda: "# test material\nnewmtl default\nKd 0.8 0.8 0.8\n",
+    )
     obj = tmp_path / "character.obj"
     obj.write_text("o character\n", encoding="utf-8")
     mtl = converter.ensure_obj_mtl(obj)
