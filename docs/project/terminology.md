@@ -204,7 +204,7 @@ Przykład: zamiast pisać tylko „IOR rogówki = 1,376”, należy najpierw wyj
 Przy dodawaniu terminu, którego nie ma w słowniku:
 
 1. sprawdź polskie normy, podręczniki akademickie, dokumentację uczelni lub polską dokumentację producenta;
-2. wybierz termin opisująjący znaczenie, a nie mechaniczną kalkę słowo po słowie;
+2. wybierz termin opisujący znaczenie, a nie mechaniczną kalkę słowo po słowie;
 3. dodaj angielski odpowiednik w nawiasie;
 4. wpisz termin do tego słownika przed użyciem go w wielu dokumentach;
 5. przy pierwszym użyciu przygotuj dydaktyczne wyjaśnienie zgodne z zasadą pierwszego użycia pojęcia;
