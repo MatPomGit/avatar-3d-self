@@ -1,51 +1,38 @@
-# Project documentation
+# Documentation
 
-This directory contains maintained documentation for the current implementation of `avatar-3d-self`.
+This directory contains maintained technical sources of truth. The project is
+an early-stage editable production pipeline, not a completed automated avatar
+generator.
 
-## Main documentation
+## Start here
 
-- [`COMPLETE_PIPELINE.md`](COMPLETE_PIPELINE.md) describes the end-to-end avatar production pipeline.
-- [`REALISTIC_AVATAR_GUIDE.md`](REALISTIC_AVATAR_GUIDE.md) contains practical guidance for building the avatar.
-- [`ENGINE_INTEGRATION.md`](ENGINE_INTEGRATION.md) covers integration with target 3D engines.
-- [`MODEL_FORMAT_CONVERTER.md`](MODEL_FORMAT_CONVERTER.md) is the authoritative technical and user reference for the loss-aware 3D model converter.
-- [`FORMAT_CONVERSION_EXAMPLES.md`](FORMAT_CONVERSION_EXAMPLES.md) contains validated conversion scenarios, expected losses and post-export checks.
+- [Architecture](ARCHITECTURE.md): boundaries, asset lifecycle and canonical
+  interchange formats.
+- [Roadmap](ROADMAP.md): milestones, acceptance criteria and current blockers.
+- [Changelog](../CHANGELOG.md): released baseline and unreleased changes.
+- [Architecture decision records](adr/README.md): stable technical decisions.
 
-## Environment boundaries
+## Production and tools
 
-The project uses four distinct execution environments:
+- [Complete production pipeline](COMPLETE_PIPELINE.md): manual workflow and
+  quality gates.
+- [Realistic avatar guide](realistic_avatar_guide.md): capture, topology, rig
+  and animation principles.
+- [Engine integration](ENGINE_INTEGRATION.md): target-engine responsibilities.
+- [Model format converter](model_format_converter.md): authoritative CLI and
+  limitations.
+- [Format conversion examples](format_conversion_examples.md): loss-aware
+  recipes.
 
-1. **Python development and CI**
-   - Python 3.11
-   - source validation, utility code and tests
-   - dependencies declared in `pyproject.toml`
+## Execution environments
 
-2. **Blender conversion and asset-processing workstation**
-   - Blender installed as a system application
-   - `scripts/model_format_converter.py` launches Blender in background mode
-   - full conversion tests require representative 3D assets and are not suitable for lightweight GitHub-hosted CI
+| Environment | Responsibility | Not performed in GitHub-hosted CI |
+| --- | --- | --- |
+| Python 3.11 | utilities, tests and static validation | DCC conversion |
+| Blender workstation | conversion, texture and rig inspection | Blender execution |
+| COLMAP workstation | reconstruction from approved captures | reconstruction |
+| Unreal/MetaHuman workstation | import, animation and performance validation | engine automation |
+| GitHub Pages | static documentation and viewer | source-data processing or secrets |
 
-3. **COLMAP reconstruction workstation**
-   - COLMAP installed as a system application
-   - reconstruction scripts call the `colmap` executable through `subprocess`
-   - large scan data and generated reconstruction artifacts should not be treated as CI inputs
-
-4. **Unreal Engine and MetaHuman workstation**
-   - Unreal Engine provides the `unreal` Python module
-   - Unreal-specific scripts must run inside the Unreal Python environment
-   - MetaHuman assets remain external to standard GitHub-hosted CI
-
-## Dependency groups
-
-`pyproject.toml` is the only Python dependency manifest.
-
-- `dev` contains lightweight development and CI tools.
-- `geometry` contains numerical and mesh-processing libraries.
-- `vision` contains image-processing libraries.
-
-Install only the group required for the task being performed.
-
-## Automation policy
-
-GitHub Actions should fail only for deterministic repository problems. Workflows requiring proprietary applications, GPU-heavy processing, large assets, Blender integration assets or workstation state remain manual until a dedicated runner exists.
-
-Placeholder workflows are entry points for future automation, not claims that those pipelines are currently reproducible on GitHub-hosted runners.
+See [contributor guidance](../AGENTS.md) for personal-data, Git LFS and change
+rules.
