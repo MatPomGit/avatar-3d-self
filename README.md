@@ -1,3 +1,7 @@
+[![CI](https://github.com/MatPomGit/avatar-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/MatPomGit/avatar-studio/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/MatPomGit/avatar-studio//actions/workflows/codeql.yml/badge.svg)](https://github.com/MatPomGit/avatar-studio//actions/workflows/codeql.yml)
+[![Documentation](https://github.com/MatPomGit/avatar-studio//actions/workflows/docs.yml/badge.svg)](https://matpomgit.github.io/avatar-studio//)
+
 # Avatar Studio
 
 **Avatar Studio** is a professional, reproducible environment for building a photorealistic, editable and real-time digital human. It combines a documented production pipeline with a local desktop application that guides the user through reference acquisition, reconstruction, retopology, PBR materials, hair, clothing, rigging, animation, Piper-based speech and runtime validation.
