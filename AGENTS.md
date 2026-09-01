@@ -2,24 +2,26 @@
 
 ## Zakres projektu
 
-`avatar-3d-self` jest edytowalnym pipeline'em tworzenia fotorealistycznego awatara. Repozytorium zawiera lekkie narzędzia Python, dokumentację i statyczny viewer. Rekonstrukcja, Blender, MetaHuman, Unreal Engine oraz Piper działają lokalnie i nie są wykonywane w standardowym CI.
+`avatar-3d-self` jest edytowalnym pipeline'em tworzenia fotorealistycznego cyfrowego człowieka czasu rzeczywistego. Repozytorium zawiera narzędzia Python, dokumentację MkDocs i aplikację desktopową Avatar Studio. Rekonstrukcja, Blender, COLMAP, Unreal Engine oraz Piper działają lokalnie i nie są wykonywane w standardowym CI.
 
-Priorytety jakości: podobieństwo do materiałów referencyjnych, anatomia i deformacje, naturalna mimika, wydajność czasu rzeczywistego.
+Priorytety jakości: podobieństwo do materiałów referencyjnych, anatomia i deformacje, naturalna mimika, realistyczne oczy i skóra, wiarygodny lip-sync oraz wydajność czasu rzeczywistego.
 
 ## Zasady obowiązkowe
 
-- Stosuj zasady nazewnictwa, PEP 8, PEP 257 i KISS opisane w `docs/architecture.md`.
-- Kod, identyfikatory i docstringi zapisuj po angielsku. Dokumentację użytkową w Markdown zapisuj po polsku.
-- Nie wprowadzaj frameworków, zależności ani warstw abstrakcji bez konkretnej potrzeby.
+- Stosuj konwencje z `docs/project/conventions.md` oraz architekturę z `docs/project/architecture.md`.
+- Kod, identyfikatory i docstringi zapisuj po angielsku. Dokumentację użytkową w Markdown zapisuj po polsku albo, dla stabilnych nazw standardów i API, zachowuj terminologię angielską.
+- Procedury instalacyjne, polecenia CLI i ścieżki systemowe dokumentuj osobno dla Windows i Linux.
+- Nie wprowadzaj frameworków ani warstw abstrakcji bez konkretnej potrzeby.
 - Nowy lub zmieniony kod Python musi mieć czytelne nazwy, jawne importy i docstringi dla publicznych modułów, klas oraz funkcji.
-- Dla zmian w Pythonie uruchom odpowiednie testy, `python -m pytest -q` oraz `ruff check scripts tests`.
+- Dla zmian w Pythonie uruchom `python -m pytest -q` oraz `ruff check scripts apps tests`.
+- Dla zmian dokumentacji uruchom `mkdocs build --strict`.
 
 ## Dane i artefakty
 
 - Zdjęcia, skany, nagrania głosu i adnotacje biometryczne są danymi wrażliwymi. Nie umieszczaj ich w publicznym repozytorium bez wyraźnej zgody.
-- Duże, celowo wersjonowane zasoby używają Git LFS.
-- Zachowuj osobno źródłową scenę DCC, retopologię, tekstury, rig i animacje. Eksport FBX lub GLB nie może być jedynym źródłem modelu.
-- GitHub Pages zawiera wyłącznie publiczny, statyczny viewer i dokumentację.
+- Duże, celowo wersjonowane zasoby używają Git LFS. Prywatne źródła pozostają poza publicznym repozytorium.
+- Zachowuj osobno źródłową scenę DCC, retopologię, tekstury, rig i animacje. Eksport FBX, GLB albo USD nie może być jedynym źródłem modelu.
+- GitHub Pages zawiera wyłącznie publiczną dokumentację. Stan projektu i prywatne artefakty są obsługiwane lokalnie przez Avatar Studio.
 
 ## Zmiany
 

@@ -1,16 +1,19 @@
-name: GitHub Pages
+name: Documentation
 
 on:
   pull_request:
     branches: [main]
     paths:
-      - "web/viewer/**"
+      - "docs/**"
+      - "mkdocs.yml"
+      - "pyproject.toml"
       - ".github/workflows/pages.yml"
   push:
     branches: [main]
     paths:
-      - "web/viewer/**"
-      - "exports/avatar_final.fbx"
+      - "docs/**"
+      - "mkdocs.yml"
+      - "pyproject.toml"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -31,25 +34,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
-          node-version: "22"
+          python-version: "3.11"
+          cache: pip
 
-      - name: Install dependencies
-        working-directory: web/viewer
-        run: npm install --no-audit --no-fund
+      - name: Install documentation dependencies
+        run: python -m pip install -e ".[docs]"
 
-      - name: Add published avatar model
-        run: |
-          mkdir -p web/viewer/public/model
-          if [ -s exports/avatar_final.fbx ]; then
-            cp exports/avatar_final.fbx web/viewer/public/model/avatar_final.fbx
-          fi
-
-      - name: Build site
-        working-directory: web/viewer
-        run: npm run build
+      - name: Build documentation
+        run: mkdocs build --strict
 
       - name: Configure Pages
         if: github.event_name != 'pull_request'
@@ -59,7 +54,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v5
         with:
-          path: web/viewer/dist
+          path: site
 
   deploy:
     if: github.event_name != 'pull_request'

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "avatar-3d-self"
-version = "0.1.0"
-description = "Tooling for a realistic 3D self-avatar pipeline from reconstruction to Unreal Engine."
+version = "0.2.0"
+description = "Tooling and desktop guidance for a photorealistic editable real-time digital human pipeline."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
@@ -14,6 +14,16 @@ dependencies = []
 dev = [
     "pytest>=8,<10",
     "ruff>=0.12,<1",
+]
+docs = [
+    "mkdocs>=1.6,<2",
+    "mkdocs-material>=9.6,<10",
+]
+desktop = [
+    "PySide6>=6.8,<7",
+]
+desktop-build = [
+    "pyinstaller>=6.11,<7",
 ]
 geometry = [
     "numpy>=1.26,<3",
@@ -27,8 +37,12 @@ vision = [
     "opencv-python>=4.8,<6",
 ]
 
-[tool.setuptools]
-packages = []
+[project.scripts]
+avatar-studio = "avatar_studio.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["apps/avatar_studio/src"]
+include = ["avatar_studio*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

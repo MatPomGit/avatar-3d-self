@@ -1,0 +1,34 @@
+:root {
+  --avatar-card-border: rgba(96, 125, 139, 0.24);
+}
+
+.md-typeset h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.md-typeset h2 {
+  font-weight: 650;
+}
+
+.avatar-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.avatar-status-card {
+  border: 1px solid var(--avatar-card-border);
+  border-radius: 0.55rem;
+  padding: 0.85rem 1rem;
+}
+
+.avatar-status-card strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.md-typeset table:not([class]) {
+  font-size: 0.72rem;
+}

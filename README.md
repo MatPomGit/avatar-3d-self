@@ -1,55 +1,68 @@
 # avatar-3d-self
 
-Narzędzia i pipeline tworzenia fotorealistycznego, edytowalnego awatara 3D własnej osoby. Projekt obejmuje rekonstrukcję, przetwarzanie siatek, materiały, rig, animację oraz integrację z silnikiem i Piper TTS.
+Professional, reproducible pipeline for building a photorealistic, editable and real-time 3D self-avatar. The project covers reference acquisition, reconstruction, retopology, PBR materials, hair, clothing, body and facial rigging, animation, Piper-based speech and runtime validation.
 
-Strona projektu: **https://matpomgit.github.io/avatar-3d-self/**
+Documentation: **https://matpomgit.github.io/avatar-3d-self/**
 
-## Stan
+The public website is documentation only. Interactive stage guidance, project state, artefact inspection and local tool orchestration belong to the separate **Avatar Studio** desktop application under `apps/avatar_studio/`.
 
-Projekt jest na wczesnym etapie. CI sprawdza kod i buduje stronę, ale nie uruchamia COLMAP, Blendera, MetaHuman ani Unreal Engine.
+## Repository roles
 
-## Struktura
+- `docs/`: MkDocs documentation and technical specifications;
+- `apps/avatar_studio/`: cross-platform desktop application;
+- `scripts/`: deterministic pipeline utilities and validators;
+- `source/`: approved editable source assets and manifests;
+- `references/`: non-sensitive reference manifests;
+- `animations/`: animation metadata and mappings;
+- `exports/`: derived interchange artefacts and conversion reports;
+- `tests/`: automated tests.
 
-- `scripts/`: narzędzia pipeline'u;
-- `source/`: opisy i źródła modelu;
-- `references/`: metadane referencji;
-- `animations/`: zasoby animacji;
-- `exports/`: eksporty i raporty;
-- `web/viewer/`: strona oraz viewer;
-- `docs/`: dokumentacja.
+## Development environment
 
-## Środowisko Python
+### Windows
 
-Wymagany jest Python 3.11.
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev,docs,desktop]"
+```
+
+### Linux
 
 ```bash
-python -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,docs,desktop]"
 ```
 
-Opcjonalne zależności:
+## Documentation
+
+### Windows
+
+```powershell
+mkdocs serve
+```
+
+### Linux
 
 ```bash
-python -m pip install -e ".[geometry]"
-python -m pip install -e ".[vision]"
+mkdocs serve
 ```
 
-## Viewer WWW
+## Avatar Studio
+
+### Windows
+
+```powershell
+avatar-studio
+```
+
+### Linux
 
 ```bash
-cd web/viewer
-npm install
-npm run dev
+avatar-studio
 ```
 
-## Konwerter formatów
-
-Konwerter oparty na Blenderze obsługuje FBX, glTF, GLB, USD, USDZ, OBJ, PLY i STL oraz raportuje potencjalną utratę danych.
-
-```bash
-python scripts/model_format_converter.py exports/avatar_final.fbx exports/avatar_final.glb
-```
-
-Dalsze informacje: [dokumentacja](docs/index.md).
+The application architecture and packaging strategy are documented in `docs/desktop/architecture.md`.
