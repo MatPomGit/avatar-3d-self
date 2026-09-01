@@ -14,6 +14,7 @@ nav:
       - Goals and requirements: project/goals-and-requirements.md
       - Architecture: project/architecture.md
       - Naming: project/naming.md
+      - Technical baselines: project/technical-baselines.md
       - Repository structure: project/repository-structure.md
       - Conventions: project/conventions.md
       - Asset versioning: project/asset-versioning.md
