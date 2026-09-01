@@ -8,7 +8,9 @@ version = "0.3.0"
 description = "Avatar Studio: professional tooling, documentation and desktop guidance for a photorealistic editable real-time digital human pipeline."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "PyYAML>=6,<7",
+]
 
 [project.optional-dependencies]
 dev = [
