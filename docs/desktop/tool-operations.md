@@ -79,6 +79,21 @@ Zapisywane są również:
 
 `length_scale = 1,0` oznacza tempo bazowe modelu. Wartość `0,9` skraca wypowiedź i ją przyspiesza, a `1,1` wydłuża i spowalnia. Zmiana tego parametru unieważnia wcześniejsze dopasowanie czasowe fonemów, ponieważ zmienia czas trwania dźwięku.
 
+### Diagnostyczne wyrównanie z serwera HTTP
+
+Bieżący serwer HTTP Piper udostępnia w `/info` listę fonemów i czas trwania każdego fonemu dla ostatniej syntezy. `PiperAdapter.fetch_http_alignment()` pobiera te dane, a `normalize_http_info()` zamienia kolejne czasy trwania na jawne przedziały `start_s` i `end_s`.
+
+Przykład:
+
+```text
+m: 0.000-0.060 s
+a: 0.060-0.200 s
+```
+
+Te dane są traktowane jako diagnostyczne źródło czasu. Przed użyciem w animacji należy je przekształcić do kanonicznego formatu projektu z `docs/speech/alignment-format.md`, znormalizować symbole fonetyczne oraz dopiero później zastosować mapowanie na wizemy i koartykulację (coarticulation).
+
+Adapter nie zapisuje jawnej treści ostatniej wypowiedzi zwróconej przez `/info`. Zapisuje jej skrót SHA-256 i długość.
+
 ## Artefakty i unieważnianie danych
 
 Każdy etap zależny od audio powinien traktować zmianę któregokolwiek z poniższych elementów jako zmianę artefaktu źródłowego:
