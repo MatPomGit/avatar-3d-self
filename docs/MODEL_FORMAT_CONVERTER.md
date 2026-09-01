@@ -1,8 +1,8 @@
 # Konwerter formatów modeli 3D
 
-Repozytorium zawiera konwerter `scripts/model_format_converter.py` obsługujący pliki **FBX, glTF, GLB, OBJ i STL** w obu kierunkach, o ile Blender potrafi zaimportować format źródłowy i wyeksportować format docelowy.
+Repozytorium zawiera konwerter `scripts/model_format_converter.py` obsługujący pliki **FBX, glTF, GLB, USD, USDZ, OBJ, PLY i STL**. Konwersja jest wykonywana przez Blender w trybie bez interfejsu, dzięki czemu narzędzie może pracować nie tylko na samej siatce, ale również na UV, materiałach, teksturach, szkielecie, wagach kości, blendshapes i animacjach.
 
-Konwerter używa Blendera w trybie bez interfejsu. To ważne, ponieważ model 3D może zawierać znacznie więcej niż samą siatkę: mapy UV, materiały, tekstury, szkielet, wagi kości, blendshapes i animacje. Przy każdej konwersji narzędzie analizuje scenę i zapisuje raport JSON informujący, które dane zostały wykryte i których format docelowy nie potrafi zachować.
+Przy każdej konwersji narzędzie najpierw analizuje zawartość sceny. Następnie sprawdza możliwości formatu docelowego i zapisuje raport JSON z informacją, które dane zostały zachowane, a które musiały zostać utracone lub uproszczone.
 
 ## Najprostsze użycie
 
@@ -10,69 +10,83 @@ Konwerter używa Blendera w trybie bez interfejsu. To ważne, ponieważ model 3D
 python scripts/model_format_converter.py exports/avatar_final.fbx exports/avatar_final.glb
 ```
 
-Jeżeli Blender nie znajduje się w `PATH`, podaj jego lokalizację:
+Dodatkowe przykłady:
 
 ```bash
-python scripts/model_format_converter.py model.fbx model.glb \
-  --blender "C:\Program Files\Blender Foundation\Blender 4.5\blender.exe"
+# Kompletny asset do jednego pliku
+python scripts/model_format_converter.py avatar.fbx avatar.usdz --textures embed
+
+# Skan PLY do formatu nadającego się do dalszej pracy z materiałami
+python scripts/model_format_converter.py scan.ply scan.glb
+
+# Statyczny OBJ razem z MTL
+python scripts/model_format_converter.py avatar.glb avatar.obj
 ```
 
-Można też uruchomić skrypt bezpośrednio przez Blender:
-
-```bash
-blender --background --python scripts/model_format_converter.py -- model.fbx model.glb
-```
-
-Po konwersji obok pliku wynikowego powstaje raport, np. `model.glb.conversion.json`.
+Po konwersji obok pliku wynikowego powstaje raport, np. `avatar.glb.conversion.json`.
 
 ## Różnice między formatami
 
 ### GLB
 
-GLB jest binarną odmianą glTF. Geometria, materiały PBR, tekstury, szkielet, skinning, blendshapes i animacje mogą znajdować się w jednym pliku. To najwygodniejszy format do przenoszenia kompletnej postaci między nowoczesnymi narzędziami, viewerami WWW i silnikami obsługującymi glTF.
-
-Praktycznie: jeżeli chcesz wysłać komuś jeden plik zawierający animowaną postać wraz z materiałami, **GLB jest zwykle najlepszym wyborem**.
+GLB jest binarną odmianą glTF. Geometria, materiały PBR, tekstury, szkielet, skinning, blendshapes i animacje mogą znajdować się w jednym pliku. To wygodny format do viewerów WWW, wymiany assetów oraz przenoszenia kompletnej postaci między nowoczesnymi narzędziami.
 
 ### glTF
 
-glTF przechowuje te same typy danych co GLB, ale najczęściej rozdziela je na plik `.gltf`, plik binarny `.bin` i osobne obrazy tekstur. Ułatwia to ręczne podmienianie tekstur i analizowanie struktury assetu, ale wymaga pilnowania kilku plików jednocześnie.
-
-Praktycznie: wybierz **glTF**, gdy chcesz mieć tekstury jako osobne pliki. Wybierz **GLB**, gdy zależy Ci na jednym przenośnym pliku.
+glTF przechowuje podobny zestaw danych jak GLB, ale zwykle jako plik `.gltf`, plik `.bin` oraz osobne tekstury. Jest wygodny wtedy, gdy użytkownik chce mieć dostęp do poszczególnych elementów assetu zamiast jednego pakietu.
 
 ### FBX
 
-FBX jest rozbudowanym formatem wymiany używanym m.in. przez Blender, Maya, Unity i Unreal Engine. Może przenosić geometrię, UV, materiały, szkielet, skinning, blendshapes i animacje. Poszczególne programy mogą jednak interpretować część materiałów, osi, skal i animacji nieco inaczej, dlatego po konwersji trzeba sprawdzić rezultat w programie docelowym.
+FBX jest rozbudowanym formatem wymiany używanym m.in. przez Blender, Maya, Unity i Unreal Engine. Dobrze nadaje się do animowanych postaci z rigami, morph targets i animacjami. Materiały oraz układ osi zawsze warto sprawdzić po imporcie do programu docelowego.
 
-Praktycznie: **FBX jest dobrym formatem roboczym dla animowanych postaci**, szczególnie w pipeline Unity/Unreal, ale materiały PBR często wymagają ponownego sprawdzenia po imporcie.
+### USD
 
-### OBJ
+USD, czyli Universal Scene Description, jest formatem scenowym przeznaczonym do wymiany złożonych assetów i całych scen. Blender potrafi eksportować do USD siatki, UV, materiały, skeletony, skinned meshes, shape keys jako blend shapes oraz animacje. W praktyce USD jest dobrym wyborem, gdy model ma pozostać częścią większego pipeline scenowego, a nie tylko pojedynczym plikiem siatki. citeturn822445search1turn822445search2
 
-OBJ przechowuje geometrię i mapy UV. Materiały są zwykle opisane w dodatkowym pliku `.mtl`, który może wskazywać na osobne tekstury. OBJ nie przechowuje szkieletu, skinningu, blendshapes ani animacji.
+### USDZ
 
-Praktycznie: OBJ nadaje się do przeniesienia **statycznego modelu z UV i prostymi materiałami**. Jeżeli wyeksportujesz animowaną postać FBX do OBJ, otrzymasz jej geometrię, ale utracisz rig i animacje.
+USDZ jest pakietem USD zapisanym jako pojedyncze archiwum. Może zawierać scenę USD oraz jej zależności teksturowe, dlatego jest wygodny do przenoszenia kompletnego assetu jako jednego pliku. Blender tworzy USDZ po prostu przez eksport USD do pliku z rozszerzeniem `.usdz`. citeturn609168search0turn609168search8
+
+### OBJ + MTL
+
+OBJ przechowuje statyczną geometrię, normalne i UV. Materiały są zapisane w osobnym pliku `.mtl`, który z kolei może odwoływać się do plików tekstur. OBJ nie przechowuje armatur, skinningu, blendshapes ani animacji. Blender standardowo zapisuje plik MTL razem z OBJ, a konwerter dodatkowo sprawdza jego obecność i w razie potrzeby tworzy brakujący plik oraz wpis `mtllib` w OBJ. citeturn609168search3turn609168search9
+
+Przykład wyniku:
+
+```text
+avatar.obj
+avatar.mtl
+textures/
+  skin_basecolor.png
+  skin_normal.png
+```
+
+### PLY
+
+PLY jest formatem używanym często dla skanów, chmur punktów i statycznych siatek. Blender może zapisywać w nim geometrię, UV, normalne oraz kolory wierzchołków, ale format nie jest przeznaczony do przenoszenia typowych materiałów PBR, tekstur, riga ani animacji postaci. Jest więc dobrym formatem wejściowym dla skanu, ale słabym formatem archiwalnym dla kompletnego awatara. citeturn822445search0turn822445search4
 
 ### STL
 
-STL opisuje praktycznie wyłącznie powierzchnię zbudowaną z trójkątów. Nie przechowuje UV, tekstur, materiałów PBR, szkieletu, blendshapes ani animacji. Jest popularny przede wszystkim w druku 3D i prostych przepływach CAD.
-
-Praktycznie: STL wybierz wtedy, gdy potrzebujesz **samego kształtu do druku 3D**. Nie używaj go jako formatu archiwalnego dla cyfrowej postaci.
+STL opisuje praktycznie wyłącznie powierzchnię zbudowaną z trójkątów. Nie przechowuje UV, materiałów, tekstur, skeletonu, blendshapes ani animacji. Nadaje się przede wszystkim do druku 3D i prostych zastosowań geometrycznych.
 
 ## Co dzieje się z danymi podczas konwersji
 
-| Dane modelu | FBX | glTF | GLB | OBJ | STL |
-| --- | :---: | :---: | :---: | :---: | :---: |
-| Geometria | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Mapy UV | ✓ | ✓ | ✓ | ✓ | ✗ |
-| Materiały | ✓ | ✓ | ✓ | ✓* | ✗ |
-| Tekstury | ✓ | ✓ | ✓ | ✓* | ✗ |
-| Szkielet | ✓ | ✓ | ✓ | ✗ | ✗ |
-| Wagi kości | ✓ | ✓ | ✓ | ✗ | ✗ |
-| Blendshapes / morph targets | ✓ | ✓ | ✓ | ✗ | ✗ |
-| Animacje | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Dane modelu | FBX | glTF | GLB | USD | USDZ | OBJ + MTL | PLY | STL |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Geometria | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Mapy UV | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
+| Materiały | ✓ | ✓ | ✓ | ✓ | ✓ | ✓* | ✗ | ✗ |
+| Tekstury | ✓ | ✓ | ✓ | ✓ | ✓ | ✓* | ✗ | ✗ |
+| Szkielet | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Wagi kości | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Blendshapes / morph targets | ✓ | ✓ | ✓ | ✓** | ✓** | ✗ | ✗ | ✗ |
+| Animacje | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 
-`*` OBJ używa prostszego systemu materiałów MTL i osobnych plików tekstur. Materiał PBR z FBX lub glTF może wymagać uproszczenia.
+`*` OBJ używa MTL i osobnych tekstur. Materiał PBR może wymagać uproszczenia do parametrów obsługiwanych przez MTL.
 
-Tabela opisuje możliwości formatów, a nie gwarancję idealnej konwersji pomiędzy każdym programem. Materiały, układ osi, skala i część ustawień animacji mogą wymagać kontroli po imporcie.
+`**` Blender eksportuje shape keys jako USD blend shapes, ale absolute shape keys nie są obsługiwane. citeturn822445search1turn822445search3
+
+Tabela opisuje możliwości formatów w tym pipeline, a nie gwarancję identycznej interpretacji danych przez każdy program 3D.
 
 ## Tekstury
 
@@ -87,18 +101,27 @@ Dostępne tryby:
 ```text
 auto   dobierz naturalny sposób zapisu dla formatu
 embed  osadź tekstury, jeżeli format i eksporter to umożliwia
-copy   zapisz lub skopiuj tekstury obok modelu
-skip   nie przenoś tekstur
+copy   zachowaj tekstury jako pliki zewnętrzne
+skip   usuń tekstury przed eksportem
 ```
 
-GLB naturalnie nadaje się do umieszczenia tekstur wewnątrz jednego pliku. glTF i OBJ zwykle korzystają z plików zewnętrznych. Przy konwersji materiałów PBR zawsze należy sprawdzić Base Color, Normal, Roughness, Metallic i ewentualnie AO po imporcie do programu docelowego.
+Można dodatkowo zmniejszyć rozdzielczość i zmienić format obrazów:
+
+```bash
+python scripts/model_format_converter.py model.fbx model.usdz \
+  --textures embed \
+  --max-texture-size 2048 \
+  --texture-format png
+```
+
+USDZ naturalnie nadaje się do pakowania zależności teksturowych razem ze sceną. Dla OBJ tekstury pozostają plikami zewnętrznymi wskazywanymi przez `.mtl`. Dla PLY i STL tekstury nie są częścią standardowego modelu konwersji i zostaną zgłoszone jako utrata danych.
 
 ## Animacje i blendshapes
 
 Domyślny tryb `auto` zachowuje animacje, jeżeli format wyjściowy je obsługuje:
 
 ```bash
-python scripts/model_format_converter.py character.fbx character.glb --animations keep
+python scripts/model_format_converter.py character.fbx character.usd --animations keep
 ```
 
 Aby świadomie usunąć animacje:
@@ -107,36 +130,33 @@ Aby świadomie usunąć animacje:
 python scripts/model_format_converter.py character.fbx static.glb --animations strip
 ```
 
-Eksport do OBJ lub STL zawsze powoduje utratę animacji. Konwerter wykryje ten problem przed zapisem i umieści informację w raporcie.
+Eksport do OBJ, PLY lub STL powoduje utratę animacji. Konwerter wykrywa ten problem przed zapisem i umieszcza informację w raporcie.
 
 ## Tryb bezpieczny
 
 Jeżeli nie chcesz dopuścić do konwersji powodującej utratę wykrytych danych, użyj `--strict`:
 
 ```bash
-python scripts/model_format_converter.py animated_character.fbx character.obj --strict
+python scripts/model_format_converter.py animated_character.fbx character.ply --strict
 ```
 
-Jeżeli wejściowy model zawiera np. szkielet, blendshapes albo animacje, konwersja zostanie przerwana zamiast utworzyć niepełny OBJ.
+Jeżeli wejściowy model zawiera szkielet, blendshapes, materiały lub animacje nieobsługiwane przez format docelowy, konwersja zostanie przerwana.
 
 ## Raport konwersji
 
-Raport JSON zawiera m.in. liczbę obiektów, siatek, wierzchołków, materiałów, tekstur, armatur, shape keys i akcji animacji. Pole `losses` pokazuje dane, których nie da się zachować w wybranym formacie docelowym.
+Raport JSON zawiera m.in. liczbę obiektów, siatek, wierzchołków, warstw UV, atrybutów kolorów, materiałów, tekstur, armatur, shape keys i akcji animacji. Pole `losses` pokazuje dane, których nie da się zachować w wybranym formacie docelowym.
+
+Dla OBJ raport zawiera również `companion_files`, dzięki czemu użytkownik widzi towarzyszący plik `.mtl`.
 
 Przykład:
 
 ```json
 {
-  "input_format": ".fbx",
+  "input_format": ".glb",
   "output_format": ".obj",
-  "scene": {
-    "meshes": 4,
-    "materials": 7,
-    "textures": 12,
-    "armatures": 1,
-    "shape_keys": 52,
-    "actions": 3
-  },
+  "companion_files": [
+    "/path/to/avatar.mtl"
+  ],
   "losses": [
     "szkielet",
     "wagi kości",
@@ -146,5 +166,3 @@ Przykład:
   "lossless_for_detected_features": false
 }
 ```
-
-Dzięki temu użytkownik wie, że plik OBJ został utworzony poprawnie, ale nie jest już pełnym animowanym awatarem.
