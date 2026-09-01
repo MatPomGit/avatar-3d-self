@@ -13,6 +13,7 @@ nav:
       - Overview: project/overview.md
       - Goals and requirements: project/goals-and-requirements.md
       - Architecture: project/architecture.md
+      - Documentation map: project/documentation-map.md
       - Naming: project/naming.md
       - Terminology: project/terminology.md
       - Technical baselines: project/technical-baselines.md
@@ -116,6 +117,8 @@ nav:
   - Tools:
       - Blender: tools/blender.md
       - COLMAP: tools/colmap.md
+      - FFmpeg: tools/ffmpeg.md
+      - Piper: tools/piper.md
       - Model format converter: tools/model-format-converter.md
       - Conversion examples: tools/conversion-examples.md
   - Setup:
@@ -127,6 +130,7 @@ nav:
       - Project workspace: desktop/project-workspace.md
       - Artefact inspection: desktop/artifact-inspection.md
       - User workflow: desktop/user-workflow.md
+      - Packaging and releases: desktop/packaging.md
   - Roadmap: roadmap/roadmap.md
   - Architecture decisions: adr/README.md
 
