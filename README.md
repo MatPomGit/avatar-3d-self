@@ -28,23 +28,26 @@ The project is in early development. The repository intentionally separates ligh
 
 ## Model format converter
 
-The repository includes a loss-aware Blender-backed converter for **FBX, glTF, GLB, OBJ and STL**. It inspects the imported scene before export and reports whether geometry, UVs, materials, textures, armatures, skin weights, shape keys and animations can be represented by the target format.
+The repository includes a loss-aware Blender-backed converter for **FBX, glTF, GLB, USD, USDZ, OBJ, PLY and STL**. It inspects the imported scene before export and reports whether geometry, UVs, materials, textures, armatures, skin weights, shape keys and animations can be represented by the target format.
 
 ```bash
 python scripts/model_format_converter.py exports/avatar_final.fbx exports/avatar_final.glb
+python scripts/model_format_converter.py avatar.fbx avatar.usdz --textures embed
+python scripts/model_format_converter.py scan.ply scan.glb
+python scripts/model_format_converter.py avatar.glb avatar.obj --textures copy
 ```
 
-Texture processing can be included in the same operation:
+OBJ export always includes a companion `.mtl` file and an `mtllib` reference in the OBJ file. Texture processing can be included in the same operation:
 
 ```bash
-python scripts/model_format_converter.py model.fbx model.glb \
+python scripts/model_format_converter.py model.fbx model.usdz \
   --max-texture-size 2048 \
   --texture-format png \
   --textures embed \
   --animations keep
 ```
 
-Use `--strict` when conversion should stop instead of silently creating a reduced asset. For example, converting an animated FBX to OBJ or STL would otherwise discard rigging and animation data.
+Use `--strict` when conversion should stop instead of silently creating a reduced asset. For example, converting an animated FBX to OBJ, PLY or STL would otherwise discard rigging and animation data.
 
 See [`docs/MODEL_FORMAT_CONVERTER.md`](docs/MODEL_FORMAT_CONVERTER.md) for the capability matrix and practical differences between the formats.
 
