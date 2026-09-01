@@ -41,15 +41,15 @@ FBX jest rozbudowanym formatem wymiany używanym m.in. przez Blender, Maya, Unit
 
 ### USD
 
-USD, czyli Universal Scene Description, jest formatem scenowym przeznaczonym do wymiany złożonych assetów i całych scen. Blender potrafi eksportować do USD siatki, UV, materiały, skeletony, skinned meshes, shape keys jako blend shapes oraz animacje. W praktyce USD jest dobrym wyborem, gdy model ma pozostać częścią większego pipeline scenowego, a nie tylko pojedynczym plikiem siatki. citeturn822445search1turn822445search2
+USD, czyli Universal Scene Description, jest formatem scenowym przeznaczonym do wymiany złożonych assetów i całych scen. Blender potrafi eksportować do USD siatki, UV, materiały, skeletony, skinned meshes, shape keys jako blend shapes oraz animacje. W praktyce USD jest dobrym wyborem, gdy model ma pozostać częścią większego pipeline scenowego, a nie tylko pojedynczym plikiem siatki.
 
 ### USDZ
 
-USDZ jest pakietem USD zapisanym jako pojedyncze archiwum. Może zawierać scenę USD oraz jej zależności teksturowe, dlatego jest wygodny do przenoszenia kompletnego assetu jako jednego pliku. Blender tworzy USDZ po prostu przez eksport USD do pliku z rozszerzeniem `.usdz`. citeturn609168search0turn609168search8
+USDZ jest pakietem USD zapisanym jako pojedyncze archiwum. Może zawierać scenę USD oraz jej zależności teksturowe, dlatego jest wygodny do przenoszenia kompletnego assetu jako jednego pliku. Blender tworzy USDZ przez eksport USD do pliku z rozszerzeniem `.usdz`.
 
 ### OBJ + MTL
 
-OBJ przechowuje statyczną geometrię, normalne i UV. Materiały są zapisane w osobnym pliku `.mtl`, który z kolei może odwoływać się do plików tekstur. OBJ nie przechowuje armatur, skinningu, blendshapes ani animacji. Blender standardowo zapisuje plik MTL razem z OBJ, a konwerter dodatkowo sprawdza jego obecność i w razie potrzeby tworzy brakujący plik oraz wpis `mtllib` w OBJ. citeturn609168search3turn609168search9
+OBJ przechowuje statyczną geometrię, normalne i UV. Materiały są zapisane w osobnym pliku `.mtl`, który może odwoływać się do plików tekstur. OBJ nie przechowuje armatur, skinningu, blendshapes ani animacji. Konwerter zawsze zapewnia plik MTL i wpis `mtllib` w pliku OBJ.
 
 Przykład wyniku:
 
@@ -63,7 +63,7 @@ textures/
 
 ### PLY
 
-PLY jest formatem używanym często dla skanów, chmur punktów i statycznych siatek. Blender może zapisywać w nim geometrię, UV, normalne oraz kolory wierzchołków, ale format nie jest przeznaczony do przenoszenia typowych materiałów PBR, tekstur, riga ani animacji postaci. Jest więc dobrym formatem wejściowym dla skanu, ale słabym formatem archiwalnym dla kompletnego awatara. citeturn822445search0turn822445search4
+PLY jest formatem używanym często dla skanów, chmur punktów i statycznych siatek. Blender może zapisywać w nim geometrię, UV, normalne oraz kolory wierzchołków, ale format nie jest przeznaczony do przenoszenia typowych materiałów PBR, tekstur, riga ani animacji postaci. Jest więc dobrym formatem wejściowym dla skanu, ale słabym formatem archiwalnym dla kompletnego awatara.
 
 ### STL
 
@@ -84,7 +84,7 @@ STL opisuje praktycznie wyłącznie powierzchnię zbudowaną z trójkątów. Nie
 
 `*` OBJ używa MTL i osobnych tekstur. Materiał PBR może wymagać uproszczenia do parametrów obsługiwanych przez MTL.
 
-`**` Blender eksportuje shape keys jako USD blend shapes, ale absolute shape keys nie są obsługiwane. citeturn822445search1turn822445search3
+`**` Blender eksportuje shape keys jako USD blend shapes, ale absolute shape keys nie są obsługiwane.
 
 Tabela opisuje możliwości formatów w tym pipeline, a nie gwarancję identycznej interpretacji danych przez każdy program 3D.
 
