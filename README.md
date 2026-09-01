@@ -26,6 +26,31 @@ The project is in early development. The repository intentionally separates ligh
 - `web/viewer/` contains the GitHub Pages project site and interactive Three.js viewer.
 - `.github/workflows/` contains CI, Pages deployment and manually triggered 3D workflow entry points.
 
+## Model format converter
+
+The repository includes a loss-aware Blender-backed converter for **FBX, glTF, GLB, USD, USDZ, OBJ, PLY and STL**. It inspects the imported scene before export and reports whether geometry, UVs, materials, textures, armatures, skin weights, shape keys and animations can be represented by the target format.
+
+```bash
+python scripts/model_format_converter.py exports/avatar_final.fbx exports/avatar_final.glb
+python scripts/model_format_converter.py avatar.fbx avatar.usdz --textures embed
+python scripts/model_format_converter.py scan.ply scan.glb
+python scripts/model_format_converter.py avatar.glb avatar.obj --textures copy
+```
+
+OBJ export always includes a companion `.mtl` file named after the OBJ and an `mtllib` reference in the OBJ file. For example, `avatar.obj` is accompanied by `avatar.mtl`. Texture processing can be included in the same operation:
+
+```bash
+python scripts/model_format_converter.py model.fbx model.usdz \
+  --max-texture-size 2048 \
+  --texture-format png \
+  --textures embed \
+  --animations keep
+```
+
+Use `--strict` when conversion should stop instead of silently creating a reduced asset. For example, converting an animated FBX to OBJ, PLY or STL would otherwise discard rigging and animation data.
+
+See [`docs/MODEL_FORMAT_CONVERTER.md`](docs/MODEL_FORMAT_CONVERTER.md) for the capability matrix and practical differences between the formats.
+
 ## Development environment
 
 Python 3.11 is the supported development version.
@@ -52,7 +77,7 @@ python -m pip install -e ".[geometry]"
 python -m pip install -e ".[vision]"
 ```
 
-`pyproject.toml` is the single source of truth for Python dependencies. Unreal Engine's `unreal` module is provided by Unreal Engine itself and is therefore not declared as a PyPI dependency. COLMAP is an external executable and must also be installed separately.
+`pyproject.toml` is the single source of truth for Python dependencies. Unreal Engine's `unreal` module is provided by Unreal Engine itself and is therefore not declared as a PyPI dependency. COLMAP and Blender are external executables and must also be installed separately.
 
 ## Web development
 
@@ -75,4 +100,4 @@ The separate `GitHub Pages` workflow validates the web build on pull requests an
 
 ## Documentation
 
-See [`docs/index.md`](docs/index.md), [`docs/REALISTIC_AVATAR_GUIDE.md`](docs/REALISTIC_AVATAR_GUIDE.md) and [`docs/COMPLETE_PIPELINE.md`](docs/COMPLETE_PIPELINE.md) for detailed technical notes.
+See [`docs/index.md`](docs/index.md), [`docs/REALISTIC_AVATAR_GUIDE.md`](docs/REALISTIC_AVATAR_GUIDE.md), [`docs/COMPLETE_PIPELINE.md`](docs/COMPLETE_PIPELINE.md) and [`docs/MODEL_FORMAT_CONVERTER.md`](docs/MODEL_FORMAT_CONVERTER.md) for detailed technical notes.
