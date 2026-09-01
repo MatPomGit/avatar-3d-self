@@ -37,7 +37,7 @@ python scripts/model_format_converter.py scan.ply scan.glb
 python scripts/model_format_converter.py avatar.glb avatar.obj --textures copy
 ```
 
-OBJ export always includes a companion `.mtl` file and an `mtllib` reference in the OBJ file. Texture processing can be included in the same operation:
+OBJ export always includes a companion `.mtl` file named after the OBJ and an `mtllib` reference in the OBJ file. For example, `avatar.obj` is accompanied by `avatar.mtl`. Texture processing can be included in the same operation:
 
 ```bash
 python scripts/model_format_converter.py model.fbx model.usdz \
