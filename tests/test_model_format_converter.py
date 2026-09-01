@@ -16,6 +16,7 @@ def inventory(**overrides):
         "vertices": 100,
         "polygons": 50,
         "uv_layers": 1,
+        "color_attributes": 1,
         "materials": 1,
         "textures": 1,
         "armatures": 1,
@@ -27,8 +28,9 @@ def inventory(**overrides):
     return base
 
 
-def test_glb_can_represent_detected_character_data():
-    assert converter.loss_analysis(inventory(), ".glb", "keep", "auto") == []
+def test_rich_formats_can_represent_detected_character_data():
+    for ext in (".fbx", ".gltf", ".glb", ".usd", ".usdz"):
+        assert converter.loss_analysis(inventory(), ext, "keep", "auto") == []
 
 
 def test_obj_reports_rig_morph_and_animation_loss():
@@ -41,6 +43,17 @@ def test_obj_reports_rig_morph_and_animation_loss():
     assert "tekstury" not in losses
 
 
+def test_ply_preserves_geometry_and_uv_but_not_character_data():
+    losses = converter.loss_analysis(inventory(), ".ply", "keep", "auto")
+    assert "mapy UV" not in losses
+    assert "materiały" in losses
+    assert "tekstury" in losses
+    assert "szkielet" in losses
+    assert "wagi kości" in losses
+    assert "blendshapes / shape keys" in losses
+    assert "animacje" in losses
+
+
 def test_stl_reports_non_geometry_data_loss():
     losses = converter.loss_analysis(inventory(), ".stl", "keep", "auto")
     assert "mapy UV" in losses
@@ -50,14 +63,28 @@ def test_stl_reports_non_geometry_data_loss():
     assert "animacje" in losses
 
 
-def test_strip_animation_is_reported_even_for_glb():
-    losses = converter.loss_analysis(inventory(), ".glb", "strip", "auto")
+def test_strip_animation_is_reported_even_for_usd():
+    losses = converter.loss_analysis(inventory(), ".usd", "strip", "auto")
     assert losses == ["animacje (wyłączone przez --animations strip)"]
 
 
 def test_skip_textures_is_reported():
     losses = converter.loss_analysis(inventory(), ".glb", "keep", "skip")
     assert losses == ["tekstury (wyłączone przez --textures skip)"]
+
+
+def test_obj_mtl_name_uses_same_stem(tmp_path):
+    obj = tmp_path / "character.obj"
+    obj.write_text("o character\n", encoding="utf-8")
+    mtl = converter.ensure_obj_mtl(obj)
+    assert mtl == tmp_path / "character.mtl"
+    assert mtl.exists()
+    assert "mtllib character.mtl" in obj.read_text(encoding="utf-8")
+
+
+def test_supported_extensions_include_usd_usdz_and_ply():
+    for name in ("asset.usd", "asset.usdz", "scan.ply"):
+        assert converter.extension(Path(name)) == Path(name).suffix
 
 
 def test_rejects_unknown_extension():
