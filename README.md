@@ -12,7 +12,7 @@ The site is built from `web/viewer/` and deployed automatically to GitHub Pages 
 
 ## Status
 
-The project is in early development. The repository intentionally separates lightweight Python tooling from workstation-specific 3D software. GitHub-hosted CI validates source quality but does not attempt to run COLMAP, Unreal Engine or MetaHuman workflows.
+The project is in early development. The repository intentionally separates lightweight Python tooling from workstation-specific 3D software. GitHub-hosted CI validates source quality but does not attempt to run COLMAP, Blender integration assets, Unreal Engine or MetaHuman workflows.
 
 ## Structure
 
@@ -37,7 +37,7 @@ python scripts/model_format_converter.py scan.ply scan.glb
 python scripts/model_format_converter.py avatar.glb avatar.obj --textures copy
 ```
 
-OBJ export always includes a companion `.mtl` file named after the OBJ and an `mtllib` reference in the OBJ file. For example, `avatar.obj` is accompanied by `avatar.mtl`. Texture processing can be included in the same operation:
+OBJ export always includes a companion `.mtl` file named after the OBJ and an `mtllib` reference in the OBJ file. Texture processing can be included in the same operation:
 
 ```bash
 python scripts/model_format_converter.py model.fbx model.usdz \
@@ -49,7 +49,10 @@ python scripts/model_format_converter.py model.fbx model.usdz \
 
 Use `--strict` when conversion should stop instead of silently creating a reduced asset. For example, converting an animated FBX to OBJ, PLY or STL would otherwise discard rigging and animation data.
 
-See [`docs/MODEL_FORMAT_CONVERTER.md`](docs/MODEL_FORMAT_CONVERTER.md) for the capability matrix and practical differences between the formats.
+Documentation:
+
+- [`docs/MODEL_FORMAT_CONVERTER.md`](docs/MODEL_FORMAT_CONVERTER.md) — complete technical and user reference, CLI, architecture, capability matrix, validation and troubleshooting.
+- [`docs/FORMAT_CONVERSION_EXAMPLES.md`](docs/FORMAT_CONVERSION_EXAMPLES.md) — practical conversion recipes with expected preserved data, losses and post-export checks.
 
 ## Development environment
 
@@ -100,4 +103,4 @@ The separate `GitHub Pages` workflow validates the web build on pull requests an
 
 ## Documentation
 
-See [`docs/index.md`](docs/index.md), [`docs/REALISTIC_AVATAR_GUIDE.md`](docs/REALISTIC_AVATAR_GUIDE.md), [`docs/COMPLETE_PIPELINE.md`](docs/COMPLETE_PIPELINE.md) and [`docs/MODEL_FORMAT_CONVERTER.md`](docs/MODEL_FORMAT_CONVERTER.md) for detailed technical notes.
+See [`docs/index.md`](docs/index.md), [`docs/REALISTIC_AVATAR_GUIDE.md`](docs/REALISTIC_AVATAR_GUIDE.md), [`docs/COMPLETE_PIPELINE.md`](docs/COMPLETE_PIPELINE.md), [`docs/MODEL_FORMAT_CONVERTER.md`](docs/MODEL_FORMAT_CONVERTER.md) and [`docs/FORMAT_CONVERSION_EXAMPLES.md`](docs/FORMAT_CONVERSION_EXAMPLES.md) for detailed technical notes.
