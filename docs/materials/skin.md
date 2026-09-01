@@ -1,6 +1,6 @@
 # Skóra
 
-Skóra jest materiałem wielowarstwowym. Fotorealizm wymaga równoczesnego odwzorowania pigmentacji, mikrogeometrii, refleksu powierzchniowego oraz subsurface scattering. Samo wysokiej jakości albedo i normal map nie wystarczają do uzyskania wiarygodnej skóry w ruchu i zmiennym oświetleniu. citeturn810865search0
+Skóra jest materiałem wielowarstwowym. Fotorealizm wymaga równoczesnego odwzorowania pigmentacji, mikrogeometrii, refleksu powierzchniowego oraz subsurface scattering. Samo wysokiej jakości albedo i normal map nie wystarczają do uzyskania wiarygodnej skóry w ruchu i zmiennym oświetleniu.
 
 ## Kanoniczny zestaw map
 
@@ -43,7 +43,7 @@ Wartości trzeba stroić względem rzeczywistej osoby, warunków referencyjnego 
 
 ## Subsurface scattering
 
-SSS jest obowiązkowy w profilu fotorealistycznym. Bez niego skóra ma tendencję do wyglądu suchego, plastikowego lub kredowego. citeturn810865search0
+SSS jest obowiązkowy w profilu fotorealistycznym. Bez niego skóra ma tendencję do wyglądu suchego, plastikowego lub kredowego.
 
 Jako baseline dla efektywnego promienia rozpraszania w rendererze obsługującym fizyczną skalę przyjmujemy orientacyjnie:
 
