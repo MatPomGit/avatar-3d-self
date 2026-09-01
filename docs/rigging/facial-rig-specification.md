@@ -1,224 +1,123 @@
-# Specyfikacja facial rigu
+# Specyfikacja układu sterowania twarzą
 
-Projekt używa zestawu zgodnego z ARKit jako interoperacyjnej warstwy sterowania oraz FACS jako warstwy interpretacji ruchów mięśniowych. Warstwa runtime może używać corrective shapes, kości lub hybrydy, ale interfejs sterowania musi pozostać stabilny.
+Układ sterowania twarzą łączy anatomiczne ruchy kości, kształty deformacyjne, ruch oczu, powiek, żuchwy i języka. Warstwą interoperacyjną jest zestaw ARKit, a FACS służy do interpretacji ruchów mięśniowych i walidacji ekspresji.
 
-## Kanoniczne coefficients
+## Architektura hybrydowa
 
-```text
-browDownLeft browDownRight browInnerUp browOuterUpLeft browOuterUpRight
-cheekPuff cheekSquintLeft cheekSquintRight
-eyeBlinkLeft eyeBlinkRight eyeLookDownLeft eyeLookDownRight
-eyeLookInLeft eyeLookInRight eyeLookOutLeft eyeLookOutRight
-eyeLookUpLeft eyeLookUpRight eyeSquintLeft eyeSquintRight eyeWideLeft eyeWideRight
-jawForward jawLeft jawOpen jawRight
-mouthClose mouthDimpleLeft mouthDimpleRight mouthFrownLeft mouthFrownRight
-mouthFunnel mouthLeft mouthLowerDownLeft mouthLowerDownRight
-mouthPressLeft mouthPressRight mouthPucker mouthRight mouthRollLower mouthRollUpper
-mouthShrugLower mouthShrugUpper mouthSmileLeft mouthSmileRight
-mouthStretchLeft mouthStretchRight mouthUpperUpLeft mouthUpperUpRight
-noseSneerLeft noseSneerRight tongueOut
-```
+Preferowany jest rig hybrydowy:
 
-## Normalizacja
+- kości lub transformacje dla żuchwy i oczu;
+- kształty deformacyjne dla miękkich tkanek twarzy;
+- kształty korekcyjne dla trudnych kombinacji;
+- dodatkowe kontrolery dla języka;
+- warstwa ARKit jako stabilny interfejs wejściowy.
 
-Wszystkie współczynniki interoperacyjne używają zakresu `0..1`.
+Takie podejście ogranicza liczbę deformacji, które muszą być ręcznie rzeźbione, a jednocześnie pozwala zachować anatomiczną kontrolę.
 
-Zasady:
+## Neutralna twarz
 
-- `0` oznacza neutralny shape;
-- `1` oznacza zatwierdzone maksimum konkretnego kanału;
-- wartości pośrednie nie muszą być liniowe geometrycznie, ale muszą zmieniać ekspresję monotonicznie;
-- overshoot powyżej 1 jest zabroniony w standardowym runtime;
-- corrective shapes nie są wystawiane jako dodatkowe wejścia użytkownika, jeśli wynikają automatycznie z kombinacji kanałów.
+Neutralna poza jest stanem kalibracyjnym. Usta są domknięte bez zaciskania, żuchwa pozostaje w pozycji spoczynkowej, oczy są naturalnie otwarte, a brwi nie są sztucznie uniesione.
 
-## Neutral pose
+Neutral nie może być tworzony przez kompensowanie błędnej geometrii wartościami sterowników.
 
-Neutralna twarz jest osobnym stanem kalibracyjnym.
+## Żuchwa
 
-Wymagania:
+Żuchwa jest sterowana transformem lub kością. `jawOpen=1` odpowiada zatwierdzonemu maksimum awatara, zwykle około 30-35 mm rozwarcia między siekaczami i około 25-30° rotacji.
 
-- zamknięte usta bez zaciskania;
-- żuchwa w pozycji spoczynkowej;
-- oczy otwarte naturalnie, bez `eyeWide`;
-- brwi w pozycji referencyjnej;
-- brak napięcia policzków;
-- brak kompensacyjnego uśmiechu.
+Ruch boczny może wynosić około 5-8 mm, a wysunięcie około 4-7 mm. Są to wartości orientacyjne. Model referencyjny ma pierwszeństwo.
 
-Neutral nie może być tworzony przez ręczne wyzerowanie błędnie zbudowanych shape keys. To geometria bazowa musi być neutralna.
+## Domknięcie warg
 
-## Jaw
+Domknięcie warg (lip seal) jest niezależne od zamknięcia żuchwy. Pełna siła może działać do około `jawOpen=0.08`, następnie wygasać płynnie do zera przy około `0.22`.
 
-Żuchwa jest sterowana anatomicznie przez transform/kość.
-
-Baseline:
-
-- `jawOpen = 1.0` odpowiada około 30-35 mm rozwarcia między siekaczami dla przeciętnej osoby dorosłej;
-- maksymalny runtime angle: około 25-30°;
-- `jawLeft` i `jawRight`: do około 5-8 mm translacji bocznej;
-- `jawForward`: około 4-7 mm.
-
-Wartości geometryczne należy dopasować do referencji i skali konkretnej głowy.
-
-`jawOpen` może sterować miękką tkanką i corrective shapes, ale nie może być wyłącznie morph targetem warg.
-
-## Lip seal
-
-Domknięcie warg jest osobnym zachowaniem od zamknięcia żuchwy.
-
-Dodaj pomocniczy mechanizm `lip_seal`, który:
-
-- utrzymuje kontakt czerwieni warg przy małym `jawOpen`;
-- wygasa płynnie wraz z otwieraniem ust;
-- nie powoduje zasysania warg do wnętrza;
-- współpracuje z `mouthClose`, `mouthPress`, `mouthPucker` i fonemami `/p b m/`.
-
-Baseline wygaszania lip seal: pełna siła do `jawOpen=0.08`, przejście do zera przy `jawOpen≈0.22`.
+Zbyt silne domknięcie powoduje wciąganie czerwieni warg do wnętrza. Zbyt słabe daje szczelinę przy `/p b m/`.
 
 ## Powieki
 
-Blink nie jest prostą interpolacją pojedynczego shape key.
+Pełne mrugnięcie nie jest prostym przesunięciem górnej powieki. Górna powieka wykonuje większość ruchu, a dolna niewielki ruch współtowarzyszący. Punktem startowym może być około 85% ruchu górnej i 15% dolnej powieki.
 
-Wymagania:
+Testuj `eyeBlink` przy 0,25, 0,5, 0,75 i 1,0. Oko musi zamknąć się bez penetracji rogówki i bez utraty naturalnego łuku powieki.
 
-- górna powieka wykonuje większość ruchu;
-- dolna powieka wykonuje mniejszy ruch współtowarzyszący;
-- shape zamknięcia musi dopasowywać się do rogówki;
-- `eyeBlinkLeft/Right=1` daje pełne zamknięcie bez penetracji;
-- `eyeSquint` nie może być tym samym kształtem co częściowy blink.
+## Śledzenie powiek za ruchem oka
 
-Baseline udziału ruchu:
+Powieki podążają za pionowym ruchem gałki ocznej. Jako punkt startowy przyjmujemy wpływ około 0,30-0,35 dla spojrzenia w górę i 0,40-0,45 dla spojrzenia w dół.
 
-- górna powieka: około 85%;
-- dolna: około 15%.
+Zbyt mała wartość daje efekt oka poruszającego się niezależnie od powieki. Zbyt duża sprawia, że powieka „przykleja się” do oka.
 
-## Eyelid follow
+## Wargi i zachowanie objętości
 
-Powieki podążają za pionowym ruchem oka.
+Uśmiech, wysunięcie warg, lejek i zawijanie warg nie mogą redukować objętości przez liniowe rozciąganie wierzchołków.
 
-Baseline:
+Minimalne kształty korekcyjne:
 
-- spojrzenie w górę: follow 0.30-0.35;
-- spojrzenie w dół: follow 0.40-0.45.
+- `jawOpen × mouthSmile`;
+- `jawOpen × mouthPucker`;
+- `jawOpen × mouthFunnel`;
+- `eyeBlink × eyeLookUp/Down`;
+- `cheekSquint × eyeBlink`;
+- `browDown × eyeSquint`;
+- `mouthSmile × cheekSquint`.
 
-Follow jest additive względem blink i squint.
+## Kształty korekcyjne
 
-## Oczy
+Kształt korekcyjny (corrective shape) jest deformacją uruchamianą automatycznie, gdy kombinacja dwóch poprawnych ruchów daje błędny wynik.
 
-Gaze jest sterowany transformami gałek ocznych. ARKit `eyeLook*` pełni rolę interoperacyjnego wejścia, ale target może mapować je na rotację kości/obiektu.
-
-Maksymalny komfortowy zakres bez ruchu głowy:
-
-- horyzontalnie: około ±25°;
-- pionowo: około +20° / -25°.
-
-Przy większym wymaganym kącie system gaze powinien uruchamiać współruch głowy.
-
-## Wargi
-
-Wargi wymagają poprawnego volume preservation.
-
-Minimalne correctives:
-
-- smile + jaw open;
-- pucker + jaw open;
-- funnel + jaw open;
-- mouth close + jaw open;
-- lip corner compression;
-- upper/lower lip roll;
-- asymetryczne smile/frown.
-
-Nie wolno dopuścić do zmniejszenia objętości warg przy pełnym uśmiechu tylko dlatego, że wierzchołki zostały rozciągnięte liniowo.
-
-## Policzki i nos
-
-`cheekSquint` powinien wpływać na dolną powiekę i okolice zewnętrznego kącika oka. `noseSneer` wymaga lokalnego uniesienia skrzydełka nosa i fałdu nosowo-wargowego.
-
-Silny uśmiech powinien automatycznie aktywować corrective nasolabial fold nawet wtedy, gdy warstwa wejściowa nie wystawia osobnego kanału.
-
-## Corrective shapes
-
-Corrective shape jest wymagany, jeśli kombinacja dwóch poprawnych shape keys daje anatomicznie błędny wynik.
-
-Priorytetowe pary:
-
-- jawOpen × mouthSmile;
-- jawOpen × mouthPucker;
-- jawOpen × mouthFunnel;
-- eyeBlink × eyeLookUp/Down;
-- cheekSquint × eyeBlink;
-- browDown × eyeSquint;
-- mouthSmile × cheekSquint.
-
-Corrective może być wyzwalany np. iloczynem wag:
+Przykładowy sterownik:
 
 `w_corrective = smoothstep(t0, t1, w_A * w_B)`
 
-Baseline `t0=0.15`, `t1=0.55`, jeśli test kombinacji nie wskazuje innego zakresu.
+Punktem startowym może być `t0=0.15` i `t1=0.55`. Niższy `t0` uruchamia korekcję wcześniej; zbyt niski może zmieniać neutralne, subtelne ruchy. Wyższy `t1` opóźnia pełny wpływ i może pozostawić błąd w średnich zakresach.
 
-## FACS
+## Policzki i bruzda nosowo-wargowa
 
-Każdy istotny shape powinien mieć relację do Action Units, jeśli istnieje sensowne mapowanie. Nie wymuszamy relacji 1:1, ponieważ ARKit coefficients i FACS opisują inne poziomy abstrakcji.
-
-Przykładowo:
-
-- `browInnerUp` wspiera AU1;
-- `browOuterUp` wspiera AU2;
-- `browDown` wiąże się głównie z AU4;
-- `cheekSquint` z AU6;
-- `mouthSmile` z AU12;
-- `mouthFrown` z AU15;
-- `mouthPucker` z AU18.
+Silny uśmiech powinien powodować uniesienie policzka i zmianę bruzdy nosowo-wargowej. `cheekSquint` powinien wpływać również na dolną powiekę i zewnętrzny kącik oka.
 
 ## Język
 
-`tongueOut` jest minimum interoperacyjnym. W rig master zalecane jest dodatkowe sterowanie językiem:
+`tongueOut` zapewnia minimum interoperacyjności, ale rig wzorcowy powinien mieć sterowanie:
 
-- root;
-- mid;
-- tip;
-- lateral curl opcjonalnie.
+- podstawą języka;
+- częścią środkową;
+- czubkiem;
+- opcjonalnym zagięciem bocznym.
 
-Język musi podążać za żuchwą, ale zachowywać własne deformacje dla mowy.
+Język podąża za żuchwą, zachowując niezależne ruchy artykulacyjne.
 
-## Zęby
+## Test pojedynczych kanałów
 
-- górne zęby są związane z czaszką;
-- dolne zęby z żuchwą;
-- zęby nie mogą być deformowane przez skin weights;
-- przy pełnym `jawOpen` nie mogą przecinać warg ani języka.
-
-## Jakość shape keys
-
-Każdy kanał powinien przejść test w wagach:
+Każdy kanał należy sprawdzić przy:
 
 `0.0, 0.25, 0.5, 0.75, 1.0`.
 
-Fail, jeśli występuje:
+Fail występuje przy:
 
-- nagły skok geometrii;
-- utrata objętości;
-- załamanie normalnych;
-- samoprzecięcie;
-- niespójność L/R większa niż zamierzona asymetria.
+- skoku geometrii;
+- utracie objętości;
+- załamaniu normalnych;
+- samoprzecięciu;
+- niekontrolowanej asymetrii.
 
-## Windows
+## Test kombinacji
 
-Eksportuj morph targets z niezmienionymi nazwami. Uruchom walidację kompletności przed FBX/runtime importem.
+Obowiązkowe pary i zestawy:
 
-## Linux
-
-Używaj identycznych nazw i walidatora. Różnice platformy nie mogą zmieniać facial interface.
+- smile + jaw open;
+- pucker + jaw open;
+- blink + eye look up/down;
+- smile + cheek squint;
+- brow down + squint;
+- asymetryczny smile + jaw;
+- mowa + mruganie + spojrzenie.
 
 ## Definition of Done
 
-Facial rig jest zaliczony, jeśli:
+Rig twarzy jest zaliczony, gdy:
 
-- wszystkie 52 kanały interoperacyjne są obecne;
-- jaw jest anatomicznym transformem;
-- blink zamyka oko bez penetracji;
-- gaze działa niezależnie od head rig;
-- lip seal zachowuje kontakt warg;
-- correctives usuwają błędy najważniejszych kombinacji;
+- 52 kanały ARKit są dostępne;
+- żuchwa działa anatomicznie;
+- oczy i powieki współpracują;
+- domknięcie warg działa podczas mowy;
+- kształty korekcyjne usuwają główne błędy kombinacji;
 - FACS mapping jest udokumentowany;
-- testy pojedynczych shape keys i kombinacji przechodzą bez artefaktów;
-- rig umożliwia późniejsze sterowanie face trackingiem i lip-sync.
+- pojedyncze kanały i kombinacje przechodzą testy pośrednich wartości;
+- rig nadaje się do face trackingu i lip-sync.
