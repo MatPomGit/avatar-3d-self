@@ -1,21 +1,27 @@
-# Przewodnik tworzenia realistycznego awatara
+# Kryteria realizmu awatara
 
-## Cel
+Szczegółowy proces wykonania znajduje się w [instrukcji pipeline'u](complete-pipeline.md). Ten dokument określa wynik, który należy ocenić.
 
-Awatar ma zachowywać podobieństwo do osoby referencyjnej, poprawne proporcje, naturalną mimikę i użyteczność w czasie rzeczywistym.
+## Podobieństwo
 
-## Referencje
+Zachowaj proporcje twarzy i sylwetki, kształt oczu, okulary, linię włosów oraz charakter zarostu. Nie wygładzaj ani nie upiększaj cech kosztem podobieństwa do referencji.
 
-Wykonaj zdjęcia frontalne, profilowe i trzy czwarte w równym oświetleniu. Uwzględnij neutralną twarz, okulary, zarost, fryzurę oraz sylwetkę. Nie zastępuj charakterystycznych cech uogólnionym, upiększonym modelem.
+## Anatomia i deformacja
 
-## Model i topologia
+Główna siatka ciała musi zachowywać poprawny kształt podczas zgięcia stawów. Dłonie wymagają niezależnego ruchu wszystkich palców. Otwieranie ust wymaga ruchu żuchwy, dolnych zębów i języka.
 
-Pętle topologii prowadź wokół oczu, ust, żuchwy i policzków. Zaplanuj deformacje barków, łokci, nadgarstków, dłoni, bioder i kolan. Oczy, zęby, język, okulary, ubranie i włosy utrzymuj jako odrębne elementy.
+## Oczy i włosy
 
-## Materiały i włosy
+Gałki oczne obracają się niezależnie od głowy. Powieki oraz rzęsy współpracują z mruganiem. Włosy i broda są osobnymi elementami przytwierdzonymi do skóry, a nie wyłącznie płaską teksturą.
 
-Skóra wymaga albedo, normal, roughness, AO i w razie potrzeby SSS. Sprawdź pory, lokalną zmienność koloru i przejścia materiałów. Broda i włosy wymagają groomu albo hair cards, jeżeli zwiększa to realizm.
+## Materiały
 
-## Mimikra i animacja
+Skóra, oczy, włosy, broda, ubrania i okulary mają własne materiały PBR. Skórę sprawdzaj w świetle frontalnym i bocznym.
 
-Steruj niezależnie powiekami, brwiami, spojrzeniem, policzkami, ustami i żuchwą. Łącz emocje z asymetrią, mruganiem, mikroruchami oczu i głowy. Wypowiedź nie może ograniczać się do ruchu ust.
+## Zachowanie
+
+Mowa łączy visemy z ruchem żuchwy, mimiką, spojrzeniem, mruganiem i niewielkim ruchem głowy. Emocje nie powinny być idealnie symetryczne.
+
+## Minimalny test odbiorczy
+
+Postać w środowisku docelowym ma: patrzeć w różnych kierunkach, mrugać, otwierać usta, poruszać każdym palcem, wykonywać gest, mówić oraz utrzymywać stabilne okulary i ubranie.
