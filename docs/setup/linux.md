@@ -3,8 +3,8 @@
 ## Python i repozytorium
 
 ```bash
-git clone https://github.com/MatPomGit/avatar-3d-self.git
-cd avatar-3d-self
+git clone https://github.com/MatPomGit/avatar-studio.git
+cd avatar-studio
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
@@ -27,7 +27,7 @@ Zainstaluj Blender, COLMAP, Git LFS i FFmpeg z repozytoriów dystrybucji albo of
 Przykładowy workspace:
 
 ```text
-/home/<user>/Avatar3D/projects/self-avatar/
+/home/<user>/AvatarStudio/projects/self-avatar/
 ```
 
-Prywatnego capture nie przechowuj w katalogu repozytorium.
+Prywatnego materiału referencyjnego (reference capture) nie przechowuj w katalogu repozytorium.
