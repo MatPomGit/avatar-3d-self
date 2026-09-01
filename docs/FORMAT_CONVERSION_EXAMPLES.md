@@ -81,7 +81,7 @@ PLY zachowa geometrię i UV, ale raport wskaże utratę materiałów, tekstur, s
 python scripts/model_format_converter.py avatar.glb avatar.obj --textures copy
 ```
 
-Konwerter zawsze zapewnia plik MTL i wpis `mtllib` w OBJ. Typowy wynik wygląda tak:
+Konwerter zawsze tworzy lub zapewnia plik MTL i wpis `mtllib` w OBJ. Typowy wynik wygląda tak:
 
 ```text
 avatar.obj
