@@ -1,198 +1,88 @@
-# Complete Avatar Production Pipeline
+# Complete avatar production pipeline
 
-## Multi-Engine Universal Avatar
+This is the intended editable production workflow. A check mark is earned only
+after the stated quality gate is recorded for the actual avatar; it is not
+implied by the presence of a script or a GitHub Actions workflow.
 
-### Supported Engines
-- ✅ Unreal Engine 5
-- ✅ Unity (HDRP + URP)
-- ✅ Twinmotion
-- ✅ MetaHuman Creator
-- ✅ Custom WebGL (THREE.js)
+## 1. Reference capture and consent
 
----
+Capture consistent facial, profile, three-quarter, full-body and clothing
+references. Record lighting, focal length, scale reference and intended use.
+Keep raw images, scans, audio and biometric annotations outside this public
+repository unless explicit publication approval exists.
 
-## Phase 1: PBR Texture Generation
+**Gate:** sufficient multi-view coverage, neutral expression and a reference
+inventory; the distinctive face, glasses and facial hair are visible.
 
-### Input
-- High-quality diffuse scan texture (4K+ recommended)
+## 2. Reconstruction and editable high-resolution source
 
-### Processing
-```bash
-python scripts/pbr_texture_processor.py \
-  --diffuse references/photos/scan_2048.png \
-  --output assets/textures/pbr
-```
+Use a local COLMAP or comparable workflow to create a dense scan. Clean only
+reconstruction artefacts in a high-resolution source mesh; retain original
+capture and unmodified reconstruction separately.
 
-### Output
-- diffuse.png (original scan)
-- normal.png (surface detail)
-- roughness.png (matte/glossy)
-- metallic.png (non-metallic for skin)
-- ao.png (ambient occlusion)
+**Gate:** correct scale and orientation, no missing facial regions, and no
+destructive overwrite of the source scan.
 
-### Quality
-- All textures: 2048×2048 (scalable to 4K)
+## 3. Retopology, UVs and component separation
 
-## Phase 2: Multi-Engine Material Export
+Create animation-ready topology with loops around eyelids, mouth, jaw, cheeks,
+shoulders, elbows, wrists, hips, knees and fingers. Keep body, teeth, tongue,
+eyes, glasses, clothing and hair/groom as separate editable components.
 
-```bash
-python scripts/material_converter.py
-```
+**Gate:** clean deformation test for blink, jaw open, smile, fist, shoulder
+raise, elbow bend and knee bend.
 
-Generates material configs for:
-- Unreal: M_Avatar_Master instance
-- Unity: Standard/HDRP shader setup
-- Twinmotion: PBR material definition
+## 4. Materials, hair, clothing and glasses
 
-Each engine gets optimal settings (SSS for UE, properties for Unity, etc.)
+Prepare PBR maps appropriate to each component. Skin requires believable colour
+variation, micro-normal detail and, where supported, subsurface scattering.
+Hair and beard require groom or suitable cards, not merely a flat colour map.
+The provided `pbr_texture_processor.py` is a utility and does not replace
+material review in the target renderer.
 
-## Phase 3: Lip Sync + Speech animation
+**Gate:** inspected under neutral and raking light; glasses preserve frame and
+lens behaviour; no visible seams or texture stretching.
 
-Install Piper TTS
-```bash
-pip install piper-tts
-piper --download-model en_US-libritts-high
-```
+## 5. Body, hand and facial rig
 
-Generate Lip Sync
-```bash
-python scripts/piper_lipsync_generator.py \
-  --text "Hello world! My name is [Your Name]." \
-  --output exports/speech
-```
+Build an IK/FK body rig, individual finger controls, independent eye aim and a
+facial system compatible with the chosen ARKit/FACS mapping.
 
-Output
-- speech.wav - Synthesized audio
-- phonemes.txt - Phoneme timeline
-- lipsync_blendshapes.json - Blendshape keyframes (30 FPS)
-- lipsync_fbx_format.json - Import-ready for game engines
+**Gate:** correct skinning through the deformation set and a validated mapping
+for every implemented facial control.
 
+## 6. Speech and behaviour layers
 
-## Phase 4: Web Viewer
+The target chain is `text -> Piper audio -> phoneme/viseme timing -> facial
+animation -> engine playback`. `scripts/piper_lipsync_generator.py` is an
+experimental helper: validate its Piper invocation and timing output against the
+installed voice before relying on it. Layer visemes with jaw motion, gaze,
+blinks, asymmetry, head motion and gestures.
 
-### Build
-```bash
-cd web/viewer
-npm install
-npm run dev
-```
+**Gate:** reviewed spoken clips with consonant closures, no eye deadness and no
+audio-animation drift.
 
-### Access
-- http://localhost:5173
+## 7. Export and target validation
 
-### Features
-✅ Real-time FBX preview
-✅ Blendshape sliders
-✅ Animation playback
-✅ Model stats (triangles, vertices)
-✅ Texture inspection
-✅ Engine export buttons
+Use the format converter with a report and `--strict` when a loss is not
+acceptable. Keep a high-fidelity editable master and create target-specific
+exports. Validate the export in the destination application.
 
+**Gate:** geometry, materials, UVs, rig, skin weights, shape keys and animation
+are checked after import; intended losses are recorded in the conversion report.
 
-## Phase 5: Cross-Engine Export
+## 8. Real-time integration and release package
 
-### Unreal Engine 5
-- Import exports/avatar_final.fbx
-- Apply material from exports/materials/- Skin_Face_UE5.json
-- Assign lip sync to AnimBP_Speech
-- Test in PIE
+Integrate the validated asset in one target runtime first. Measure frame time,
+memory, draw calls and visual quality on target hardware. Deliver an asset
+manifest, known limitations and reproducible import steps with the export.
 
-### Unity (HDRP)
-- Import FBX → Assets/Characters/
-- Create material from Skin_Face_Unity.json
-- Assign to mesh
-- Attach LipSyncController.cs script
-- Play speech animation
+**Gate:** the selected runtime can load, idle, speak, emote and gesture without
+regressing likeness or the agreed performance budget.
 
-### Twinmotion
-- Import to Twinmotion
-- Apply Skin_Face_Twinmotion.json material
-- Use for architectural visualization
+## Automation boundary
 
-## Lip Sync Integration
-
-### Phoneme-to-Blendshape Mapping
-Vowels (a, e, i, o, u) → mouthOpen, mouthWide
-Consonants (p, b, m) → lip press
-Fricatives (f, v, s) → mouth position
-Stops (t, d) → jaw open
-
-### Real-Time Speech
-```bash
-# Import in your app
-from piper_lipsync_generator import generate_speech_with_lipsync
-
-text = "Welcome to my digital avatar"
-generate_speech_with_lipsync(text, "exports/speech")
-```
-
-
-
-## Quality Checklist
-[ ] PBR textures processed (5 maps)
-[ ] Material configs for all engines
-[ ] Web viewer renders correctly
-[ ] All 48 blendshapes functional
-[ ] Lip sync synced to audio
-[ ] Model < 200k triangles (game-ready)
-[ ] Animations smooth (no popping)
-[ ] Tested in at least one engine
-
-## Specs
-Aspect
-Spec
-Geometry
-~80-120k triangles (game-ready)
-Textures
-2048×2048 PBR (5 maps)
-Blendshapes
-48+ FACS-based
-Animations
-10+ locomotion/gesture
-Lip Sync
-Phoneme-driven, 30 FPS
-Format
-FBX universal
-
-
-## GitHub Actions Automation
-Pipeline runs on every push:
-- Generate PBR textures
-- Convert materials
-- Create lip sync
-- Build web viewer
-- Validate all exports
-- Create GitHub Release
-
-### Check Actions tab for logs.
-```bash
----
-
-## 8. Dodaj to do `pyproject.toml`
-
-```toml
-[project.optional-dependencies]
-pbr = ["pillow>=10.0", "numpy>=1.24", "scipy>=1.11"]
-lipsync = ["piper-tts>=1.2"]
-web = ["flask>=3.0", "flask-cors>=4.0"]
-```
-
-
-## PODSUMOWANIE: Copy-Paste Lista
-- scripts/pbr_texture_processor.py ← PBR generacja
-- scripts/material_converter.py ← Multi-engine konwersja
-- scripts/piper_lipsync_generator.py ← Lip sync + TTS
-- web/viewer/src/App.jsx ← THREE.js viewer
-- .github/workflows/avatar_complete_pipeline.yml ← Automation
-- docs/COMPLETE_PIPELINE.md ← Dokumentacja
-
-Uruchom:
-```bash
-pip install pillow numpy scipy piper-tts
-python scripts/pbr_texture_processor.py --diffuse scan.png --output assets/textures
-python scripts/piper_lipsync_generator.py --text "Hello!" --output exports/speech
-cd web/viewer && npm install && npm run dev
-```
-
-Model będzie dostępny na http://localhost:5173 z możliwością eksportu do wszystkich silników.
-
+GitHub Actions validates deterministic source quality and deploys the static
+viewer. Heavy reconstruction, Blender, MetaHuman and Unreal Engine operations
+are manual workflow entry points only; they are not routine CI or releases until
+a reproducible runner and test assets exist.

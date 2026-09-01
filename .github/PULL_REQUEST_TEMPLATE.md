@@ -17,10 +17,8 @@ Closes #<!-- numer issue -->
 
 ## Lista kontrolna
 
-- [ ] Kod przechodzi `ruff check src/ tests/` bez błędów
-- [ ] Kod przechodzi `mypy src/` bez błędów
-- [ ] Testy przechodzą: `pytest --cov=src/image_analysis`
-- [ ] Pokrycie testów ≥ 80 % dla zmodyfikowanych modułów
+- [ ] Python quality checks pass: `ruff check scripts tests`
+- [ ] Python tests pass: `python -m pytest -q`
 - [ ] Dodano lub zaktualizowano testy dla nowego kodu
 - [ ] Docstringi są w formacie Google-style i po angielsku
 - [ ] Żadne klucze API / sekrety nie zostały zapisane w kodzie

@@ -21,7 +21,6 @@ The project is in early development. The repository intentionally separates ligh
 - `exports/` is reserved for generated deliverables.
 - `animations/` contains animation assets.
 - `references/` contains source/reference material.
-- `notebooks/` contains exploratory analysis.
 - `docs/` contains maintained project documentation.
 - `web/viewer/` contains the GitHub Pages project site and interactive Three.js viewer.
 - `.github/workflows/` contains CI, Pages deployment and manually triggered 3D workflow entry points.
@@ -51,8 +50,8 @@ Use `--strict` when conversion should stop instead of silently creating a reduce
 
 Documentation:
 
-- [`docs/MODEL_FORMAT_CONVERTER.md`](docs/MODEL_FORMAT_CONVERTER.md) — complete technical and user reference, CLI, architecture, capability matrix, validation and troubleshooting.
-- [`docs/FORMAT_CONVERSION_EXAMPLES.md`](docs/FORMAT_CONVERSION_EXAMPLES.md) — practical conversion recipes with expected preserved data, losses and post-export checks.
+- [`docs/model_format_converter.md`](docs/model_format_converter.md) — complete technical and user reference, CLI, architecture, capability matrix, validation and troubleshooting.
+- [`docs/format_conversion_examples.md`](docs/format_conversion_examples.md) — practical conversion recipes with expected preserved data, losses and post-export checks.
 
 ## Development environment
 
@@ -98,9 +97,10 @@ Pull requests touching Python sources or project configuration run deterministic
 
 - Python bytecode compilation,
 - Ruff checks for syntax errors, undefined names and related critical failures.
+- pytest tests.
 
 The separate `GitHub Pages` workflow validates the web build on pull requests and deploys the site only from `main`. Heavy 3D jobs stay manual until a reproducible dedicated runner or containerized toolchain is available.
 
 ## Documentation
 
-See [`docs/index.md`](docs/index.md), [`docs/REALISTIC_AVATAR_GUIDE.md`](docs/REALISTIC_AVATAR_GUIDE.md), [`docs/COMPLETE_PIPELINE.md`](docs/COMPLETE_PIPELINE.md), [`docs/MODEL_FORMAT_CONVERTER.md`](docs/MODEL_FORMAT_CONVERTER.md) and [`docs/FORMAT_CONVERSION_EXAMPLES.md`](docs/FORMAT_CONVERSION_EXAMPLES.md) for detailed technical notes.
+See [`docs/index.md`](docs/index.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`CHANGELOG.md`](CHANGELOG.md), [`docs/realistic_avatar_guide.md`](docs/realistic_avatar_guide.md), [`docs/COMPLETE_PIPELINE.md`](docs/COMPLETE_PIPELINE.md), [`docs/model_format_converter.md`](docs/model_format_converter.md) and [`docs/format_conversion_examples.md`](docs/format_conversion_examples.md) for detailed technical notes.
