@@ -14,6 +14,7 @@
 - [Przewodnik realizmu](realistic_avatar_guide.md)
 - [Konwerter formatów modeli](model_format_converter.md)
 - [Przykłady konwersji](format_conversion_examples.md)
+ - [Poradnik fotografii do fotogrametrii](photogrammetry-capture-guide.md)
 
 ## Środowiska
 

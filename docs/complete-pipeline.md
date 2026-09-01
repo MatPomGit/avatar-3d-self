@@ -18,6 +18,8 @@ Zdefiniuj jeden układ współrzędnych, skalę w centymetrach oraz nazwę wersj
 
 **Kontrola:** na referencjach są czytelne rysy twarzy, proporcje sylwetki, oprawki, zarost i charakter włosów.
 
+Szczegółową procedurę ustawienia stanowiska, wykonania serii i opisu plików zawiera [poradnik fotogrametryczny](photogrammetry-capture-guide.md).
+
 ## 2. Zbuduj lub zrekonstruuj główny mesh ciała
 
 Główny mesh to jedna, animowana powierzchnia: głowa, szyja, tułów, ręce z dłońmi i palcami oraz nogi ze stopami. Nie modeluj w nim okularów, ubrań, gałek ocznych, rzęs, włosów ani brody.
