@@ -912,4 +912,4 @@ Oficjalne źródła:
 - implementacja: [`../scripts/model_format_converter.py`](../scripts/model_format_converter.py)
 - praktyczne przykłady: [`format_conversion_examples.md`](format_conversion_examples.md)
 - testy: [`../tests/test_model_format_converter.py`](../tests/test_model_format_converter.py)
-- dokumentacja integracji z silnikami: [`ENGINE_INTEGRATION.md`](ENGINE_INTEGRATION.md)
+- dokumentacja integracji z silnikami: [`engine-integration.md`](engine-integration.md)
