@@ -2,7 +2,8 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-import shutil
+
+from avatar_studio.adapters import BlenderAdapter, ColmapAdapter, FFmpegAdapter, PiperAdapter
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,8 +21,11 @@ class ToolProbe:
 def probe_default_tools() -> tuple[ToolProbe, ...]:
     """Locate common tools without executing or modifying them."""
 
-    names = ("blender", "colmap", "ffmpeg", "piper")
-    return tuple(ToolProbe(name, shutil.which(name)) for name in names)
+    adapters = (BlenderAdapter(), ColmapAdapter(), FFmpegAdapter(), PiperAdapter())
+    return tuple(
+        ToolProbe(adapter.name, str(path) if (path := adapter.resolve()) else None)
+        for adapter in adapters
+    )
 
 
 def display_path(path: str | None) -> str:
