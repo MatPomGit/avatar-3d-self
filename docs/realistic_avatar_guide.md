@@ -14,6 +14,8 @@ Główna siatka ciała musi zachowywać poprawny kształt podczas zgięcia staw�
 
 Gałki oczne obracają się niezależnie od głowy. Powieki oraz rzęsy współpracują z mruganiem. Włosy i broda są osobnymi elementami przytwierdzonymi do skóry, a nie wyłącznie płaską teksturą.
 
+Długie włosy wymagają rigowania pasm lub symulacji z kolizją z głową, barkami i ubraniem. Dla sylwetki kobiecej z piersiami dodatkowy rig zapewnia subtelny ruch wtórny zależny od ruchu klatki piersiowej.
+
 ## Materiały
 
 Skóra, oczy, włosy, broda, ubrania i okulary mają własne materiały PBR. Skórę sprawdzaj w świetle frontalnym i bocznym.
