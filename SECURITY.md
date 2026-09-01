@@ -1,21 +1,9 @@
-# Security Policy
+# Polityka bezpieczeństwa
 
-## Supported Versions
+## Zgłaszanie problemów
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Nie publikuj luk bezpieczeństwa, danych osobowych, zdjęć referencyjnych, nagrań głosu ani danych dostępu w publicznych zgłoszeniach. Skontaktuj się prywatnie z właścicielem repozytorium i opisz zakres, sposób odtworzenia oraz potencjalny wpływ.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+## Dane wrażliwe
 
-## Reporting a Vulnerability
-
-Use this section to tell people how to report a vulnerability.
-
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Repozytorium publiczne nie jest miejscem na skany twarzy, głosu, klucze API, tokeny ani pliki środowiskowe. Przed wysłaniem zmian sprawdź diff i historię Git.
