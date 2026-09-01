@@ -113,12 +113,12 @@ Elementy dodatkowe można wymieniać lub ukrywać bez zmiany głównego mesha.
 ### Dodatkowy rig zależny od sylwetki i fryzury
 
 1. Dla modelu kobiecego z piersiami dodaj po jednym kontrolerze lub łańcuchu kości dla lewej i prawej piersi. Kontrolery dziedziczą ruch klatki piersiowej, ale mają ograniczoną wtórną dynamikę.
-2. Ustaw małą amplitudę, tłumienie i ograniczenia ruchu. Celem jest naturalna reakcja na chód, bieg i nagłe zatrzymanie, bez nadmiernego kołysania.
+2. Ustaw małą amplitudę, tłumienie i ograniczenia ruchu. Celem jest naturalna reakcja na chód, bieg i nagłe zatrzymanie. ma być zauważalna, ale bez nadmiernego kołysania.
 3. Dla długich włosów podziel fryzurę na kilka pasm. Każde pasmo otrzymuje łańcuch kości od nasady do końca albo odpowiednią symulację włosów.
 4. Włosy nie mogą przenikać przez głowę, barki, plecy ani ubranie. Dodaj kolizje uproszczonymi bryłami dopiero po sprawdzeniu podstawowej animacji.
 5. Dla krótkich włosów, zarostu i fryzur sztywnych nie dodawaj symulacji bez widocznej potrzeby.
 
-**Kontrola:** podczas chodu i obrotu tułowia wtórny ruch piersi oraz długich włosów jest subtelny, opóźniony względem ruchu ciała i wolny od przenikania.
+**Kontrola:** podczas chodu i obrotu tułowia wtórny ruch piersi oraz długich włosów jest subtelny, zauważalny, opóźniony względem ruchu ciała i wolny od przenikania.
 
 
 ## 8. Zbuduj rig ust, szczęki i twarzy
@@ -128,7 +128,7 @@ Elementy dodatkowe można wymieniać lub ukrywać bez zmiany głównego mesha.
 3. Utwórz kontrolery lub blend shapes dla warg, kącików ust, policzków, brwi i powiek.
 4. Dodaj niezależne sterowanie oczami i mruganiem.
 5. Przygotuj mapowanie zgodne z ARKit, FACS albo udokumentowaną konwersję między nimi.
-6. Sprawdź otwarcie ust, uśmiech, zaciskanie warg, mrugnięcie, marszczenie brwi i spojrzenie w każdą stronę.
+6. Sprawdź otwarcie ust, uśmiech, zaciskanie warg, mrugnięcie, marszczenie brwi, powiek i spojrzenie w każdą stronę.
 
 **Kontrola:** podczas otwierania ust porusza się żuchwa, dolne zęby i język; wargi nie rozrywają mesha.
 
