@@ -14,6 +14,7 @@ nav:
       - Goals and requirements: project/goals-and-requirements.md
       - Architecture: project/architecture.md
       - Naming: project/naming.md
+      - Terminology: project/terminology.md
       - Technical baselines: project/technical-baselines.md
       - Repository structure: project/repository-structure.md
       - Conventions: project/conventions.md
@@ -62,6 +63,7 @@ nav:
   - Materials:
       - Overview: materials/overview.md
       - PBR conventions: materials/pbr-conventions.md
+      - UV and texture layout: materials/uv-texture-layout.md
       - Skin: materials/skin.md
       - Eyes: materials/eyes.md
       - Hair and facial hair: materials/hair.md

@@ -1,136 +1,124 @@
 # Włosy i zarost
 
-Włosy, broda, wąsy, brwi i rzęsy są osobnymi systemami o różnych długościach, kierunkach wzrostu i wymaganiach runtime. Nie należy traktować ich jako jednego materiału.
+Włosy, broda, wąsy, brwi i rzęsy są osobnymi systemami o różnych długościach, kierunkach wzrostu i wymaganiach środowiska czasu rzeczywistego (runtime environment). Nie należy traktować ich jako jednego materiału.
 
-## Reprezentacja
+Terminologia jest zgodna ze [słownikiem terminologicznym](../project/terminology.md).
+
+## Sposób reprezentacji
 
 Dozwolone są trzy strategie:
 
-- groom strands;
-- hair cards;
-- hybryda, np. groom dla LOD0 i cards dla dalszych LOD.
+- system włosów oparty na pojedynczych pasmach (strand-based groom);
+- płaszczyzny z teksturą włosów (hair cards);
+- rozwiązanie hybrydowe, np. system włosów (groom) dla LOD0 i płaszczyzny z teksturą włosów (hair cards) dla dalszych poziomów szczegółowości (Levels of Detail, LOD).
 
-Wybór jest dokonywany per element, nie globalnie dla całej postaci.
+Wybór jest dokonywany osobno dla każdego elementu fryzury i zarostu.
 
 ## Parametry włosa
 
 Jako punkt startowy dla włosów głowy przyjmujemy:
 
-| Parametr | Baseline | Zakres |
+| Parametr | Wartość bazowa | Zakres |
 | --- | ---: | ---: |
 | średnica włosa | 70 µm | 50-100 µm |
 | losowa zmiana średnicy | ±12% | 5-20% |
 | losowa zmiana długości | ±4% | 2-8% |
 | losowa zmiana kierunku | 2° | 0.5-5° |
-| roughness longitudinal | 0.28 | 0.20-0.40 |
-| roughness azimuthal | 0.45 | 0.35-0.60 |
+| chropowatość wzdłużna (longitudinal roughness) | 0.28 | 0.20-0.40 |
+| chropowatość azymutalna (azimuthal roughness) | 0.45 | 0.35-0.60 |
 
-Jeżeli shader nie obsługuje anizotropowego modelu włosa, należy użyć rozwiązania docelowego silnika zamiast próbować kopiować te parametry bezpośrednio do klasycznego GGX.
+Jeżeli program cieniujący (shader) nie obsługuje anizotropowego modelu odbicia włosa (anisotropic hair shading model), należy użyć rozwiązania przewidzianego przez środowisko docelowe (target environment), zamiast kopiować wartości do klasycznego modelu GGX.
 
-## Gęstość
+## Gęstość i prowadnice
 
-Rzeczywista liczba włosów na głowie jest duża, ale renderowany groom nie musi odwzorowywać każdego włosa 1:1.
+Rzeczywista liczba włosów na głowie jest duża, ale system włosów (groom) nie musi odwzorowywać każdego włosa 1:1.
 
-Baseline LOD0:
+Wartości bazowe dla LOD0:
 
-- 800-1500 guides;
-- około 60k-120k render strands dla fryzury o średniej gęstości;
-- children/interpolation zależnie od DCC;
-- clumping wieloskalowy, minimum dwa poziomy;
-- pojedyncze flyaways: około 0.5-2% widocznych włosów.
+- 800-1500 prowadnic włosów (guide strands);
+- około 60 000-120 000 włosów renderowanych (render strands) dla fryzury o średniej gęstości;
+- interpolacja włosów potomnych (child strand interpolation) zależnie od programu DCC;
+- grupowanie pasm (clumping) co najmniej na dwóch skalach;
+- pojedyncze odstające włosy (flyaway hairs): około 0,5-2% widocznych włosów.
 
-Wartości są budżetem produkcyjnym i należy je zmniejszać w runtime zgodnie z profilem wydajności.
+Są to budżety produkcyjne. W środowisku czasu rzeczywistego (runtime environment) należy je zmniejszać zgodnie z profilem wydajności.
 
 ## Linia włosów
 
-Linia włosów jest jednym z silnych elementów podobieństwa twarzy.
+Linia włosów (hairline) jest jednym z silnych elementów podobieństwa twarzy.
 
 Wymagania:
 
 - przebieg linii włosów zgodny z referencją;
 - naturalne przejście gęstości przy skroniach i czole;
-- brak idealnie równej granicy groomu;
-- osobne krótkie baby hairs przy krawędzi, jeśli są obecne na referencji.
+- brak idealnie równej granicy systemu włosów (groom);
+- osobne krótkie włosy przy krawędzi (baby hairs), jeśli występują w materiale referencyjnym.
 
 ## Broda i wąsy
 
 Broda o widocznej objętości nie może być zastąpiona wyłącznie teksturą skóry.
 
-Baseline:
+Wartości bazowe:
 
-- strand diameter 60-100 µm;
+- średnica włosa zarostu (strand diameter): 60-100 µm;
 - większa losowość kierunku niż dla włosów głowy;
-- clumping słabszy niż dla fryzury;
-- osobne grupy: broda, wąsy, bokobrody;
-- kolor musi zawierać naturalne lokalne różnice.
+- słabsze grupowanie pasm (clumping) niż dla fryzury;
+- osobne grupy: broda, wąsy i bokobrody;
+- barwa musi zawierać naturalne lokalne różnice.
 
-Dla bardzo krótkiego zarostu można stosować hybrydę: tekstura/normal + krótkie strands w obszarach silnego profilu.
+Dla bardzo krótkiego zarostu można stosować rozwiązanie hybrydowe: teksturę i mapę normalnych (normal map) uzupełnione krótkimi włosami renderowanymi (render strands) w obszarach istotnych dla sylwetki twarzy.
 
 ## Brwi
 
-Brwi wymagają osobnego groomu albo cards.
+Brwi wymagają osobnego systemu włosów (groom) albo płaszczyzn z teksturą włosów (hair cards).
 
-- kierunek rośnie od przyśrodkowego ku bocznemu;
+- kierunek włosków zmienia się od części przyśrodkowej ku bocznej;
 - gęstość nie może być jednolita;
-- pojedyncze włoski wystają poza główny kontur;
-- brwi muszą deformować się razem z brow rig bez ślizgania po skórze.
+- pojedyncze włoski powinny wychodzić poza główny kontur;
+- brwi muszą deformować się razem z układem sterowania brwiami (brow rig) bez ślizgania po skórze.
 
 ## Rzęsy
 
 Rzęsy są częścią mechaniki powieki.
 
-Baseline długości:
+Wartości bazowe długości:
 
 - górne: 7-10 mm;
 - dolne: 4-7 mm;
 - większa gęstość w środkowo-bocznej części górnej powieki;
-- brak idealnej symetrii L/R.
+- brak idealnej symetrii lewej i prawej strony.
 
-Rzęsy muszą przejść pełny test blink bez penetracji rogówki.
+Rzęsy muszą przejść pełny test mrugnięcia (blink test) bez penetracji rogówki.
 
 ## Długie włosy
 
-Długie włosy wymagają ruchu wtórnego. Zalecany jest podział na sekcje funkcjonalne:
+Długie włosy wymagają ruchu wtórnego (secondary motion). Zalecany jest podział na sekcje funkcjonalne: przód lewy/prawy, skronie, tył centralny, tył lewy/prawy i opcjonalne pasma boczne.
 
-- przód lewy/prawy;
-- skronie;
-- tył centralny;
-- tył lewy/prawy;
-- opcjonalne pasma boczne.
-
-Każda sekcja może być sterowana łańcuchem kości, groom dynamics albo hybrydą. Root włosa pozostaje stabilnie związany ze skalpem.
+Każda sekcja może być sterowana łańcuchem kości, dynamiką systemu włosów (groom dynamics) albo rozwiązaniem hybrydowym. Nasada włosa (hair root) pozostaje stabilnie związana ze skórą głowy (scalp).
 
 ## Kolizje
 
-Dla symulacji używamy uproszczonych colliderów:
+Do symulacji używamy uproszczonych brył kolizyjnych (collision volumes) dla czaszki, szyi, barków, klatki piersiowej i górnej części pleców.
 
-- czaszka;
-- szyja;
-- barki;
-- klatka;
-- górna część pleców.
+Minimalny margines kolizji (collision margin) dla LOD0: 2-4 mm. Nie należy zwiększać go tak mocno, aby fryzura zaczęła unosić się nad ciałem.
 
-Minimalna odległość bezpieczeństwa od powierzchni kolizji: baseline 2-4 mm w LOD0. Nie należy zwiększać jej tak mocno, aby fryzura zaczęła „unosić się” nad ciałem.
+## Poziomy szczegółowości
 
-## LOD
-
-Rekomendowany profil:
-
-| LOD | Render strands / cards | Dynamika |
+| Poziom szczegółowości (LOD) | Włosy renderowane / płaszczyzny włosów | Dynamika |
 | --- | --- | --- |
 | LOD0 | 100% | pełna |
 | LOD1 | 55-65% | uproszczona |
 | LOD2 | 25-35% | tylko główne pasma |
-| LOD3 | cards / 10-15% | wyłączona |
+| LOD3 | płaszczyzny z teksturą włosów (hair cards) lub 10-15% pasm | wyłączona |
 
-## Definition of Done
+## Kryteria ukończenia
 
 System włosów i zarostu zalicza etap, jeśli:
 
 - linia włosów odpowiada referencji;
 - broda ma właściwą objętość;
 - brwi i rzęsy są osobnymi elementami;
-- nie występuje widoczny scalp pop-through;
-- groom nie przenika przez głowę i ubranie w standardowym zakresie ruchu;
-- LOD nie zmienia radykalnie sylwetki fryzury;
-- ruch wtórny długich włosów jest stabilny i nie oscyluje bez tłumienia.
+- nie występuje prześwitywanie skóry głowy (scalp pop-through);
+- system włosów nie przenika przez głowę ani ubranie w standardowym zakresie ruchu;
+- zmiana poziomu szczegółowości (LOD transition) nie zmienia radykalnie sylwetki fryzury;
+- ruch wtórny (secondary motion) długich włosów jest stabilny i nie oscyluje bez tłumienia.
