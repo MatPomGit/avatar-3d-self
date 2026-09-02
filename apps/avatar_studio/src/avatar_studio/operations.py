@@ -154,17 +154,23 @@ class OperationService:
         length_scale: float = 1.0,
     ) -> tuple[dict[str, Any], Path]:
         adapter = self._adapter(PiperAdapter, "piper")
-        args = {
+        call_args = {
             "text": text,
             "model": str(Path(model).resolve()),
-            "output_file": str(Path(output_file).resolve()),
+            "output_wav": str(Path(output_file).resolve()),
+            "length_scale": length_scale,
+            "overwrite": True,
+        }
+        safe_report_args = {
+            "text": f"<{len(text)} characters>",
+            "model": call_args["model"],
+            "output_wav": call_args["output_wav"],
             "length_scale": length_scale,
         }
-        safe_report_args = {**args, "text": f"<{len(text)} characters>"}
         return self._run_recorded(
             "19-piper-integration",
             adapter,
             "piper_synthesize",
             safe_report_args,
-            lambda: adapter.synthesize(**args),  # type: ignore[attr-defined]
+            lambda: adapter.synthesize(**call_args),  # type: ignore[attr-defined]
         )
