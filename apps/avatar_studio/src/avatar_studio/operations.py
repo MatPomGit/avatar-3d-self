@@ -11,6 +11,9 @@ from avatar_studio.adapters.base import ToolAdapter
 from avatar_studio.store import ProjectStore
 
 
+ProgressCallback = Callable[[int, str], None]
+
+
 class OperationService:
     """Execute supported tool operations with provenance reports and database records."""
 
@@ -33,6 +36,7 @@ class OperationService:
         operation_name: str,
         arguments: dict[str, Any],
         callback: Callable[[], dict[str, Any]],
+        progress_callback: ProgressCallback | None = None,
     ) -> tuple[dict[str, Any], Path]:
         executable = adapter.resolve()
         if executable is None:
@@ -43,6 +47,8 @@ class OperationService:
         self.active_adapter = adapter
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         report_path = self.store.reports_dir / f"{stage_id}_{operation_name}_{timestamp}.json"
+        if progress_callback:
+            progress_callback(1, f"Starting {operation_name}")
         try:
             report = callback()
             report.update(
@@ -55,6 +61,8 @@ class OperationService:
             )
             adapter.write_report(report, report_path)
             self.store.finish_tool_run(run_id, 0, report_path)
+            if progress_callback:
+                progress_callback(100, f"{operation_name} complete")
             return report, report_path
         except Exception:
             self.store.finish_tool_run(run_id, 1, report_path if report_path.exists() else None)
@@ -69,6 +77,7 @@ class OperationService:
         camera_model: str = "OPENCV",
         matcher: str = "exhaustive",
         single_camera: bool = True,
+        progress_callback: ProgressCallback | None = None,
     ) -> tuple[dict[str, Any], Path]:
         adapter = self._adapter(ColmapAdapter, "colmap")
         workspace = self.store.workspace / "work" / "colmap"
@@ -84,7 +93,8 @@ class OperationService:
             adapter,
             "colmap_sparse",
             args,
-            lambda: adapter.reconstruct_sparse(**args),  # type: ignore[attr-defined]
+            lambda: adapter.reconstruct_sparse(**args, progress_callback=progress_callback),  # type: ignore[attr-defined]
+            progress_callback,
         )
 
     def colmap_dense(
@@ -94,6 +104,7 @@ class OperationService:
         *,
         max_image_size: int = 3200,
         mesher: str = "poisson",
+        progress_callback: ProgressCallback | None = None,
     ) -> tuple[dict[str, Any], Path]:
         adapter = self._adapter(ColmapAdapter, "colmap")
         workspace = self.store.workspace / "work" / "colmap"
@@ -109,10 +120,17 @@ class OperationService:
             adapter,
             "colmap_dense",
             args,
-            lambda: adapter.reconstruct_dense(**args),  # type: ignore[attr-defined]
+            lambda: adapter.reconstruct_dense(**args, progress_callback=progress_callback),  # type: ignore[attr-defined]
+            progress_callback,
         )
 
-    def inspect_blend(self, stage_id: str, blend_file: str | Path) -> tuple[dict[str, Any], Path]:
+    def inspect_blend(
+        self,
+        stage_id: str,
+        blend_file: str | Path,
+        *,
+        progress_callback: ProgressCallback | None = None,
+    ) -> tuple[dict[str, Any], Path]:
         adapter = self._adapter(BlenderAdapter, "blender")
         args = {"blend_file": str(Path(blend_file).resolve())}
         return self._run_recorded(
@@ -121,6 +139,7 @@ class OperationService:
             "blender_inspect",
             args,
             lambda: adapter.inspect_scene(**args),  # type: ignore[attr-defined]
+            progress_callback,
         )
 
     def normalize_audio(
@@ -129,6 +148,7 @@ class OperationService:
         output_file: str | Path,
         *,
         sample_rate_hz: int = 22050,
+        progress_callback: ProgressCallback | None = None,
     ) -> tuple[dict[str, Any], Path]:
         adapter = self._adapter(FFmpegAdapter, "ffmpeg")
         args = {
@@ -143,6 +163,7 @@ class OperationService:
             "ffmpeg_normalize",
             args,
             lambda: adapter.normalize_wav(**args),  # type: ignore[attr-defined]
+            progress_callback,
         )
 
     def synthesize_piper(
@@ -152,6 +173,7 @@ class OperationService:
         output_file: str | Path,
         *,
         length_scale: float = 1.0,
+        progress_callback: ProgressCallback | None = None,
     ) -> tuple[dict[str, Any], Path]:
         adapter = self._adapter(PiperAdapter, "piper")
         call_args = {
@@ -173,4 +195,5 @@ class OperationService:
             "piper_synthesize",
             safe_report_args,
             lambda: adapter.synthesize(**call_args),  # type: ignore[attr-defined]
+            progress_callback,
         )
