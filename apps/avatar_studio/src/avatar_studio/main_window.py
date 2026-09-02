@@ -56,7 +56,7 @@ class OperationWorker(QObject):
     def run(self) -> None:
         try:
             self.finished.emit(self.operation(self._report_progress))
-        except Exception as exc:  # surfaced to the user with operation context
+        except Exception as exc:
             self.failed.emit(str(exc))
 
     def _report_progress(self, value: int, message: str) -> None:
@@ -89,8 +89,7 @@ class ToolSettingsDialog(QDialog):
             form.addRow(name.capitalize(), row)
         layout.addLayout(form)
         info = QLabel(
-            "Leave a field empty to use automatic PATH discovery. "
-            "Settings are stored only in this project workspace."
+            "Leave a field empty to use automatic PATH discovery. Settings are stored only in this project workspace."
         )
         info.setWordWrap(True)
         layout.addWidget(info)
@@ -111,7 +110,7 @@ class ToolSettingsDialog(QDialog):
 
 
 class MainWindow(QMainWindow):
-    """Pipeline navigator, learning interface, operation launcher and artefact inspector."""
+    """Pipeline navigator, operation launcher and artefact inspector."""
 
     def __init__(self, store: ProjectStore) -> None:
         super().__init__()
@@ -152,7 +151,6 @@ class MainWindow(QMainWindow):
         self.stage_details = QTextBrowser()
         self.stage_details.setOpenExternalLinks(True)
         center_layout.addWidget(self.stage_details)
-
         self.operation_explanation = QLabel()
         self.operation_explanation.setWordWrap(True)
         center_layout.addWidget(self.operation_explanation)
@@ -239,11 +237,7 @@ class MainWindow(QMainWindow):
             return
         self.log.appendPlainText(f"Project report generated: {markdown_path}")
         self.log.appendPlainText(f"Machine-readable report: {json_path}")
-        QMessageBox.information(
-            self,
-            "Project report generated",
-            f"Markdown:\n{markdown_path}\n\nJSON:\n{json_path}",
-        )
+        QMessageBox.information(self, "Project report generated", f"Markdown:\n{markdown_path}\n\nJSON:\n{json_path}")
 
     def _tool_settings(self) -> None:
         if ToolSettingsDialog(self.store, self).exec() == QDialog.Accepted:
@@ -279,6 +273,8 @@ class MainWindow(QMainWindow):
         self._update_current_view()
 
     def _operation_text(self, stage_id: str) -> tuple[str, bool]:
+        if stage_id == "01-reference-acquisition":
+            return ("Create a versioned capture manifest, hash every photograph, detect duplicates and check minimum count and image resolution before COLMAP.", True)
         if stage_id == "02-photogrammetry":
             return ("COLMAP sparse reconstruction with phase-aware progress: feature extraction, matching and camera registration.", True)
         if stage_id == "03-reconstruction":
@@ -408,7 +404,18 @@ class MainWindow(QMainWindow):
         if not stage_id:
             return
         operation: BackgroundOperation | None = None
-        if stage_id == "02-photogrammetry":
+        if stage_id == "01-reference-acquisition":
+            photos = QFileDialog.getExistingDirectory(self, "Select reference photograph directory", str(self.store.workspace))
+            if not photos:
+                return
+            min_photos, ok = QInputDialog.getInt(self, "Capture profile", "Minimum photograph count", 60, 1, 5000, 1)
+            if not ok:
+                return
+            min_edge, ok = QInputDialog.getInt(self, "Capture profile", "Minimum long edge [px]", 3000, 256, 20000, 128)
+            if not ok:
+                return
+            operation = lambda progress: self.operations.capture_manifest(photos, min_photos=min_photos, min_long_edge_px=min_edge, progress_callback=progress)
+        elif stage_id == "02-photogrammetry":
             images = QFileDialog.getExistingDirectory(self, "Select source photographs", str(self.store.workspace))
             if not images:
                 return
@@ -495,13 +502,17 @@ class MainWindow(QMainWindow):
             return
         report, report_path = result  # type: ignore[misc]
         self.log.appendPlainText(f"{stage_id}: operation completed; report: {report_path}")
-        if stage_id == "02-photogrammetry":
+        if stage_id == "01-reference-acquisition":
+            self.store.register_artifact(stage_id, report_path, kind="capture_manifest", metadata={"summary": report.get("summary", {})})
+            gate = report.get("summary", {}).get("quality_gate", "failed")
+            self.store.add_validation_result(stage_id, "capture_quality_gate", "passed" if gate == "passed" else "failed", value=report.get("summary", {}), expected="quality_gate == passed", message="Capture set passed pre-COLMAP checks." if gate == "passed" else "Capture set has blocking completeness or duplicate-file problems.")
+            for issue in report.get("issues", []):
+                if issue.get("severity") == "warning":
+                    self.store.add_validation_result(stage_id, issue.get("check", "capture_warning"), "warning", message=issue.get("message", ""))
+        elif stage_id == "02-photogrammetry":
             models = report.get("models", [])
             self.store.register_artifact(stage_id, report_path, kind="operation_report", metadata={"models": models})
-            if models:
-                self.store.add_validation_result(stage_id, "sparse_model_created", "passed", value=len(models), expected=">= 1", message="COLMAP created at least one sparse model.")
-            else:
-                self.store.add_validation_result(stage_id, "sparse_model_created", "failed", value=0, expected=">= 1", message="No sparse reconstruction model was created.")
+            self.store.add_validation_result(stage_id, "sparse_model_created", "passed" if models else "failed", value=len(models), expected=">= 1", message="COLMAP created at least one sparse model." if models else "No sparse reconstruction model was created.")
         elif stage_id == "03-reconstruction":
             mesh = Path(report["mesh"])
             self.store.register_artifact(stage_id, mesh, metadata={"operation_report": str(report_path)})
