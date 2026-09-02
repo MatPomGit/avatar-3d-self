@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - "apps/avatar_studio/src/**"
       - "scripts/**"
       - "tests/**"
       - "pyproject.toml"
@@ -11,6 +12,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "apps/avatar_studio/src/**"
       - "scripts/**"
       - "tests/**"
       - "pyproject.toml"
@@ -27,7 +29,7 @@ concurrency:
 jobs:
   python-checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v7
 
@@ -39,13 +41,13 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Install development tools
-        run: python -m pip install --disable-pip-version-check --quiet -e ".[dev]"
+        run: python -m pip install --disable-pip-version-check --quiet -e ".[dev,geometry,vision]"
 
       - name: Compile Python sources
-        run: python -m compileall -q scripts tests
+        run: python -m compileall -q apps/avatar_studio/src scripts tests
 
       - name: Check critical Python errors
-        run: ruff check scripts tests
+        run: ruff check apps/avatar_studio/src scripts tests
 
       - name: Run unit tests
         run: pytest -q
