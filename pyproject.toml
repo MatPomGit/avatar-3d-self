@@ -23,6 +23,8 @@ docs = [
 ]
 desktop = [
     "PySide6>=6.8,<7",
+    "numpy>=1.26,<3",
+    "trimesh>=4,<6",
 ]
 desktop-build = [
     "pyinstaller>=6.11,<7",
