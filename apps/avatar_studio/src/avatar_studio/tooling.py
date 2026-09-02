@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Mapping
 
 from avatar_studio.adapters import BlenderAdapter, ColmapAdapter, FFmpegAdapter, PiperAdapter
 
@@ -18,10 +19,16 @@ class ToolProbe:
         return self.executable is not None
 
 
-def probe_default_tools() -> tuple[ToolProbe, ...]:
-    """Locate common tools without executing or modifying them."""
+def probe_default_tools(configured: Mapping[str, str | None] | None = None) -> tuple[ToolProbe, ...]:
+    """Locate common tools, honoring optional project-specific executable paths."""
 
-    adapters = (BlenderAdapter(), ColmapAdapter(), FFmpegAdapter(), PiperAdapter())
+    configured = configured or {}
+    adapters = (
+        BlenderAdapter(configured.get("blender") or None),
+        ColmapAdapter(configured.get("colmap") or None),
+        FFmpegAdapter(configured.get("ffmpeg") or None),
+        PiperAdapter(configured.get("piper") or None),
+    )
     return tuple(
         ToolProbe(adapter.name, str(path) if (path := adapter.resolve()) else None)
         for adapter in adapters
@@ -29,6 +36,4 @@ def probe_default_tools() -> tuple[ToolProbe, ...]:
 
 
 def display_path(path: str | None) -> str:
-    """Return a stable display value for a discovered executable."""
-
     return str(Path(path)) if path else "not found in PATH"
