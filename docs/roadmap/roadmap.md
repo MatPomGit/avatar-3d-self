@@ -28,8 +28,9 @@ Roadmapa opisuje rozwój produktu i implementacji. Szczegółowy stan stabilizac
 - [x] Bramki DoD, waivery i automatyczne unieważnianie etapów zależnych.
 - [x] CI obejmujące kod aplikacji desktopowej.
 - [x] Headless GUI smoke test w workflow desktopowym.
+- [x] Rozbudowane instrukcje krok po kroku dla etapów 02, 03, 04, 05, 06, 12, 16, 20 i 21.
 - [~] Raportowanie postępu: log i stan operacji są dostępne, brak dokładnego procentowego postępu COLMAP.
-- [~] Dokumentacja dydaktyczna: szczegółowo rozbudowane 02 i 03; pozostałe rozdziały wymagają analogicznego poziomu instrukcji.
+- [~] Pozostałe rozdziały pipeline'u wymagają doprowadzenia do tego samego poziomu dydaktycznego.
 - [ ] Smoke test end-to-end na prawdziwym mini-zestawie zdjęć i rzeczywistym COLMAP.
 
 **DoD M0.5:** użytkownik bez CLI potrafi skonfigurować narzędzia, uruchomić rekonstrukcję sparse i dense, uzyskać mesh i raport, anulować operację oraz przejść przez kontrolowaną bramkę jakości. Do pełnego zamknięcia pozostaje realny test end-to-end.
@@ -55,9 +56,10 @@ Roadmapa opisuje rozwój produktu i implementacji. Szczegółowy stan stabilizac
 
 - [x] sparse reconstruction z GUI;
 - [x] dense reconstruction, fusion i mesh z GUI;
-- [~] cleanup: instrukcja + inspekcja Blender, bez automatycznego edytora;
-- [~] retopologia: instrukcja + inspekcja Blender, bez automatycznego workflow;
-- [~] UV i PBR: dokumentacja i narzędzia pomocnicze;
+- [~] cleanup: rozbudowana instrukcja + inspekcja Blender, bez automatycznego edytora;
+- [~] retopologia: rozbudowana instrukcja + inspekcja Blender, bez automatycznego workflow;
+- [~] UV: rozbudowana instrukcja + narzędzia pomocnicze;
+- [~] PBR: dokumentacja i narzędzia pomocnicze;
 - [~] oczy, jama ustna, włosy i zarost: dokumentacja produkcyjna;
 - [~] ubrania i okulary: dokumentacja produkcyjna.
 
@@ -68,9 +70,11 @@ Roadmapa opisuje rozwój produktu i implementacji. Szczegółowy stan stabilizac
 **Stan:** specyfikacje są rozwinięte, a sceny Blender można inspektować z GUI. Automatyczne tworzenie rigu nie jest jeszcze funkcją Avatar Studio.
 
 - [x] specyfikacja szkieletu;
-- [x] specyfikacja rigu ciała i dłoni;
+- [x] rozbudowana instrukcja rigu ciała;
+- [x] specyfikacja rigu dłoni;
 - [x] specyfikacja ARKit/FACS;
-- [x] dokumentacja ruchu wtórnego i skinningu;
+- [x] dokumentacja ruchu wtórnego;
+- [x] rozbudowana instrukcja skinningu;
 - [ ] kreator lub kontrolowany workflow riggingu z GUI;
 - [ ] automatyczna walidacja semantyczna skeleton/weights względem specyfikacji.
 
@@ -91,11 +95,12 @@ Roadmapa opisuje rozwój produktu i implementacji. Szczegółowy stan stabilizac
 
 ## M5: środowisko czasu rzeczywistego
 
-**Stan:** dokumentacja i narzędzia eksportowe istnieją, ale demonstrator czasu rzeczywistego nie jest jeszcze końcowym artefaktem produktu.
+**Stan:** dokumentacja eksportu i walidacji runtime została rozbudowana; demonstrator czasu rzeczywistego nadal nie jest końcowym artefaktem produktu.
 
 - [x] dokumentacja Unreal Engine, Unity i Web;
 - [x] specyfikacja LOD i budżetu wydajności;
-- [x] dokumentacja walidacji importu;
+- [x] rozbudowana procedura eksportu i importu kontrolnego;
+- [x] rozbudowana procedura walidacji runtime;
 - [ ] wybrany profil referencyjnego runtime dla wersji 1.0;
 - [ ] demonstrator czasu rzeczywistego;
 - [ ] pomiar wydajności na określonym sprzęcie.
