@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
+from typing import Callable
 
 from avatar_studio.adapters.base import CommandResult, ToolAdapter
+
+
+ProgressCallback = Callable[[int, str], None]
 
 
 class ColmapAdapter(ToolAdapter):
@@ -14,8 +18,6 @@ class ColmapAdapter(ToolAdapter):
     version_args = ("-h",)
 
     def analyze_sparse_model(self, model_path: str | Path) -> dict:
-        """Run COLMAP model_analyzer and normalize its principal quality metrics."""
-
         path = Path(model_path).resolve()
         if not path.exists():
             raise FileNotFoundError(path)
@@ -35,9 +37,8 @@ class ColmapAdapter(ToolAdapter):
         matcher: str = "exhaustive",
         mask_path: str | Path | None = None,
         timeout_s: float = 3600.0,
+        progress_callback: ProgressCallback | None = None,
     ) -> dict:
-        """Execute feature extraction, matching and sparse mapping in a private workspace."""
-
         images = Path(image_path).resolve()
         if not images.is_dir():
             raise NotADirectoryError(images)
@@ -47,15 +48,14 @@ class ColmapAdapter(ToolAdapter):
         sparse = root / "sparse"
         sparse.mkdir(parents=True, exist_ok=True)
 
+        def progress(value: int, message: str) -> None:
+            if progress_callback:
+                progress_callback(value, message)
+
+        progress(5, "Preparing sparse reconstruction")
         feature_args = [
-            "feature_extractor",
-            "--database_path",
-            str(database),
-            "--image_path",
-            str(images),
-            "--ImageReader.camera_model",
-            camera_model,
-            "--ImageReader.single_camera",
+            "feature_extractor", "--database_path", str(database), "--image_path", str(images),
+            "--ImageReader.camera_model", camera_model, "--ImageReader.single_camera",
             "1" if single_camera else "0",
         ]
         if mask_path is not None:
@@ -64,8 +64,10 @@ class ColmapAdapter(ToolAdapter):
                 raise NotADirectoryError(masks)
             feature_args.extend(("--ImageReader.mask_path", str(masks)))
 
+        progress(10, "Extracting image features")
         feature_result = self.run(feature_args, timeout_s=timeout_s)
         self._require_success(feature_result, "COLMAP feature extraction")
+        progress(35, "Feature extraction complete")
 
         matcher_command = {
             "exhaustive": "exhaustive_matcher",
@@ -74,24 +76,23 @@ class ColmapAdapter(ToolAdapter):
         }.get(matcher)
         if matcher_command is None:
             raise ValueError("matcher must be exhaustive, sequential or spatial")
+        progress(40, f"Matching features ({matcher})")
         match_result = self.run((matcher_command, "--database_path", str(database)), timeout_s=timeout_s)
         self._require_success(match_result, "COLMAP feature matching")
+        progress(70, "Feature matching complete")
 
+        progress(75, "Registering cameras and building sparse model")
         mapper_result = self.run(
             ("mapper", "--database_path", str(database), "--image_path", str(images), "--output_path", str(sparse)),
             timeout_s=timeout_s,
         )
         self._require_success(mapper_result, "COLMAP sparse mapping")
-
         models = sorted(path for path in sparse.iterdir() if path.is_dir())
+        progress(100, "Sparse reconstruction complete")
         return {
-            "tool": "COLMAP",
-            "database_path": str(database),
-            "sparse_root": str(sparse),
-            "models": [str(path) for path in models],
-            "camera_model": camera_model,
-            "single_camera": single_camera,
-            "matcher": matcher,
+            "tool": "COLMAP", "database_path": str(database), "sparse_root": str(sparse),
+            "models": [str(path) for path in models], "camera_model": camera_model,
+            "single_camera": single_camera, "matcher": matcher,
             "commands": [list(feature_result.command), list(match_result.command), list(mapper_result.command)],
         }
 
@@ -104,9 +105,8 @@ class ColmapAdapter(ToolAdapter):
         max_image_size: int = 3200,
         mesher: str = "poisson",
         timeout_s: float = 14400.0,
+        progress_callback: ProgressCallback | None = None,
     ) -> dict:
-        """Undistort images, run PatchMatch stereo, fuse depth maps and create a mesh."""
-
         images = Path(image_path).resolve()
         model = Path(sparse_model).resolve()
         root = Path(workspace).resolve()
@@ -119,44 +119,45 @@ class ColmapAdapter(ToolAdapter):
         if mesher not in {"poisson", "delaunay"}:
             raise ValueError("mesher must be poisson or delaunay")
 
+        def progress(value: int, message: str) -> None:
+            if progress_callback:
+                progress_callback(value, message)
+
         dense = root / "dense"
         dense.mkdir(parents=True, exist_ok=True)
         fused = dense / "fused.ply"
         mesh = dense / ("meshed-poisson.ply" if mesher == "poisson" else "meshed-delaunay.ply")
 
+        progress(5, "Undistorting images")
         undistort = self.run(
-            (
-                "image_undistorter",
-                "--image_path", str(images),
-                "--input_path", str(model),
-                "--output_path", str(dense),
-                "--output_type", "COLMAP",
-                "--max_image_size", str(max_image_size),
-            ),
+            ("image_undistorter", "--image_path", str(images), "--input_path", str(model),
+             "--output_path", str(dense), "--output_type", "COLMAP", "--max_image_size", str(max_image_size)),
             timeout_s=timeout_s,
         )
         self._require_success(undistort, "COLMAP image undistortion")
+        progress(20, "Image undistortion complete")
 
+        progress(25, "Running PatchMatch stereo")
         patch_match = self.run(
-            ("patch_match_stereo", "--workspace_path", str(dense), "--workspace_format", "COLMAP", "--PatchMatchStereo.geom_consistency", "true"),
+            ("patch_match_stereo", "--workspace_path", str(dense), "--workspace_format", "COLMAP",
+             "--PatchMatchStereo.geom_consistency", "true"),
             timeout_s=timeout_s,
         )
         self._require_success(patch_match, "COLMAP PatchMatch stereo")
+        progress(65, "PatchMatch stereo complete")
 
+        progress(70, "Fusing depth maps")
         fusion = self.run(
-            (
-                "stereo_fusion",
-                "--workspace_path", str(dense),
-                "--workspace_format", "COLMAP",
-                "--input_type", "geometric",
-                "--output_path", str(fused),
-            ),
+            ("stereo_fusion", "--workspace_path", str(dense), "--workspace_format", "COLMAP",
+             "--input_type", "geometric", "--output_path", str(fused)),
             timeout_s=timeout_s,
         )
         self._require_success(fusion, "COLMAP stereo fusion")
         if not fused.is_file():
             raise RuntimeError("COLMAP completed fusion without creating fused.ply")
+        progress(85, "Stereo fusion complete")
 
+        progress(88, f"Building {mesher} mesh")
         if mesher == "poisson":
             meshing = self.run(("poisson_mesher", "--input_path", str(fused), "--output_path", str(mesh)), timeout_s=timeout_s)
         else:
@@ -164,14 +165,11 @@ class ColmapAdapter(ToolAdapter):
         self._require_success(meshing, f"COLMAP {mesher} meshing")
         if not mesh.is_file():
             raise RuntimeError("COLMAP meshing completed without creating the expected mesh")
+        progress(100, "Dense reconstruction and meshing complete")
 
         return {
-            "tool": "COLMAP",
-            "dense_workspace": str(dense),
-            "fused_point_cloud": str(fused),
-            "mesh": str(mesh),
-            "max_image_size": max_image_size,
-            "mesher": mesher,
+            "tool": "COLMAP", "dense_workspace": str(dense), "fused_point_cloud": str(fused),
+            "mesh": str(mesh), "max_image_size": max_image_size, "mesher": mesher,
             "commands": [list(undistort.command), list(patch_match.command), list(fusion.command), list(meshing.command)],
         }
 
