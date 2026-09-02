@@ -8,6 +8,7 @@ from typing import Any, Callable
 
 from avatar_studio.adapters import BlenderAdapter, ColmapAdapter, FFmpegAdapter, PiperAdapter
 from avatar_studio.adapters.base import ToolAdapter
+from avatar_studio.capture import write_capture_manifest
 from avatar_studio.store import ProjectStore
 
 
@@ -69,6 +70,25 @@ class OperationService:
             raise
         finally:
             self.active_adapter = None
+
+    def capture_manifest(
+        self,
+        photo_directory: str | Path,
+        *,
+        min_photos: int = 60,
+        min_long_edge_px: int = 3000,
+        progress_callback: ProgressCallback | None = None,
+    ) -> tuple[dict[str, Any], Path]:
+        """Create the stage-01 capture manifest and pre-COLMAP quality report."""
+
+        output = self.store.workspace / "capture" / "capture_manifest.json"
+        return write_capture_manifest(
+            photo_directory,
+            output,
+            min_photos=min_photos,
+            min_long_edge_px=min_long_edge_px,
+            progress_callback=progress_callback,
+        )
 
     def colmap_sparse(
         self,
