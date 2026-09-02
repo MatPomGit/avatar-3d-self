@@ -1,0 +1,3 @@
+# Placeholder only.
+# Do not list or commit private biometric photo paths in the public repository.
+# Real capture inputs belong in the private Avatar Studio workspace.
