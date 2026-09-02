@@ -19,5 +19,7 @@ def test_main_window_opens_headless(tmp_path: Path) -> None:
     assert window.stage_list.count() == 21
     assert "Avatar Studio" in window.windowTitle()
     assert window.progress_bar.maximum() == 1000
+    assert window.operation_progress.maximum() == 100
+    assert window.artifact_preview is not None
     window.close()
     app.processEvents()
