@@ -92,6 +92,10 @@ Przykład: zamiast pisać tylko „IOR rogówki = 1,376”, należy najpierw wyj
 | geometria niebędąca rozmaitością | non-manifold geometry | Można skrócić do „geometria non-manifold” tylko w kodzie lub nazwie narzędzia. |
 | obwiednia | bounding box | Dla osiowej: osiowo wyrównana obwiednia prostopadłościenna (axis-aligned bounding box, AABB). |
 | poziom szczegółowości | Level of Detail, LOD | Skrót LOD jest dopuszczalny po rozwinięciu. |
+| | feature extraction | |
+| | feature matching | |
+| | sparse reconstruction | |
+| | dense reconstruction | |
 
 ## Włosy i zarost
 
