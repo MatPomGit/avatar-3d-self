@@ -14,6 +14,7 @@ nav:
       - Goals and requirements: project/goals-and-requirements.md
       - Architecture: project/architecture.md
       - Documentation map: project/documentation-map.md
+      - Pre-development audit: project/pre-development-audit.md
       - Naming: project/naming.md
       - Terminology: project/terminology.md
       - Technical baselines: project/technical-baselines.md
