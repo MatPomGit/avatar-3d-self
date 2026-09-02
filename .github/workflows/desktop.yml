@@ -20,6 +20,8 @@ jobs:
             artifact: AvatarStudio-Linux
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    env:
+      QT_QPA_PLATFORM: offscreen
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
@@ -27,9 +29,9 @@ jobs:
           python-version: "3.11"
           cache: pip
       - name: Install desktop dependencies
-        run: python -m pip install -e ".[desktop,desktop-build]"
-      - name: Run non-GUI tests
-        run: python -m pytest -q tests/test_avatar_studio.py
+        run: python -m pip install -e ".[dev,desktop,desktop-build]"
+      - name: Run desktop state and GUI smoke tests
+        run: python -m pytest -q tests/test_avatar_studio.py tests/test_gui_smoke.py
       - name: Build standalone application
         run: pyinstaller --noconfirm --clean --onefile --windowed --name AvatarStudio apps/avatar_studio/launcher.py
       - name: Upload package
