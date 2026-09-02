@@ -1,8 +1,6 @@
 # Roadmapa
 
-Roadmapa opisuje rozwój produktu i implementacji. Warstwa dokumentacji bazowej dla całego 21-etapowego pipeline'u jest opracowana i utrzymywana zgodnie z [mapą dokumentacji](../project/documentation-map.md). Oznacza to kompletność specyfikacji bazowej, nie zakończenie implementacji wszystkich etapów produkcyjnych.
-
-Stan implementacji po audycie opisuje [audyt gotowości przed dalszym rozwojem](../project/pre-development-audit.md). Obecna aplikacja desktopowa jest przede wszystkim nawigatorem pipeline'u i rejestrem artefaktów. Adaptery Blender/COLMAP/FFmpeg/Piper istnieją, ale większość operacji nie jest jeszcze dostępna z GUI.
+Roadmapa opisuje rozwój produktu i implementacji. Szczegółowy stan stabilizacji znajduje się w [audycie gotowości przed dalszym rozwojem](../project/pre-development-audit.md).
 
 ## M0: profesjonalne fundamenty
 
@@ -14,90 +12,110 @@ Stan implementacji po audycie opisuje [audyt gotowości przed dalszym rozwojem](
 - [x] Automatyczna kontrola terminologii.
 - [x] Rygorystyczna budowa dokumentacji przez `mkdocs build --strict`.
 
-**DoD:** czysty klon buduje dokumentację, testy i minimalną aplikację desktopową.
-
 ## M0.5: stabilizacja fundamentu
 
-Ten kamień milowy jest warunkiem przejścia od architektury demonstracyjnej do podstawowego produktu używalnego bez ręcznego wpisywania poleceń.
+**Stan: w dużej mierze wykonane.** Podstawowy wykonywalny pipeline i GUI są już połączone, natomiast wymagają jeszcze praktycznego testu na realnym zestawie danych oraz dokładniejszego raportowania postępu.
 
-- [ ] Uzgodnić dokumentację GUI z faktyczną implementacją i jawnie oznaczać funkcje `implemented`, `partial` oraz `planned`.
-- [ ] Zdefiniować i uruchomić minimalny pipeline `zdjęcia -> sparse reconstruction -> dense/mesh -> inspekcja Blender -> artefakt i raport`.
-- [ ] Dodać dense reconstruction i meshing albo jawnie zintegrować wspierane narzędzie zastępcze.
-- [ ] Dodać kreator projektu oraz konfigurację Blender/COLMAP/FFmpeg/Piper w GUI.
-- [ ] Udostępnić formularze i przyciski uruchamiające adaptery bez konieczności używania CLI.
-- [ ] Uruchamiać długie zadania poza wątkiem UI z postępem, logiem, błędami i anulowaniem.
-- [ ] Wprowadzić rzeczywiste bramki Definition of Done, kontrolowane wyjątki i unieważnianie zależnych wyników.
-- [ ] Rozbudować najkrótsze rozdziały pipeline'u do instrukcji dydaktycznych krok po kroku.
-- [ ] Rozszerzyć CI o kod aplikacji desktopowej i usunąć puste testy/artefakty sugerujące nieistniejącą kompletność.
+- [x] Dokumentacja GUI odpowiada aktualnej implementacji.
+- [x] Minimalny pipeline `zdjęcia -> sparse -> dense/fusion/mesh -> Blender inspection -> artefakt i raport`.
+- [x] COLMAP dense reconstruction oraz Poisson/Delaunay meshing.
+- [x] Tworzenie/otwieranie workspace z GUI.
+- [x] Konfiguracja Blender/COLMAP/FFmpeg/Piper z GUI.
+- [x] Uruchamianie podstawowych operacji bez CLI.
+- [x] Operacje poza głównym wątkiem GUI.
+- [x] Anulowanie aktywnego procesu zewnętrznego.
+- [x] Historia `tool_runs` i raporty JSON operacji.
+- [x] Bramki DoD, waivery i automatyczne unieważnianie etapów zależnych.
+- [x] CI obejmujące kod aplikacji desktopowej.
+- [x] Headless GUI smoke test w workflow desktopowym.
+- [~] Raportowanie postępu: log i stan operacji są dostępne, brak dokładnego procentowego postępu COLMAP.
+- [~] Dokumentacja dydaktyczna: szczegółowo rozbudowane 02 i 03; pozostałe rozdziały wymagają analogicznego poziomu instrukcji.
+- [ ] Smoke test end-to-end na prawdziwym mini-zestawie zdjęć i rzeczywistym COLMAP.
 
-**DoD:** użytkownik bez wpisywania poleceń tworzy projekt, konfiguruje narzędzia, uruchamia podstawową rekonstrukcję, obserwuje postęp, otrzymuje artefakt i raport oraz przechodzi dalej wyłącznie po spełnieniu kryteriów jakości lub zapisaniu jawnego wyjątku.
+**DoD M0.5:** użytkownik bez CLI potrafi skonfigurować narzędzia, uruchomić rekonstrukcję sparse i dense, uzyskać mesh i raport, anulować operację oraz przejść przez kontrolowaną bramkę jakości. Do pełnego zamknięcia pozostaje realny test end-to-end.
 
 ## M1: pozyskiwanie materiału referencyjnego
 
-**Stan:** dokumentacja i struktura danych są rozwinięte; pełna obsługa procesu przez GUI pozostaje częściowa.
+**Stan:** dokumentacja capture jest rozwinięta; GUI zarządza etapem i artefaktami, ale nie steruje kamerą ani automatycznym acquisition.
 
-- prywatny workspace;
-- fotografie geometryczne i referencyjne;
-- pomiary antropometryczne;
-- ekspresje i FACS;
-- manifest pozyskiwania danych.
+- [x] prywatny workspace;
+- [x] dokumentacja fotografii geometrycznej i referencyjnej;
+- [x] procedury samodzielnego capture i obracającej się osoby;
+- [x] dokumentacja pomiarów antropometrycznych;
+- [x] dokumentacja ekspresji i FACS;
+- [x] specyfikacja manifestu pozyskiwania danych;
+- [ ] kreator manifestu capture w GUI;
+- [ ] automatyczna kontrola kompletności serii zdjęć przed COLMAP.
 
 **DoD:** zatwierdzony pakiet referencji z kontrolą jakości i bez publikowania danych prywatnych.
 
 ## M2: model i opracowanie wyglądu
 
-**Stan:** dokumentacja i część narzędzi pomocniczych istnieją; pełny workflow produkcyjny nie jest jeszcze zintegrowany z Avatar Studio.
+**Stan:** rekonstrukcja COLMAP jest wykonywalna z GUI; dalsze etapy modelarskie nadal wymagają Blender/DCC.
 
-- rekonstrukcja i czyszczenie siatki;
-- retopologia;
-- UV i PBR;
-- oczy, jama ustna, włosy i zarost;
-- ubrania i okulary.
+- [x] sparse reconstruction z GUI;
+- [x] dense reconstruction, fusion i mesh z GUI;
+- [~] cleanup: instrukcja + inspekcja Blender, bez automatycznego edytora;
+- [~] retopologia: instrukcja + inspekcja Blender, bez automatycznego workflow;
+- [~] UV i PBR: dokumentacja i narzędzia pomocnicze;
+- [~] oczy, jama ustna, włosy i zarost: dokumentacja produkcyjna;
+- [~] ubrania i okulary: dokumentacja produkcyjna.
 
 **DoD:** edytowalny model zalicza geometryczne i wizualne kryteria odbiorcze.
 
 ## M3: rig i deformacja
 
-**Stan:** istnieją specyfikacje i walidatory pomocnicze; wykonanie i kontrola pełnego rigu nadal wymagają pracy w narzędziu DCC.
+**Stan:** specyfikacje są rozwinięte, a sceny Blender można inspektować z GUI. Automatyczne tworzenie rigu nie jest jeszcze funkcją Avatar Studio.
 
-- specyfikacja szkieletu;
-- rig ciała i dłoni;
-- rig twarzy ARKit/FACS;
-- ruch wtórny;
-- walidacja wiązania skóry z kośćmi.
+- [x] specyfikacja szkieletu;
+- [x] specyfikacja rigu ciała i dłoni;
+- [x] specyfikacja ARKit/FACS;
+- [x] dokumentacja ruchu wtórnego i skinningu;
+- [ ] kreator lub kontrolowany workflow riggingu z GUI;
+- [ ] automatyczna walidacja semantyczna skeleton/weights względem specyfikacji.
 
 **DoD:** pełny zakres ruchu bez krytycznych artefaktów deformacji.
 
 ## M4: zachowanie i mowa
 
-**Stan:** istnieją adapter Piper, dokumentacja fonemów/wizemów i skrypty pomocnicze; brak kompletnego sterowania tym procesem z GUI.
+**Stan:** podstawowe operacje Piper i FFmpeg są dostępne z GUI; pełna generacja animacji mowy i zachowania pozostaje w rozwoju.
 
-- warstwowa animacja;
-- spojrzenie, mruganie, animacja bezczynności i gesty;
-- Piper;
-- dopasowanie czasowe fonemów, wizemy i koartykulacja.
+- [x] adapter Piper dostępny przez GUI;
+- [x] normalizacja audio FFmpeg z GUI;
+- [x] dokumentacja fonemów, wizemów i koartykulacji;
+- [~] skrypty pomocnicze lip-sync;
+- [ ] automatyczne `audio -> alignment -> visemes -> animation curves` z GUI;
+- [ ] warstwowa integracja mowy, mimiki, spojrzenia i gestów w podglądzie.
 
 **DoD:** naturalny klip zawierający mowę, emocję, spojrzenie i gest.
 
 ## M5: środowisko czasu rzeczywistego
 
-**Stan:** dokumentacja eksportu i walidacji istnieje; demonstrator czasu rzeczywistego nie jest jeszcze końcowym, zweryfikowanym artefaktem produktu.
+**Stan:** dokumentacja i narzędzia eksportowe istnieją, ale demonstrator czasu rzeczywistego nie jest jeszcze końcowym artefaktem produktu.
 
-- zatwierdzony silnik docelowy;
-- LOD i budżet wydajności;
-- walidacja importu;
-- demonstrator czasu rzeczywistego.
+- [x] dokumentacja Unreal Engine, Unity i Web;
+- [x] specyfikacja LOD i budżetu wydajności;
+- [x] dokumentacja walidacji importu;
+- [ ] wybrany profil referencyjnego runtime dla wersji 1.0;
+- [ ] demonstrator czasu rzeczywistego;
+- [ ] pomiar wydajności na określonym sprzęcie.
 
 **DoD:** stabilne działanie na określonym sprzęcie w ustalonym budżecie.
 
 ## M6: Avatar Studio 1.0
 
-- [x] bazowa warstwa adapterów Blender/COLMAP/FFmpeg/Piper;
-- [~] bazowy inspektor artefaktów 3D, wymagający pogłębienia dla scen, rigu, materiałów i animacji;
-- [ ] integracja operacji narzędzi z interfejsem użytkownika;
-- [ ] podgląd wyników;
+- [x] warstwa adapterów Blender/COLMAP/FFmpeg/Piper;
+- [x] warstwa `OperationService` z provenance i historią uruchomień;
+- [x] bazowy inspektor artefaktów 3D;
+- [x] integracja podstawowych operacji narzędzi z GUI;
+- [x] kontrolowane bramki jakości i waivery;
+- [x] automatyczne unieważnianie wyników zależnych po zmianie artefaktu;
+- [~] podgląd wyników: metadane i raporty są dostępne, brak obrazu/viewportu 3D;
+- [ ] interaktywny podgląd zdjęć i 3D;
 - [ ] raport końcowy projektu;
-- [ ] automatyczne unieważnianie wyników zależnych po zmianie artefaktu;
-- [ ] podpisane wydanie `.exe` dla Windows i build Linux.
+- [ ] kolejka operacji i dokładny progress reporting;
+- [ ] pełne operacje produkcyjne dla kolejnych etapów Blender;
+- [ ] podpisane wydanie `.exe` dla Windows i build Linux;
+- [ ] referencyjny demonstrator czasu rzeczywistego.
 
-**DoD:** użytkownik może przejść cały obsługiwany pipeline z poziomu Avatar Studio, otrzymując wersjonowane artefakty, raporty walidacji i odtwarzalny eksport bez ręcznego obchodzenia aplikacji.
+**DoD:** użytkownik może przejść cały wspierany pipeline z poziomu Avatar Studio, otrzymując wersjonowane artefakty, raporty walidacji i odtwarzalny eksport bez ręcznego obchodzenia aplikacji tam, gdzie dany etap jest oznaczony jako zautomatyzowany.
