@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "clips": [],
+  "notes": "Project-specific animation clips are registered here when they exist; an empty list means no clips have been added yet."
+}
