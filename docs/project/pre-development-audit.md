@@ -1,163 +1,104 @@
 # Audyt gotowości przed dalszym rozwojem
 
-Dokument podsumowuje stan projektu Avatar Studio po przeglądzie repozytorium, dokumentacji, kodu aplikacji desktopowej, adapterów narzędzi i roadmapy. Jego celem jest oddzielenie elementów już istniejących od elementów, które są jedynie opisane lub przygotowane architektonicznie.
+Dokument jest żywą listą kontrolną stabilizacji Avatar Studio. Pierwszy audyt wykazał, że repozytorium miało szeroką dokumentację i poprawne fundamenty architektoniczne, ale GUI nie wykonywało podstawowego pipeline'u. Od tego czasu wdrożono zasadniczą część warstwy M0.5.
 
-## Wniosek ogólny
+## Stan po stabilizacji fundamentu
 
-Projekt ma dobrą strukturę architektoniczną, szerokie pokrycie tematyczne dokumentacji i poprawnie rozdzielone warstwy: pipeline, adaptery narzędzi, lokalny stan projektu, inspekcję artefaktów i dokumentację techniczną. Nie jest jednak jeszcze gotowym środowiskiem prowadzącym użytkownika przez podstawowy proces tworzenia awatara bez ręcznego używania narzędzi zewnętrznych.
+Avatar Studio nie jest jeszcze kompletnym automatycznym systemem tworzenia fotorealistycznego człowieka. Jest jednak obecnie wykonywalnym narzędziem desktopowym, które potrafi bez ręcznego wpisywania poleceń:
 
-Największa luka znajduje się pomiędzy warstwą adapterów i dokumentacją a interfejsem użytkownika. GUI potrafi obecnie prowadzić po etapach, przechowywać statusy i rejestrować artefakty, ale nie uruchamia większości operacji produkcyjnych. W wielu miejscach dokumentacja opisuje funkcje docelowe tak, jakby były już dostępne.
+1. utworzyć lub otworzyć prywatny workspace;
+2. skonfigurować ścieżki Blender, COLMAP, FFmpeg i Piper;
+3. uruchomić sparse reconstruction COLMAP;
+4. uruchomić dense reconstruction, fusion i meshing COLMAP;
+5. uruchomić głęboką inspekcję sceny Blender;
+6. uruchomić podstawowe operacje FFmpeg i Piper;
+7. zapisać historię uruchomień i raporty operacji;
+8. zarejestrować artefakty z SHA-256 i metadanymi;
+9. zapisać wyniki walidacji i kontrolowane wyjątki DoD;
+10. automatycznie unieważnić downstream stages po zmianie zatwierdzonego wejścia;
+11. anulować aktywny proces zewnętrzny;
+12. przejść bezpośrednio z etapu do właściwej dokumentacji.
 
-## Stan poszczególnych warstw
+Pozostałe etapy produkcyjne, szczególnie cleanup, retopologia, UV, materiały, rig, skinning i animacja, nadal wymagają pracy w Blenderze lub innym DCC. Avatar Studio prowadzi przez ich kolejność, rejestruje wyniki i może inspektować sceny, ale jeszcze ich automatycznie nie wykonuje.
 
-### Dokumentacja
+## Zrealizowane zadania P0
 
-Mocne strony:
+### Zgodność dokumentacji z implementacją
 
-- logiczny podział na 21 etapów pipeline'u;
-- osobne sekcje capture, modeling, materials, rigging, animation, speech, runtime i validation;
-- dobre rozdzielenie specyfikacji technicznej od procesu produkcyjnego;
-- osobne poradniki dotyczące fotografii, samodzielnego wykonywania zdjęć i wariantu osoby obracającej się przed kamerą;
-- jawne Definition of Done dla etapów;
-- MkDocs i automatyczna kontrola obecności dokumentów w nawigacji.
+- [x] Instrukcja GUI opisuje aktualne kontrolki i rzeczywisty zakres automatyzacji.
+- [x] Usunięto stwierdzenie, że użytkownik musi ręcznie konfigurować funkcje, których GUI nie posiada.
+- [x] Dokumentacja rozróżnia operacje automatyczne od etapów wykonywanych ręcznie w DCC.
+- [x] Zerobajtowe testy, walidator i pozorne końcowe artefakty zostały usunięte; sensowne szablony danych mają jawny minimalny format.
 
-Braki:
+### Minimalny wykonywalny pipeline
 
-- znaczna część rozdziałów pipeline'u ma charakter checklisty, a nie kompletnej instrukcji dydaktycznej;
-- część instrukcji mówi, co zrobić, ale nie pokazuje dokładnie gdzie wykonać operację, jakie parametry ustawić, jak interpretować wynik i co zrobić w przypadku niepowodzenia;
-- Windows i Linux często powtarzają niemal tę samą procedurę zamiast rozdzielać część wspólną od różnic systemowych;
-- dokumentacja nie wskazuje przy każdym etapie, które czynności wykonuje już GUI, które adapter, a które nadal wymagają ręcznej pracy w Blenderze, COLMAP lub innym programie;
-- dokumentacja desktopowa opisuje kilka funkcji, których obecne GUI jeszcze nie posiada.
+- [x] Zdefiniowano scenariusz `zdjęcia -> sparse -> dense/fusion/mesh -> Blender inspection -> artefakty i raporty`.
+- [x] Adapter COLMAP obsługuje `image_undistorter`, `patch_match_stereo`, `stereo_fusion` oraz Poisson/Delaunay meshing.
+- [x] Utworzono `OperationService` jako warstwę orkiestracji zamiast wywoływania adapterów bezpośrednio z logiki projektu.
+- [x] Każda operacja wykonywana przez `OperationService` zapisuje rekord `tool_runs` i raport JSON w `reports/`.
+- [x] Dodano test kontraktu dense reconstruction z mockowanym COLMAP.
+- [ ] Dodać opcjonalny smoke test end-to-end na prawdziwym mini-zestawie zdjęć w środowisku posiadającym COLMAP.
 
-### Kod podstawowego pipeline'u
+### GUI bez konieczności wpisywania poleceń
 
-Działające fundamenty:
+- [x] Projekt można utworzyć lub otworzyć przez wybór workspace.
+- [x] Dodano ekran konfiguracji ścieżek Blender/COLMAP/FFmpeg/Piper.
+- [x] Dodano operacje GUI dla COLMAP sparse i dense reconstruction, Blender inspection, Piper synthesis i normalizacji FFmpeg.
+- [x] Operacje są wykonywane w `QThread`, dzięki czemu główne GUI nie jest blokowane.
+- [x] Adaptery wykorzystują proces możliwy do anulowania; **Cancel operation** kończy aktywny subprocess.
+- [x] GUI pokazuje opis celu operacji i link do dokumentacji etapu.
+- [~] Parametry są zbierane formularzami/dialogami, ale wymagają dalszego ujednolicenia do jednego panelu parametrów.
+- [~] Log, błąd i anulowanie są obsługiwane; brakuje dokładnego procentowego postępu dla wieloetapowych operacji COLMAP.
+- [ ] Po zakończeniu każdej operacji pokazywać jawnie następną zalecaną czynność jako osobny element UI.
 
-- kanoniczne 21 etapów i zależności;
-- lokalny stan projektu w SQLite;
-- haszowanie i rejestracja artefaktów;
-- lekka inspekcja obrazów, WAV, JSON i wybranych formatów 3D;
-- adapter COLMAP do rekonstrukcji rzadkiej;
-- adapter Blender do inspekcji sceny;
-- adaptery FFmpeg i Piper;
-- testy części parserów i kontraktów adapterów.
+### Rzeczywiste bramki jakości
 
-Braki funkcjonalne:
+- [x] Zaliczenie etapu wymaga artefaktu.
+- [x] Krytyczny wynik walidacji `failed` blokuje zaliczenie bez jawnego waivera.
+- [x] Waiver wymaga tekstowego uzasadnienia i jest przechowywany w bazie projektu.
+- [x] Waiver nie może zastąpić brakującego artefaktu.
+- [x] Zmiana artefaktu w zatwierdzonym etapie resetuje wszystkie zależne statusy i usuwa ich nieaktualne wyniki walidacji.
+- [~] Liczba automatycznych kryteriów DoD jest jeszcze mała; kolejne kryteria trzeba dodawać wraz z implementacją etapów.
 
-- brak jednej operacji orkiestrującej minimalny proces od importu zdjęć do rekonstrukcji i przekazania wyniku do dalszej obróbki;
-- adapter COLMAP kończy się na sparse reconstruction; podstawowy proces awatara wymaga również jawnej obsługi dense reconstruction / fusion / meshing albo wskazania wspieranego zamiennika;
-- brak produkcyjnych operacji GUI dla cleanupu, retopologii, UV, materiałów, rigu i eksportu;
-- brak mechanizmu walidacyjnego, który faktycznie blokuje zaliczenie etapu, gdy wymagania nie są spełnione;
-- zaliczenie etapu może być wykonane bez artefaktu po prostym potwierdzeniu użytkownika;
-- brak automatycznego unieważniania downstream artefacts po zmianie wejścia;
-- brak spójnego zapisu uruchomień adapterów do tabeli `tool_runs` z poziomu GUI;
-- brak pełnych testów end-to-end minimalnego pipeline'u.
+## Dokumentacja dydaktyczna
 
-### GUI
+- [x] Rozbudowano etap 02 Fotogrametria do procedury obejmującej przygotowanie, wybór matchera, interpretację sparse modelu, reprojection error, diagnostykę i procedury naprawcze.
+- [x] Rozbudowano etap 03 Rekonstrukcja do procedury `undistort -> PatchMatch -> fusion -> meshing`, wraz z kontrolą jakości i typowymi awariami.
+- [ ] Ujednolicić pozostałe rozdziały pipeline'u według schematu: cel, wejście, przygotowanie, procedura, parametry, kontrola pośrednia, błędy, naprawa, artefakty, DoD.
+- [ ] Priorytetowo rozbudować cleanup, retopologię, UV, rig, skinning, eksport i runtime validation.
+- [ ] Dodać ilustracje lub zrzuty GUI tam, gdzie tekst nie wystarcza do jednoznacznego wykonania czynności.
 
-Obecnie dostępne:
+## Inspekcja i podgląd artefaktów
 
-- wybór katalogu workspace;
-- lista 21 etapów i statusów;
-- opis etapu, zależności i oczekiwanych wyników;
-- odnośnik do pełnej dokumentacji;
-- ręczna zmiana statusu etapu;
-- rejestracja i inspekcja istniejącego artefaktu;
-- diagnostyka obecności lokalnych narzędzi.
+- [x] Dostępna jest głęboka inspekcja `.blend` przez BlenderAdapter uruchamiana z GUI.
+- [x] Lekki inspektor obsługuje obrazy, WAV, JSON i popularne formaty mesh.
+- [~] Blender report obejmuje geometrię, UV, materiały, armatures, bones, shape keys, actions i jednostki, ale brakuje jeszcze walidacji semantycznej konkretnego szkieletu, materiałów i morph targets.
+- [ ] Dodać podgląd obrazów bez opuszczania Avatar Studio.
+- [ ] Dodać interaktywny podgląd 3D siatki, rigu i animacji.
+- [ ] Powiązać ostrzeżenia inspektora z większą liczbą automatycznych kryteriów etapu.
 
-Braki blokujące obsługę bez kodu i CLI:
+## Testy i CI
 
-- brak kreatora nowego projektu;
-- brak ekranu konfiguracji ścieżek Blender, COLMAP, FFmpeg i Piper;
-- brak formularzy parametrów operacji;
-- brak przycisków uruchamiających właściwe operacje narzędzi dla etapów;
-- brak kolejki zadań i widocznego postępu długich operacji;
-- brak obsługi anulowania procesu;
-- brak podglądu zdjęć, chmury punktów, siatki 3D, tekstur, rigu lub animacji;
-- brak interpretacji wyników walidacji w języku użytkownika;
-- brak widoku Definition of Done z automatycznymi i ręcznymi kryteriami;
-- brak tworzenia i zarządzania wyjątkami od kryteriów odbioru;
-- brak bezpośredniego przycisku pomocy dla konkretnej funkcji lub parametru poza ogólnym linkiem do dokumentu etapu;
-- brak raportu końcowego projektu.
+- [x] Główny CI obejmuje `apps/avatar_studio/src`, `scripts` i `tests`.
+- [x] Dodano testy bramek DoD, waiverów, unieważniania zależności, konfiguracji narzędzi i dense reconstruction.
+- [x] Usunięto puste pliki testów i pusty walidator.
+- [x] Dodano headless smoke test GUI; workflow pakowania uruchamia go przed budową aplikacji.
+- [ ] Dodać test zgodności deklarowanego statusu funkcji w dokumentacji z rejestrem operacji GUI.
+- [ ] Dodać test prawdziwego COLMAP na małym publicznym zestawie demonstracyjnym, uruchamiany opcjonalnie poza szybkim CI.
 
-## Zadania konieczne przed dalszym rozwojem funkcji wysokiego poziomu
+## Pozostałe zadania przed wersją 1.0
 
-Poniższe zadania powinny zostać potraktowane jako etap stabilizacji obecnego fundamentu.
+Najważniejsze dalsze prace nie dotyczą już samego uruchomienia podstawowego pipeline'u, lecz zwiększenia jego jakości i zakresu:
 
-### P0. Zgodność dokumentacji z implementacją
+1. procentowy postęp i kolejka operacji;
+2. podgląd obrazów i 3D;
+3. automatyczne kryteria jakości sparse modelu, meshu, UV, rigu i eksportu;
+4. głębsza integracja etapów Blender zamiast samej inspekcji;
+5. raport końcowy projektu zawierający artefakty, walidacje, waivery i provenance;
+6. wersjonowanie/superseding artefaktów zamiast pozostawiania ich wyłącznie jako historii plików;
+7. rozbudowa wszystkich instrukcji pipeline'u do poziomu dydaktycznego;
+8. pełny demonstrator czasu rzeczywistego.
 
-- [ ] Oznaczyć funkcje jako `implemented`, `partial` lub `planned` w dokumentacji desktopowej i roadmapie.
-- [ ] Usunąć lub poprawić stwierdzenia sugerujące, że GUI już uruchamia cały pipeline, waliduje DoD i blokuje błędne etapy.
-- [ ] Zaktualizować instrukcję GUI tak, aby odpowiadała faktycznym kontrolkom obecnej wersji.
-- [ ] Dodać tabelę `etap -> operacja GUI -> adapter -> narzędzie zewnętrzne -> status implementacji`.
-- [ ] Zastąpić pozorne puste artefakty i testy czytelnymi placeholderami albo usunąć je, aby plik 0 B nie sugerował gotowego wyniku.
+## Kryterium zakończenia M0.5
 
-### P0. Minimalny wykonywalny pipeline
-
-- [ ] Zdefiniować minimalny wspierany scenariusz MVP, np. `zdjęcia -> COLMAP sparse -> dense/mesh -> import/inspekcja Blender -> rejestracja artefaktu`.
-- [ ] Dodać obsługę dense reconstruction i meshing albo jawnie zintegrować inne narzędzie realizujące te kroki.
-- [ ] Utworzyć warstwę orkiestracji operacji powiązaną z `StageDefinition` zamiast wywoływać adaptery ad hoc.
-- [ ] Zapisywać każde uruchomienie narzędzia i raport do `tool_runs` oraz katalogu raportów projektu.
-- [ ] Dodać test integracyjny minimalnego pipeline'u z mockowanymi narzędziami oraz osobny test smoke na prawdziwych narzędziach, gdy są dostępne.
-
-### P0. GUI bez konieczności wpisywania poleceń
-
-- [ ] Dodać kreator projektu i ekran ustawień narzędzi.
-- [ ] Dodać do etapów panel `Run operation` z formularzem parametrów i wartościami domyślnymi.
-- [ ] Połączyć GUI co najmniej z COLMAP, Blender, FFmpeg i Piper adapterami.
-- [ ] Uruchamiać ciężkie procesy poza wątkiem UI i raportować progres, log, błąd oraz możliwość anulowania.
-- [ ] Dodać przy każdej operacji krótkie wyjaśnienie celu parametrów oraz link `Więcej w dokumentacji` do właściwej sekcji.
-- [ ] Pokazywać użytkownikowi następną zalecaną czynność po zakończeniu operacji.
-
-### P0. Rzeczywiste bramki jakości
-
-- [ ] Zamienić ręczne `Mark passed` na mechanizm oceny kryteriów DoD.
-- [ ] Rozdzielić kryteria automatyczne i wymagające inspekcji człowieka.
-- [ ] Nie pozwalać przejść dalej przy krytycznym błędzie bez jawnie zapisanego wyjątku.
-- [ ] Zapisywać uzasadnienie wyjątku i prezentować je w raporcie końcowym.
-- [ ] Automatycznie unieważniać downstream stages i artefakty po zmianie zatwierdzonego wejścia.
-
-### P1. Dokumentacja dydaktyczna krok po kroku
-
-- [ ] Ujednolicić każdy rozdział pipeline'u według schematu: cel, wejście, przygotowanie, procedura krok po kroku, parametry, kontrola pośrednia, typowe błędy, procedura naprawcza, artefakty, DoD.
-- [ ] Rozbudować szczególnie fotogrametrię, dense reconstruction, cleanup, retopologię, UV, rig, skinning, eksport i walidację runtime.
-- [ ] Wprowadzić konkretne przykłady konfiguracji dla minimalnego scenariusza referencyjnego.
-- [ ] Wyjaśnić pojęcia techniczne przed użyciem ich jako polecenia wykonawczego.
-- [ ] Dodać ilustracje lub zrzuty interfejsu tam, gdzie sam opis tekstowy nie wystarcza.
-
-### P1. Inspekcja i podgląd artefaktów
-
-- [ ] Dodać głęboką inspekcję `.blend` przez BlenderAdapter podczas rejestracji sceny.
-- [ ] Dodać inspekcję skeleton, materials, morph targets, UV i animacji dla wspieranych formatów.
-- [ ] Dodać podgląd zdjęć i podstawowy interaktywny podgląd 3D.
-- [ ] Powiązać ostrzeżenia inspektora z kryteriami etapu.
-
-### P1. Testy i CI
-
-- [ ] Usunąć puste testy lub zaimplementować je.
-- [ ] Rozszerzyć główny workflow CI o kod `apps/avatar_studio/src`, ponieważ obecny workflow sprawdza głównie `scripts` i `tests`.
-- [ ] Dodać test uruchomienia GUI w trybie headless/smoke.
-- [ ] Dodać test zgodności tekstu dokumentacji GUI z funkcjami oznaczonymi jako zaimplementowane.
-- [ ] Dodać test, że wszystkie artefakty przykładowe w repozytorium są albo poprawnymi plikami, albo jawnie oznaczonymi placeholderami.
-
-## Roadmapa po audycie
-
-Obecna roadmapa poprawnie rozdziela warstwę bazową od docelowej wersji 1.0, ale zbyt słabo pokazuje stan pośredni. M0 można uznać za w dużej mierze wykonane, natomiast M1-M5 są głównie specyfikacją procesu, a nie działającym workflow programu. M6 zawiera znaczną część zadań, które są w praktyce warunkiem używalności podstawowego produktu i powinny zostać rozpoczęte wcześniej.
-
-Zalecane jest wprowadzenie kamienia milowego **M0.5 / Foundation hardening** obejmującego zadania P0 z tego dokumentu. Dopiero po nim kolejne prace nad zaawansowanymi funkcjami modelowania, rigu i runtime powinny być traktowane jako rozwój funkcjonalny produktu.
-
-## Kryterium zakończenia stabilizacji
-
-Fundament Avatar Studio można uznać za gotowy do dalszego rozwoju, gdy użytkownik bez wpisywania poleceń może:
-
-1. utworzyć projekt;
-2. skonfigurować wymagane narzędzia;
-3. wskazać serię zdjęć;
-4. uruchomić wspierany proces rekonstrukcji;
-5. obserwować postęp i błędy;
-6. uzyskać zarejestrowany artefakt 3D i raport;
-7. zrozumieć wynik walidacji;
-8. otworzyć właściwą instrukcję bez szukania jej ręcznie;
-9. przejść do następnego etapu tylko po spełnieniu kryteriów albo zapisaniu kontrolowanego wyjątku.
-
-Dopiero ten poziom odpowiada deklaracji, że Avatar Studio pozwala wykonać przynajmniej podstawowy proces tworzenia awatara z poziomu GUI.
+M0.5 można uznać za funkcjonalnie osiągnięte dla podstawowego procesu, jeżeli instalacja użytkownika posiada poprawnie skonfigurowany COLMAP i potrafi na realnej serii zdjęć wykonać sekwencję sparse → dense → mesh bez ręcznego CLI. Pełne zamknięcie M0.5 wymaga jeszcze praktycznego smoke testu na rzeczywistym zestawie danych i potwierdzenia workflow CI po zmianach.
