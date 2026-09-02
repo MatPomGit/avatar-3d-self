@@ -1,100 +1,163 @@
-# 20. Eksport do środowiska docelowego
+# 20. Eksport
 
-Eksport jest kontrolowanym przekształceniem zatwierdzonej wersji wzorcowej do artefaktu pochodnego przeznaczonego dla konkretnego środowiska docelowego. Nie jest końcem procesu. Kończy się dopiero po poprawnym imporcie i walidacji.
+**Input:** zatwierdzony model, materiały, rig, animacje i dane mowy.  
+**Editable output:** profil eksportowy i scena źródłowa.  
+**Derived output:** paczka runtime, raport konwersji i walidacja importu.
 
-**Dane wejściowe:** zatwierdzona wersja wzorcowa sceny, profil eksportu, docelowy silnik i jego wersja.  
-**Artefakt pochodny:** FBX, GLB, glTF, USD lub inny zatwierdzony format wraz z raportem konwersji.
+## Cel etapu
 
-## Profil eksportu
+Eksport nie jest zwykłym zapisaniem FBX lub glTF. Jest kontrolowanym przejściem z kanonicznej sceny edytowalnej do konkretnego środowiska runtime. Każdy profil eksportowy musi jawnie określać osie, jednostki, skalę, skeleton, morph targets, tekstury, animacje i ograniczenia formatu.
 
-Profil eksportu powinien jawnie zawierać:
+## Przygotowanie
 
-- format i wersję formatu;
-- jednostkę długości;
-- oś pionową;
-- kierunek „przód”;
-- regułę transformacji osi;
-- sposób eksportu szkieletu;
-- sposób eksportu celów morfowania;
-- listę animacji;
-- konwencję map normalnych;
-- przestrzenie barw tekstur;
-- pakowanie kanałów;
-- poziomy szczegółowości;
-- reguły włosów;
-- reguły materiałów przezroczystych.
+1. Zablokuj wersję źródłowej sceny `.blend`.
+2. Wybierz środowisko docelowe: Unreal Engine, Unity lub Web.
+3. Odczytaj odpowiednią instrukcję w sekcji `runtime/`.
+4. Ustal format wymiany i jego ograniczenia.
+5. Zapisz profil eksportu zamiast zmieniać ustawienia ręcznie przy każdej wersji.
 
-## Kontrola przed eksportem
+## Wspólne kontrole przed eksportem
 
-Przed każdym eksportem sprawdź:
+Sprawdź:
 
-1. brak niezastosowanych przypadkowych transformacji;
-2. prawidłową skalę;
-3. poprawną pozę spoczynkową;
-4. zgodność nazw kości;
-5. zgodność nazw kształtów deformacyjnych;
-6. poprawne ścieżki tekstur;
-7. brak tymczasowych obiektów roboczych w zestawie eksportowym;
-8. wersję sceny źródłowej.
+- jednostki i skalę;
+- globalne osie i handedness;
+- rest pose;
+- nazwy kości;
+- brak control bones w eksporcie, jeśli nie są potrzebne;
+- liczbę influences per vertex;
+- obecność wymaganych morph targets;
+- zakres animacji i FPS;
+- ścieżki tekstur;
+- przestrzenie barw map PBR;
+- zgodność groom/hair z silnikiem docelowym.
 
-## Windows
+## FBX
 
-1. Zapisz nową wersję sceny wzorcowej przed eksportem.
-2. Wybierz przypięty profil środowiska docelowego.
-3. Eksportuj wyłącznie jawnie oznaczone obiekty.
-4. Zapisz wersję programu DCC i eksportera.
-5. Oblicz SHA-256 pliku wynikowego.
-6. Zaimportuj plik do czystej sceny walidacyjnej środowiska docelowego.
-7. Uruchom procedurę z [walidacji importu](../runtime/import-validation.md).
+FBX jest praktyczny dla wielu pipeline'ów Unreal/Unity, ale jego zachowanie zależy od eksportera i importera. Przed eksportem:
 
-## Linux
+1. zaznacz wyłącznie obiekty przeznaczone do runtime;
+2. wyłącz eksport niepotrzebnych kamer i świateł;
+3. upewnij się, że armature nie dostaje dodatkowego sztucznego root bone przez ustawienia eksportera;
+4. sprawdź bake animacji i zakres klatek;
+5. potwierdź eksport blend shapes/morph targets;
+6. zapisz dokładną wersję Blendera i parametry eksportera w raporcie.
 
-1. Użyj tej samej wersji sceny i tego samego profilu eksportu.
-2. Jeżeli eksport jest wykonywany wsadowo, zapisz pełne polecenie i wersję programu.
-3. Zapisz raport utraconych lub zastąpionych funkcji.
-4. Oblicz SHA-256 pliku wynikowego.
-5. Wykonaj import do czystej sceny walidacyjnej.
-6. Uruchom te same testy jak na Windows.
+## glTF/GLB
 
-## Konwersje pośrednie
+glTF jest preferowany dla interoperacyjności i Web, ale nie wszystkie funkcje DCC mają bezpośredni odpowiednik. Sprawdź szczególnie:
 
-Każda dodatkowa konwersja, np. FBX -> GLB, zwiększa ryzyko utraty informacji. Dlatego zapisujemy cały łańcuch:
+- obsługę morph targets;
+- materiały PBR;
+- ograniczenia skeletonu;
+- animacje;
+- brak natywnego odpowiednika niektórych systemów groom i constraintów.
 
-```text
-master.blend
-  -> avatar_unreal.fbx
-  -> import Unreal
-```
+Nie traktuj poprawnego otwarcia GLB w jednym viewerze jako pełnej walidacji runtime.
 
-albo:
+## Tekstury
 
-```text
-master.blend
-  -> avatar_interchange.fbx
-  -> converter
-  -> avatar_web.glb
-  -> import Web
-```
+Dla każdej mapy zapisz:
 
-Jeżeli możliwy jest eksport bezpośredni bez utraty potrzebnych funkcji, preferujemy krótszy łańcuch.
+- nazwę materiału;
+- rolę mapy;
+- rozdzielczość;
+- bit depth;
+- color space;
+- kanały pakowane;
+- format pliku.
+
+Base Color zwykle korzysta z przestrzeni sRGB, a mapy danych takie jak roughness, metallic, normal czy AO powinny być traktowane jako dane liniowe zgodnie z profilem silnika.
+
+## Skeleton i animacje
+
+Przed eksportem wykonaj test:
+
+1. neutral pose;
+2. pełny zakres ruchu kończyn;
+3. animację twarzy;
+4. kilka morph targets ARKit;
+5. klip mowy;
+6. animację zawierającą jednocześnie ciało i twarz.
+
+Po eksporcie sprawdź, czy liczba kości i morph targets nie zmieniła się nieoczekiwanie.
+
+## Włosy i ruch wtórny
+
+Hair groom, cloth i secondary motion często wymagają osobnego workflow specyficznego dla silnika. Jeżeli format wymiany nie przenosi symulacji, eksportuj geometrię/guide data i odtwórz solver w runtime zgodnie z dokumentacją targetu.
+
+## Automatyczne narzędzia repozytorium
+
+Projekt zawiera skrypty pomocnicze m.in. do:
+
+- eksportu FBX;
+- konwersji formatów;
+- walidacji FBX;
+- optymalizacji materiałów i tekstur;
+- generowania LOD;
+- eksportu do Unreal.
+
+Skrypty należy traktować jako część odtwarzalnego pipeline'u. Ich parametry powinny trafić do raportu konwersji.
 
 ## Raport eksportu
 
-Raport zawiera co najmniej:
+Raport powinien zawierać:
 
-- identyfikator wersji źródłowej;
-- profil eksportu;
-- datę;
-- wersje narzędzi;
-- format wynikowy;
-- sumę kontrolną;
-- liczbę siatek;
-- liczbę kości;
-- liczbę kształtów deformacyjnych;
-- listę animacji;
-- listę ostrzeżeń;
-- wynik importu testowego.
+1. SHA-256 sceny źródłowej;
+2. wersję narzędzia eksportującego;
+3. format i wersję eksportera;
+4. jednostki i osie;
+5. listę obiektów;
+6. liczbę kości;
+7. liczbę morph targets;
+8. liczbę animacji;
+9. listę tekstur;
+10. hash wynikowego pliku;
+11. ostrzeżenia i świadome wyjątki.
 
-## Kryterium ukończenia
+## Import kontrolny
 
-Etap eksportu jest zaliczony tylko wtedy, gdy import testowy potwierdza skalę, szkielet, kształty deformacyjne, materiały, animacje i wymagane poziomy szczegółowości. Sam komunikat „export successful” nie jest kryterium jakości.
+Nie zaliczaj etapu na podstawie samego utworzenia pliku. Zaimportuj wynik do pustego projektu docelowego i sprawdź:
+
+- skalę postaci;
+- orientację;
+- bind pose;
+- ruch kończyn;
+- twarz i blink;
+- materiały;
+- normal maps;
+- przezroczystość włosów i soczewek;
+- klip mowy.
+
+## Typowe błędy
+
+### Postać ma złą skalę
+
+Porównaj jednostki sceny, global scale eksportera i ustawienia importera. Nie koryguj problemu przypadkową skalą obiektu w runtime bez zapisania przyczyny.
+
+### Kości są obrócone po imporcie
+
+Sprawdź osie lokalne, rest pose oraz axis conversion. Problem nie powinien być naprawiany edycją animacji klatka po klatce.
+
+### Znikają blend shapes
+
+Sprawdź opcję eksportu morph targets i czy topology/vertex order nie zostały zmienione po ich utworzeniu.
+
+### Materiały wyglądają inaczej
+
+Sprawdź color space, kanały roughness/metallic/AO, normal map convention oraz shader docelowego silnika.
+
+## Validation
+
+Eksport jest poprawny, gdy:
+
+- wynik można odtworzyć z profilu i sceny źródłowej;
+- skala i orientacja są zgodne;
+- skeleton i morph targets są kompletne;
+- animacje przechodzą import kontrolny;
+- materiały są mapowane zgodnie z profilem targetu;
+- hash i raport zostały zapisane.
+
+## DoD
+
+Powstaje wersjonowana paczka runtime wraz z raportem konwersji. Sam plik FBX/GLB bez raportu i testu importu nie spełnia Definition of Done.
