@@ -142,9 +142,24 @@ Przykład: zamiast pisać tylko „IOR rogówki = 1,376”, należy najpierw wyj
 | ruch wtórny | secondary motion | |
 | ruch główny | primary motion | |
 | ruch korzenia | root motion | |
+| animacja w miejscu | in-place animation | |
 | przejście między animacjami | animation blend | |
+| krzywa przejścia | transition curve | |
+| pozycja neutralna | neutral pose | Punkt odniesienia animacji twarzy. |
+| warstwa animacji | animation layer | |
 | warstwa addytywna | additive layer | |
 | maska animacji | animation mask | |
+| priorytet | priority | Rozstrzyga konflikt wpływów warstw. |
+| ograniczanie zakresu | clamping | |
+| środek ciężkości | center of gravity | |
+| gest deiktyczny | deictic gesture | Gest wskazujący referent lub kierunek. |
+| gest ikoniczny | iconic gesture | Gest odwzorowujący kształt lub ruch. |
+| gest rytmiczny | beat gesture | Gest podkreślający rytm wypowiedzi. |
+| gest adaptacyjny | adaptive gesture | Drobny ruch samoregulacyjny. |
+| przygotowanie gestu | preparation | Faza poprzedzająca właściwy gest. |
+| uderzenie gestu | stroke | Najbardziej znacząca faza gestu. |
+| zatrzymanie gestu | hold | Opcjonalne utrzymanie czytelnej pozy. |
+| wycofanie gestu | retraction | Powrót z gestu lub przejście do kolejnego ruchu. |
 | sakkada | saccade | Termin fizjologiczny. |
 | mikrosakkada | microsaccade | |
 | fiksacja wzroku | gaze fixation | |
