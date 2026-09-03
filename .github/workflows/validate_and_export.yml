@@ -8,7 +8,7 @@ on:
       - "scripts/**"
       - "tests/**"
       - "pyproject.toml"
-      - ".github/workflows/validate_and_export.yml"
+      - ".github/workflows/**"
   push:
     branches: [main]
     paths:
@@ -16,7 +16,7 @@ on:
       - "scripts/**"
       - "tests/**"
       - "pyproject.toml"
-      - ".github/workflows/validate_and_export.yml"
+      - ".github/workflows/**"
   workflow_dispatch:
 
 permissions:
@@ -49,5 +49,5 @@ jobs:
       - name: Check critical Python errors
         run: ruff check apps/avatar_studio/src scripts tests
 
-      - name: Run unit tests
+      - name: Run unit and workflow contract tests
         run: pytest -q
