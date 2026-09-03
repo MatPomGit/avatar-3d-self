@@ -11,7 +11,20 @@ python -m pip install -e ".[desktop]"
 avatar-studio --workspace D:\Avatar3D\projects\self-avatar
 ```
 
-A standalone `.exe` can be built with the `Desktop package` GitHub Actions workflow or locally with PyInstaller.
+A standalone `.exe` is built automatically by the `Desktop package` GitHub Actions workflow after relevant changes reach `main`, for pull requests and for tags matching `studio-v*`. The resulting `AvatarStudio-Windows` artefact can be downloaded from the workflow run.
+
+To build the same executable locally, open PowerShell in the repository root:
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[desktop,desktop-build]"
+pyinstaller --noconfirm --clean --onefile --windowed --name AvatarStudio --collect-all trimesh apps/avatar_studio/launcher.py
+.\dist\AvatarStudio.exe --workspace D:\Avatar3D\projects\self-avatar
+```
+
+**Oczekiwany wynik:** samodzielny plik `dist\AvatarStudio.exe`. Zweryfikuj go przez uruchomienie z testowym katalogiem roboczym i sprawdzenie, czy lista 21 etapów jest widoczna. Gdy kompilacja nie powiedzie się, usuń katalogi `build` i `dist`, aktywuj ponownie środowisko i powtórz polecenie z opcją `--clean`.
 
 ## Linux
 
@@ -21,3 +34,16 @@ avatar-studio --workspace ~/Avatar3D/projects/self-avatar
 ```
 
 The GUI is not required for deterministic validators; pipeline logic and project storage remain importable without PySide6.
+
+To create the Linux executable locally:
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[desktop,desktop-build]"
+pyinstaller --noconfirm --clean --onefile --windowed --name AvatarStudio --collect-all trimesh apps/avatar_studio/launcher.py
+./dist/AvatarStudio --workspace ~/Avatar3D/projects/self-avatar
+```
+
+**Oczekiwany wynik:** wykonywalny plik `dist/AvatarStudio`. Zweryfikuj go z testowym katalogiem roboczym. Jeśli PyInstaller zgłosi brak biblioteki systemowej Qt, zainstaluj pakiety środowiska graficznego właściwe dla dystrybucji, usuń `build` i `dist`, a następnie zbuduj aplikację ponownie.

@@ -21,8 +21,12 @@ def main(argv: list[str] | None = None) -> int:
 
     from avatar_studio.main_window import MainWindow
     from avatar_studio.store import ProjectStore
+    from avatar_studio.theme import apply_theme
 
     application = QApplication(sys.argv[:1])
+    application.setApplicationName("Avatar Studio")
+    application.setOrganizationName("Avatar Studio")
+    apply_theme(application)
     workspace = args.workspace
     if workspace is None:
         selected = QFileDialog.getExistingDirectory(None, "Select or create Avatar Studio workspace")

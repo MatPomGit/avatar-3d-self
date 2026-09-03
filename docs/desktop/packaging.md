@@ -8,6 +8,12 @@ Dla Windows docelowym artefaktem jest `AvatarStudio.exe` lub katalog dystrybucyj
 
 Blender, COLMAP, FFmpeg i Piper pozostają narzędziami zewnętrznymi. Avatar Studio wykrywa je przez adaptery i nie powinien bez potrzeby kopiować ich binariów do własnego pakietu.
 
+## Automatyczne artefakty GitHub Actions
+
+Workflow **Desktop package** uruchamia testy GUI i buduje natywne artefakty Windows oraz Linux dla pull requestów zmieniających aplikację, po scaleniu takich zmian do `main`, na żądanie oraz dla tagów `studio-v*`. W widoku uruchomienia, w sekcji **Artifacts**, dostępne są pakiety `AvatarStudio-Windows` i `AvatarStudio-Linux`.
+
+Artefakt CI jest wynikiem pochodnym. Kod w `apps/avatar_studio` pozostaje kanonicznym, edytowalnym źródłem.
+
 ## PyInstaller
 
 Projekt używa PyInstaller jako podstawowej warstwy budowania aplikacji desktopowej. Budowanie wykonujemy osobno na każdym docelowym systemie operacyjnym. Nie należy traktować builda Windows wykonanego na Linux jako równoważnego natywnemu wydaniu Windows.
@@ -32,7 +38,9 @@ py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -e ".[desktop,desktop-build]"
-pyinstaller --clean --noconfirm apps\avatar_studio\launcher.py --name AvatarStudio
+python -m pytest -q tests/test_avatar_studio.py tests/test_gui_smoke.py
+pyinstaller --noconfirm --clean --onefile --windowed --name AvatarStudio --collect-all trimesh apps\avatar_studio\launcher.py
+.\dist\AvatarStudio.exe --workspace "$env:TEMP\avatar-studio-smoke"
 ```
 
 Po buildzie należy uruchomić program na czystym profilu użytkownika i sprawdzić co najmniej: start aplikacji, otwarcie workspace, bazę SQLite, inspekcję artefaktu oraz diagnostykę narzędzi.
@@ -44,7 +52,9 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e ".[desktop,desktop-build]"
-pyinstaller --clean --noconfirm apps/avatar_studio/launcher.py --name AvatarStudio
+python -m pytest -q tests/test_avatar_studio.py tests/test_gui_smoke.py
+pyinstaller --noconfirm --clean --onefile --windowed --name AvatarStudio --collect-all trimesh apps/avatar_studio/launcher.py
+./dist/AvatarStudio --workspace /tmp/avatar-studio-smoke
 ```
 
 Build należy testować na docelowej rodzinie dystrybucji. Różnice bibliotek systemowych mogą powodować błędy mimo poprawnego uruchomienia na maszynie budującej.

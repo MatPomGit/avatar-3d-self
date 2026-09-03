@@ -1,1 +1,0 @@
-ERROR: file:///C:/Users/matpo/repo/avatar-3d-self/apps/avatar_studio does not appear to be a Python project: neither 'setup.py' nor 'pyproject.toml' found.
