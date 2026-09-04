@@ -19,7 +19,7 @@ def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     from PySide6.QtWidgets import QApplication, QFileDialog
 
-    from avatar_studio.main_window import MainWindow
+    from avatar_studio.enhanced_main_window import EnhancedMainWindow
     from avatar_studio.store import ProjectStore
     from avatar_studio.theme import apply_theme
 
@@ -34,7 +34,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         workspace = Path(selected)
     store = ProjectStore(workspace)
-    window = MainWindow(store)
+    window = EnhancedMainWindow(store)
     window.show()
     return application.exec()
 
