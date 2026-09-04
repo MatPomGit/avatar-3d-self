@@ -2,7 +2,7 @@
 
 **Input:** zatwierdzona seria zdjęć z etapu 01.  
 **Editable output:** baza COLMAP, parametry kamer i sparse reconstruction.  
-**Derived output:** sparse point cloud oraz raport operacji.
+**Derived output:** sparse point cloud, raport jakości zdjęć, opcjonalny zestaw zdjęć po preprocessingu oraz raport operacji.
 
 ## Cel etapu
 
@@ -19,6 +19,112 @@ Przed uruchomieniem:
 3. Jeżeli używano jednej kamery i nie zmieniano obiektywu ani zoomu, traktuj serię jako `single camera`.
 4. Nie mieszaj zdjęć twarzy i pełnego ciała wykonanych w skrajnie innych warunkach optycznych bez jawnego rozdzielenia sesji.
 5. Dla osoby obracającej się przed nieruchomą kamerą przeczytaj również [Rotating-subject capture](../capture/rotating-subject-capture.md). Taki materiał jest trudniejszy niż klasyczna fotogrametria nieruchomego obiektu.
+
+## Kontrola jakości partii zdjęć przed COLMAP
+
+Przed uruchomieniem rekonstrukcji sparse należy wykonać automatyczną ocenę całej partii zdjęć. Avatar Studio zawiera moduł `photo_quality.py` oraz polecenie `scripts/photo_batch.py`, które analizują każde zdjęcie i relację pomiędzy kolejnymi ujęciami.
+
+Wymagane są zależności `vision`:
+
+```bash
+pip install -e ".[vision]"
+```
+
+Analizę uruchamia się poleceniem:
+
+```bash
+python scripts/photo_batch.py analyze references/photos \
+  --report reports/photo_quality_report.json
+```
+
+Raport obejmuje:
+
+- ostrość ocenianą przez wariancję Laplasjanu;
+- średnią luminancję i wykrywanie niedoświetlenia lub prześwietlenia;
+- udział pikseli obciętych w cieniach i światłach;
+- kontrast globalny;
+- liczbę dopasowanych cech pomiędzy kolejnymi zdjęciami;
+- udział dopasowań zgodnych z homografią RANSAC;
+- syntetyczny `overlap_score` opisujący siłę pokrycia pomiędzy kolejnymi ujęciami;
+- listę zdjęć sugerowanych do ponownego wykonania;
+- listę par zdjęć o zbyt małym pokryciu.
+
+### Interpretacja overlapu
+
+Overlap nie jest liczony jako proste podobieństwo pikseli. Moduł wykrywa cechy ORB w dwóch sąsiednich zdjęciach, dopasowuje deskryptory, odrzuca niejednoznaczne dopasowania testem ilorazowym i następnie wykorzystuje RANSAC do oceny zgodności geometrycznej. Takie podejście jest bardziej odporne na zmianę punktu widzenia niż korelacja całych obrazów.
+
+Niski overlap może oznaczać:
+
+1. zbyt duży skok kątowy pomiędzy zdjęciami;
+2. zbyt małą liczbę stabilnych cech powierzchni;
+3. zmianę ekspozycji lub ostrości;
+4. ruch osoby pomiędzy ujęciami;
+5. zmianę kadru, ogniskowej albo dystansu;
+6. refleksy na okularach, skórze lub ubraniu.
+
+Jeżeli raport oznacza zdjęcie jako `insufficient_overlap_with_previous`, należy w pierwszej kolejności wykonać dodatkowe zdjęcie pomostowe pomiędzy wskazanymi pozycjami.
+
+### Ocena rozmycia
+
+Wariancja Laplasjanu jest metryką techniczną, a nie semantyczną oceną jakości fotografii. Niski wynik oznacza małą ilość energii wysokich częstotliwości, co często odpowiada motion blur albo defocus. Próg należy kalibrować dla konkretnego aparatu, rozdzielczości i sposobu kadrowania. Zdjęcia twarzy mogą wymagać wyższego progu niż zdjęcia całej sylwetki.
+
+### Ocena światła
+
+Raport nie ogranicza się do średniej jasności. Rejestruje również odsetek pikseli bardzo ciemnych i bardzo jasnych. Jest to istotne, ponieważ poprawna średnia luminancja może współistnieć z lokalnym clippingiem skóry, włosów albo ubrania.
+
+Automatyczna analiza ma identyfikować fotografie wymagające inspekcji lub ponownego wykonania. Nie należy bezrefleksyjnie usuwać wszystkich zdjęć oznaczonych ostrzeżeniem.
+
+## Preprocessing partii zdjęć
+
+Avatar Studio może utworzyć osobny, pochodny zestaw zdjęć z ujednoliconą luminancją, poprawionym kontrastem albo usuniętym statycznym tłem. Oryginalne fotografie nie są nadpisywane.
+
+Przykład:
+
+```bash
+python scripts/photo_batch.py preprocess references/photos work/photos_preprocessed \
+  --normalize-lighting \
+  --improve-contrast \
+  --background references/background/empty_scene.jpg
+```
+
+Każda operacja zapisuje `preprocessing_report.json`, zawierający źródło, katalog wynikowy i listę zastosowanych transformacji.
+
+### Normalizacja oświetlenia
+
+Normalizacja działa na kanale luminancji w przestrzeni LAB. Dla całej partii obliczana jest mediana luminancji, a każde zdjęcie jest delikatnie dopasowywane do wspólnego poziomu odniesienia. Chromatyczność nie jest bezpośrednio skalowana.
+
+Ta operacja może poprawić stabilność ekstrakcji cech przy umiarkowanych zmianach ekspozycji, ale nie zastępuje poprawnego oświetlenia podczas capture. Silne prześwietlenia i niedoświetlenia należy poprawić przez ponowne wykonanie zdjęcia.
+
+### Poprawa kontrastu
+
+Opcjonalna poprawa kontrastu wykorzystuje CLAHE na kanale luminancji. Parametry są celowo zachowawcze. Nadmierne wzmacnianie lokalnego kontrastu może wytworzyć sztuczne cechy i pogorszyć zgodność fotometryczną między zdjęciami.
+
+Do rekonstrukcji należy porównać wynik na małej próbce i zachować możliwość powrotu do oryginałów.
+
+### Usuwanie tła
+
+Jeżeli dostępny jest osobny obraz pustego tła wykonany:
+
+- z tej samej pozycji kamery;
+- przy tej samej ogniskowej;
+- z niezmienionym kadrem;
+- przy możliwie takim samym oświetleniu;
+
+moduł może utworzyć maskę pierwszego planu przez różnicowanie obrazu z fotografią tła. Wynik jest zapisywany jako PNG z kanałem alfa.
+
+Metoda ta jest przeznaczona dla nieruchomej kamery i statycznego tła. Nie należy stosować jej do sesji, w której kamera przemieszcza się wokół osoby, ponieważ tło nie jest wtedy geometrycznie zgodne z kolejnymi zdjęciami.
+
+### Zasada reprodukowalności
+
+W repozytorium i workspace należy rozróżniać:
+
+```text
+references/photos/          # oryginały, read-only
+reports/                    # raporty QA
+work/photos_preprocessed/   # obrazy pochodne
+```
+
+Preprocessing nigdy nie powinien usuwać ani nadpisywać materiału źródłowego. W razie problemu z rekonstrukcją trzeba móc jednoznacznie ustalić, czy używano oryginałów czy konkretnej wersji danych pochodnych.
 
 ## Wykonanie w Avatar Studio
 
@@ -168,13 +274,16 @@ GUI Avatar Studio obsługuje podstawową rekonstrukcję sparse. Ręczne otwarcie
 
 Etap należy uznać za poprawny, gdy:
 
-1. powstał co najmniej jeden sparse model;
-2. większość zatwierdzonych zdjęć jest zarejestrowana;
-3. trajektoria kamer jest geometrycznie sensowna;
-4. nie ma dużych luk w krytycznych obszarach ciała;
-5. błąd reprojekcji nie wskazuje na systematyczny problem;
-6. konfiguracja i raport operacji zostały zapisane.
+1. partia zdjęć została poddana kontroli technicznej;
+2. fotografie oznaczone jako wymagające ponownego wykonania zostały przejrzane;
+3. nie ma nieuzasadnionych luk overlapu pomiędzy kolejnymi ujęciami;
+4. powstał co najmniej jeden sparse model;
+5. większość zatwierdzonych zdjęć jest zarejestrowana;
+6. trajektoria kamer jest geometrycznie sensowna;
+7. nie ma dużych luk w krytycznych obszarach ciała;
+8. błąd reprojekcji nie wskazuje na systematyczny problem;
+9. konfiguracja i raport operacji zostały zapisane.
 
 ## DoD
 
-Sparse reconstruction jest spójna, pokrycie jest wystarczające do dense reconstruction, raport znajduje się w projekcie, a niezaakceptowane anomalie nie są ukryte przez ręczne oznaczenie etapu jako zaliczony.
+Sparse reconstruction jest spójna, pokrycie jest wystarczające do dense reconstruction, raport jakości zdjęć i raport COLMAP znajdują się w projekcie, a wszystkie obrazy po preprocessingu są traktowane jako dane pochodne z zachowaniem oryginałów.
