@@ -4,7 +4,19 @@
 
 ## Od czego zacząć
 
-Dla nowego projektu przeczytaj kolejno [cele i wymagania](project/goals-and-requirements.md), [architekturę](project/architecture.md) oraz [przegląd pipeline'u](pipeline/overview.md).
+Dla nowego projektu zacznij od [przeglądu projektu](project/overview.md). Avatar Studio prowadzi stan 21 etapów i pomaga uruchamiać wybrane narzędzia, ale nie tworzy samodzielnie gotowego człowieka. Wynikiem pracy jest edytowalna scena wzorcowa, materiały, rig i animacje oraz zwalidowany pakiet do wybranego środowiska czasu rzeczywistego. Modelowanie, retopologia, UV, materiały, włosy, ubrania, rig, skinning i animacja wymagają nadal pracy autora w programie DCC.
+
+### Ścieżka pierwszego projektu
+
+1. Przeczytaj konfigurację dla [Windows](setup/windows.md) albo [Linux](setup/linux.md), a przed dodaniem materiałów — [zasady prywatności](project/privacy-and-reference-data.md).
+2. Poznaj [przechwytywanie materiału](capture/photography-guide.md), [modelowanie](modeling/overview.md), [rig](rigging/skeleton-specification.md), [materiały](materials/overview.md), [animację](animation/animation-architecture.md), [eksport](runtime/overview.md) i [walidację](validation/acceptance-criteria.md), dokładnie w tej kolejności. [Przegląd pipeline'u](pipeline/overview.md) łączy te obszary z 21 etapami wykonawczymi.
+3. Utwórz lokalny workspace według [instrukcji GUI](desktop/user-workflow.md#1-utworzenie-lub-otwarcie-projektu). Wybierz katalog poza klonem repozytorium; obecność `.avatar-studio/project.sqlite3` i `reports/` w wybranym katalogu oraz brak tych elementów w repozytorium potwierdzają właściwe rozdzielenie.
+4. Pierwsze przejście wykonaj na syntetycznych renderach nieprzedstawiających rzeczywistej osoby: zarejestruj serię w etapie 01, sprawdź manifest i — jeśli ujęcia mają wystarczające pokrycie — przetestuj etapy 02–03. To próba mechaniki workspace, raportów i bramek, a nie odbiór jakości człowieka.
+5. Zatrzymaj się po każdym etapie na bramce jakości. Po wyniku `failed` nie uruchamiaj etapów zależnych ani nie używaj wadliwego artefaktu jako wejścia; przejdź do [diagnostyki](desktop/troubleshooting.md), usuń przyczynę i powtórz walidację.
+6. Gdy korekta pogarsza wynik, wróć do ostatniego artefaktu ze statusem `approved`, wskazanego wersją i SHA-256 w raporcie. Pracuj na jego nowej kopii `vNNN`, zamiast nadpisywać zatwierdzony plik; szczegóły opisuje [wersjonowanie artefaktów](project/asset-versioning.md).
+
+!!! warning "Dane prywatne"
+    Zdjęcia, skany, nagrania i modele głosu są danymi identyfikującymi. Nie kopiuj ich do repozytorium, katalogu publikowanej dokumentacji ani niezaufanej synchronizacji chmurowej.
 
 Materiał zdjęciowy: [Photography guide](capture/photography-guide.md) oraz [Self capture](capture/self-capture.md).
 

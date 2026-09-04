@@ -39,3 +39,13 @@ Każdy etap kończy się raportem. Minimalny raport zapisuje wersję narzędzia,
 ## Topology freeze
 
 Po zatwierdzeniu etapu 05 nie zmieniaj kolejności i liczby wierzchołków bez utworzenia nowej wersji bazowego mesha i ponownej walidacji wszystkich zależnych shape keys, skinningu, groom attachment oraz ubrań.
+
+## Mapa decyzyjna
+
+| Decyzja | Odpowiedź |
+| --- | --- |
+| Wymagane wejście | Dla etapu 01: prywatny lub syntetyczny zestaw referencji, zgody i workspace poza repozytorium. Dla każdego kolejnego etapu: wyłącznie wymagane artefakty upstream o statusie `approved`. |
+| Kolejność lektury | Najpierw bieżący artykuł numerowany 01–21, następnie wskazane w nim dokumenty dziedzinowe; nie pomijaj kolejności strzałek z diagramu. |
+| Rezultat | Edytowalny artefakt etapu, pochodne podglądy lub eksporty, metadane provenance i raport walidacji; na końcu zwalidowany pakiet runtime. |
+| Przejście dalej | Definition of Done bieżącego etapu ma status `passed`, oficjalne wyjście jest `approved`, a raport zawiera wejścia, wyjścia, wersje narzędzi i SHA-256. |
+| Gdy warunek nie jest spełniony | Po `failed` zatrzymaj etapy downstream, zachowaj ostatni artefakt `approved` i przejdź do [diagnostyki](../desktop/troubleshooting.md). Po naprawie powtórz kontrolę; nie edytuj ręcznie bazy projektu. |
