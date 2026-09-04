@@ -19,3 +19,13 @@ Modeling obejmuje rekonstrukcję, korektę anatomii, retopologię i przygotowani
 5. [Jama ustna](mouth-cavity.md)
 
 Powiązane etapy wykonawcze znajdują się w sekcji [Production pipeline](../pipeline/overview.md).
+
+## Mapa decyzyjna
+
+| Decyzja | Odpowiedź |
+| --- | --- |
+| Wymagane wejście | Zatwierdzona rekonstrukcja lub skan, pomiary i referencje oraz jawna skala. |
+| Kolejność lektury | [Anatomia i proporcje](anatomy-and-proportions.md) → [topologia](topology.md) → [twarz](face-topology.md) → [dłonie i stopy](hands-and-feet.md) → [jama ustna](mouth-cavity.md). |
+| Rezultat | Edytowalny, retopologizowany bazowy mesh z osobnymi elementami pomocniczymi, gotowy do topology freeze. |
+| Przejście dalej | Podobieństwo, skala, anatomia, przepływ pętli i podstawowe testy deformacji są zatwierdzone; topologia otrzymała status `approved`. |
+| Gdy warunek nie jest spełniony | Nie rozpoczynaj UV ani rigu. Wróć do właściwego etapu 04–05 i użyj [diagnostyki geometrii](../validation/geometry.md). |
