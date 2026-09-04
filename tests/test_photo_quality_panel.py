@@ -16,6 +16,8 @@ from avatar_studio.store import ProjectStore  # noqa: E402
 def test_photo_quality_panel_is_embedded_and_contextual(tmp_path: Path) -> None:
     app = QApplication.instance() or QApplication([])
     window = EnhancedMainWindow(ProjectStore(tmp_path))
+    window.show()
+    app.processEvents()
 
     assert window.photo_quality_panel is not None
     assert window.photo_quality_panel.photos_field is not None
