@@ -41,6 +41,11 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
+      - name: Install Linux GUI runtime dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1
       - name: Install desktop dependencies
         run: python -m pip install -e ".[dev,desktop,desktop-build]"
       - name: Run desktop state and GUI smoke tests
